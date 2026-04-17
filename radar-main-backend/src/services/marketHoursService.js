@@ -1,13 +1,9 @@
-/**
- * Market Hours Service
- * Detects if markets are currently open (NSE/BSE for Indian stocks)
- */
+
 
 const logger = require('../utils/logger');
 
 class MarketHoursService {
   constructor() {
-    // Indian markets (NSE/BSE)
     this.nseHours = {
       timezone: 'Asia/Kolkata',
       open: { hour: 9, minute: 15 },   // 9:15 AM IST
@@ -16,7 +12,6 @@ class MarketHoursService {
       postMarket: { hour: 16, minute: 0 },
     };
 
-    // Holidays will be checked against a list
     this.holidays2024 = [
       '2024-01-26', // Republic Day
       '2024-03-08', // Mahashivratri
@@ -54,25 +49,19 @@ class MarketHoursService {
     ];
   }
 
-  /**
-   * Check if NSE market is currently open
-   * @returns {boolean}
-   */
+  
   isNSEOpen() {
     const now = new Date();
     const istTime = this.toIST(now);
     
-    // Check if weekend
     if (this.isWeekend(istTime)) {
       return false;
     }
 
-    // Check if holiday
     if (this.isHoliday(istTime)) {
       return false;
     }
 
-    // Check market hours
     const currentHour = istTime.getHours();
     const currentMinute = istTime.getMinutes();
     const currentTime = currentHour * 60 + currentMinute;
@@ -83,25 +72,19 @@ class MarketHoursService {
     return currentTime >= openTime && currentTime <= closeTime;
   }
 
-  /**
-   * Check if we should fetch updates (during or after market hours)
-   * @returns {boolean}
-   */
+  
   shouldFetchUpdates() {
     const now = new Date();
     const istTime = this.toIST(now);
     
-    // Don't fetch on weekends
     if (this.isWeekend(istTime)) {
       return false;
     }
 
-    // Don't fetch on holidays
     if (this.isHoliday(istTime)) {
       return false;
     }
 
-    // Fetch during market hours and up to 1 hour after close
     const currentHour = istTime.getHours();
     const currentMinute = istTime.getMinutes();
     const currentTime = currentHour * 60 + currentMinute;
@@ -112,10 +95,7 @@ class MarketHoursService {
     return currentTime >= openTime && currentTime <= closeTime;
   }
 
-  /**
-   * Get market status
-   * @returns {Object}
-   */
+  
   getMarketStatus() {
     const now = new Date();
     const istTime = this.toIST(now);
@@ -132,33 +112,20 @@ class MarketHoursService {
     };
   }
 
-  /**
-   * Convert to IST timezone
-   * @param {Date} date 
-   * @returns {Date}
-   */
+  
   toIST(date) {
-    // Convert to IST (UTC+5:30)
     const utc = date.getTime() + (date.getTimezoneOffset() * 60000);
     const istOffset = 5.5 * 60 * 60000;
     return new Date(utc + istOffset);
   }
 
-  /**
-   * Check if date is weekend
-   * @param {Date} date 
-   * @returns {boolean}
-   */
+  
   isWeekend(date) {
     const day = date.getDay();
     return day === 0 || day === 6; // Sunday or Saturday
   }
 
-  /**
-   * Check if date is a holiday
-   * @param {Date} date 
-   * @returns {boolean}
-   */
+  
   isHoliday(date) {
     const dateStr = date.toISOString().split('T')[0];
     const year = date.getFullYear();
@@ -172,23 +139,16 @@ class MarketHoursService {
     return false;
   }
 
-  /**
-   * Get next market open time
-   * @param {Date} currentIST 
-   * @returns {Date|null}
-   */
+  
   getNextOpenTime(currentIST) {
     const next = new Date(currentIST);
     
-    // If weekend, move to next Monday
     while (this.isWeekend(next)) {
       next.setDate(next.getDate() + 1);
     }
 
-    // Set to market open time
     next.setHours(this.nseHours.open.hour, this.nseHours.open.minute, 0, 0);
 
-    // If already past open time today, move to next day
     if (next <= currentIST) {
       next.setDate(next.getDate() + 1);
       while (this.isWeekend(next) || this.isHoliday(next)) {
@@ -199,11 +159,7 @@ class MarketHoursService {
     return next;
   }
 
-  /**
-   * Get next market close time
-   * @param {Date} currentIST 
-   * @returns {Date|null}
-   */
+  
   getNextCloseTime(currentIST) {
     const next = new Date(currentIST);
     
@@ -220,10 +176,7 @@ class MarketHoursService {
     return next;
   }
 
-  /**
-   * Get time until next market event
-   * @returns {Object}
-   */
+  
   getTimeUntilNextEvent() {
     const status = this.getMarketStatus();
     const now = new Date();
@@ -246,10 +199,7 @@ class MarketHoursService {
     }
   }
 
-  /**
-   * Get optimal update interval based on market status
-   * @returns {number} Interval in milliseconds
-   */
+  
   getOptimalUpdateInterval() {
     const isOpen = this.isNSEOpen();
     

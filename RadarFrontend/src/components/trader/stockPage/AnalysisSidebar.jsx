@@ -19,7 +19,7 @@ export default function AnalysisSidebar({ stock }) {
 
     return (
         <div className="flex flex-col gap-4">
-            {/* SMART INSIGHTS */}
+            {}
             <div className="terminal-card bg-blue-500/5 border-blue-500/20 p-3">
                 <div className="flex items-center gap-2 mb-2">
                     <BrainCircuit size={14} className="text-blue-400" />
@@ -29,7 +29,7 @@ export default function AnalysisSidebar({ stock }) {
                     <div className="flex items-start gap-2">
                         <div className="mt-1 w-1 h-1 rounded-full bg-emerald-500"></div>
                         <p className="text-[10px] leading-relaxed text-slate-400 font-medium">
-                            <span className="text-white font-bold">Breakout Confirmed:</span> Price closing above ₹2,850 supply base with high volume.
+                            <span className="text-white font-bold">Breakout Confirmed:</span> Price closing above â‚¹2,850 supply base with high volume.
                         </p>
                     </div>
                     <div className="flex items-start gap-2">
@@ -41,7 +41,7 @@ export default function AnalysisSidebar({ stock }) {
                 </div>
             </div>
 
-            {/* SECTOR STRENGTH PANEL */}
+            {}
             <div className="terminal-card p-3">
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -68,7 +68,7 @@ export default function AnalysisSidebar({ stock }) {
                 </div>
             </div>
 
-            {/* SIMILAR OPPORTUNITIES */}
+            {}
             <div className="terminal-card p-3">
                 <div className="flex items-center gap-2 mb-3">
                     <Compass size={12} className="text-indigo-400" />
@@ -87,7 +87,7 @@ export default function AnalysisSidebar({ stock }) {
                 </div>
             </div>
 
-            {/* UNUSUAL ACTIVITY LOGS */}
+            {}
             <div className="terminal-card p-3">
                  <div className="flex items-center gap-2 mb-2">
                     <AlertCircle size={12} className="text-yellow-500" />

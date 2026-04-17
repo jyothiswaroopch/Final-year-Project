@@ -195,43 +195,56 @@ const getCorporateActions = (req, res) => {
 };
 
 const getEconomicEvents = async (req, res) => {
-    const region = String(req.query.region || DEFAULT_MARKET_REGION).toUpperCase();
+    try {
+        const region = String(req.query.region || DEFAULT_MARKET_REGION).toUpperCase();
 
-    if (region === 'US') {
-        const usEvents = [
+        if (region === 'US') {
+            const usEvents = [
+                { date: toIsoDate(nextFedDecisionDate()), country: 'US', event: 'Fed Interest Rate Decision', impact: 'High', forecast: '5.25%', previous: '5.25%' },
+                { date: toIsoDate(nextUsCpiDate()), country: 'US', event: 'US CPI Data Release', impact: 'High', forecast: '3.1%', previous: '3.2%' },
+                { date: toIsoDate(nextEventFromMonthRule([0, 3, 6, 9], (y, m) => nthWeekdayOfMonth(y, m, 4, 4))), country: 'US', event: 'US GDP Growth Estimate', impact: 'Medium', forecast: '2.2%', previous: '2.0%' },
+                { date: toIsoDate(nextEventFromMonthRule([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], (y, m) => nthWeekdayOfMonth(y, m, 5, 1))), country: 'US', event: 'US Non-Farm Payrolls', impact: 'High', forecast: '194K', previous: '188K' },
+                { date: toIsoDate(nextEcbPolicyDate()), country: 'EU', event: 'ECB Policy Statement', impact: 'High', forecast: '4.00%', previous: '4.00%' },
+                { date: toIsoDate(nextBoePolicyDate()), country: 'GB', event: 'BoE Rate Decision', impact: 'High', forecast: '5.00%', previous: '5.00%' },
+                { date: toIsoDate(nextBojOutlookDate()), country: 'JP', event: 'BoJ Outlook Report', impact: 'Medium', forecast: '-', previous: '-' },
+                { date: toIsoDate(nextUsRetailSalesDate()), country: 'US', event: 'US Retail Sales', impact: 'Medium', forecast: '0.4%', previous: '0.2%' },
+            ];
+
+            const modeledUsEvents = usEvents.map(toModeledEvent);
+
+            const liveEvents = await fetchLiveEconomicEvents({ region, limit: 12 });
+            const merged = mergeEvents(liveEvents, modeledUsEvents, 8);
+            return res.json(merged);
+        }
+
+        const inEvents = [
+            { date: toIsoDate(nextRbiPolicyDate()), country: 'IN', event: 'RBI Monetary Policy Statement', impact: 'High', forecast: '6.50%', previous: '6.50%' },
+            { date: toIsoDate(nextIndiaCpiDate()), country: 'IN', event: 'India CPI Inflation', impact: 'High', forecast: '5.1%', previous: '5.2%' },
+            { date: toIsoDate(nextIndiaIipDate()), country: 'IN', event: 'IIP Industrial Output', impact: 'Medium', forecast: '4.4%', previous: '4.2%' },
+            { date: toIsoDate(nextIndiaQuarterlyGdpDate()), country: 'IN', event: 'India GDP Growth Estimate', impact: 'High', forecast: '6.8%', previous: '6.7%' },
             { date: toIsoDate(nextFedDecisionDate()), country: 'US', event: 'Fed Interest Rate Decision', impact: 'High', forecast: '5.25%', previous: '5.25%' },
-            { date: toIsoDate(nextUsCpiDate()), country: 'US', event: 'US CPI Data Release', impact: 'High', forecast: '3.1%', previous: '3.2%' },
-            { date: toIsoDate(nextEventFromMonthRule([0, 3, 6, 9], (y, m) => nthWeekdayOfMonth(y, m, 4, 4))), country: 'US', event: 'US GDP Growth Estimate', impact: 'Medium', forecast: '2.2%', previous: '2.0%' },
-            { date: toIsoDate(nextEventFromMonthRule([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], (y, m) => nthWeekdayOfMonth(y, m, 5, 1))), country: 'US', event: 'US Non-Farm Payrolls', impact: 'High', forecast: '194K', previous: '188K' },
             { date: toIsoDate(nextEcbPolicyDate()), country: 'EU', event: 'ECB Policy Statement', impact: 'High', forecast: '4.00%', previous: '4.00%' },
             { date: toIsoDate(nextBoePolicyDate()), country: 'GB', event: 'BoE Rate Decision', impact: 'High', forecast: '5.00%', previous: '5.00%' },
             { date: toIsoDate(nextBojOutlookDate()), country: 'JP', event: 'BoJ Outlook Report', impact: 'Medium', forecast: '-', previous: '-' },
-            { date: toIsoDate(nextUsRetailSalesDate()), country: 'US', event: 'US Retail Sales', impact: 'Medium', forecast: '0.4%', previous: '0.2%' },
         ];
 
-        const modeledUsEvents = usEvents.map(toModeledEvent);
+        const modeledInEvents = inEvents.map(toModeledEvent);
 
         const liveEvents = await fetchLiveEconomicEvents({ region, limit: 12 });
-        const merged = mergeEvents(liveEvents, modeledUsEvents, 8);
-        return res.json(merged);
+        const merged = mergeEvents(liveEvents, modeledInEvents, 8);
+        res.json(merged);
+    } catch (error) {
+        console.error('Economic calendar fallback triggered:', error.message);
+
+        const safeFallback = [
+            { date: toIsoDate(nextRbiPolicyDate()), country: 'IN', event: 'RBI Monetary Policy Statement', impact: 'High', forecast: '6.50%', previous: '6.50%' },
+            { date: toIsoDate(nextIndiaCpiDate()), country: 'IN', event: 'India CPI Inflation', impact: 'High', forecast: '5.1%', previous: '5.2%' },
+            { date: toIsoDate(nextFedDecisionDate()), country: 'US', event: 'Fed Interest Rate Decision', impact: 'High', forecast: '5.25%', previous: '5.25%' },
+            { date: toIsoDate(nextEcbPolicyDate()), country: 'EU', event: 'ECB Policy Statement', impact: 'High', forecast: '4.00%', previous: '4.00%' },
+        ].map(toModeledEvent);
+
+        res.json(safeFallback);
     }
-
-    const inEvents = [
-        { date: toIsoDate(nextRbiPolicyDate()), country: 'IN', event: 'RBI Monetary Policy Statement', impact: 'High', forecast: '6.50%', previous: '6.50%' },
-        { date: toIsoDate(nextIndiaCpiDate()), country: 'IN', event: 'India CPI Inflation', impact: 'High', forecast: '5.1%', previous: '5.2%' },
-        { date: toIsoDate(nextIndiaIipDate()), country: 'IN', event: 'IIP Industrial Output', impact: 'Medium', forecast: '4.4%', previous: '4.2%' },
-        { date: toIsoDate(nextIndiaQuarterlyGdpDate()), country: 'IN', event: 'India GDP Growth Estimate', impact: 'High', forecast: '6.8%', previous: '6.7%' },
-        { date: toIsoDate(nextFedDecisionDate()), country: 'US', event: 'Fed Interest Rate Decision', impact: 'High', forecast: '5.25%', previous: '5.25%' },
-        { date: toIsoDate(nextEcbPolicyDate()), country: 'EU', event: 'ECB Policy Statement', impact: 'High', forecast: '4.00%', previous: '4.00%' },
-        { date: toIsoDate(nextBoePolicyDate()), country: 'GB', event: 'BoE Rate Decision', impact: 'High', forecast: '5.00%', previous: '5.00%' },
-        { date: toIsoDate(nextBojOutlookDate()), country: 'JP', event: 'BoJ Outlook Report', impact: 'Medium', forecast: '-', previous: '-' },
-    ];
-
-    const modeledInEvents = inEvents.map(toModeledEvent);
-
-    const liveEvents = await fetchLiveEconomicEvents({ region, limit: 12 });
-    const merged = mergeEvents(liveEvents, modeledInEvents, 8);
-    res.json(merged);
 };
 
 module.exports = { getCorporateActions, getEconomicEvents };

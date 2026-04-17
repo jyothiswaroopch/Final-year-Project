@@ -91,7 +91,7 @@ export default function AnalysisNews() {
 
     return (
         <div className="flex flex-col gap-6">
-            {/* Action Bar / Filters */}
+            {}
             <div className="flex flex-wrap items-center justify-between gap-4 px-1 pb-2 border-b border-white/5">
                 <div className="flex items-center gap-6">
                     <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ export default function AnalysisNews() {
                 </div>
                 <div className="flex items-center gap-2 text-slate-600">
                    <Target size={14} />
-                   <span className="text-[10px] font-bold uppercase tracking-widest">Alpha Intelligence Active</span>
+                         <span className="text-[10px] font-bold uppercase tracking-widest">Trader Intelligence Active</span>
                 </div>
             </div>
             
@@ -140,10 +140,10 @@ export default function AnalysisNews() {
                             exit={{ opacity: 0, scale: 0.98 }}
                             className={`group relative flex flex-col gap-4 p-5 rounded-2xl border transition-all duration-300 ${item.sentiment === 'Bullish' ? 'border-emerald-500/10 hover:border-emerald-500/30 bg-emerald-500/[0.01]' : item.sentiment === 'Bearish' ? 'border-rose-500/10 hover:border-rose-500/30 bg-rose-500/[0.01]' : 'border-white/[0.03] hover:border-white/10 bg-white/[0.01]'}`}
                         >
-                            {/* Sentiment Vertical Strip */}
+                            {}
                             <div className={`absolute left-0 top-6 bottom-6 w-1 rounded-r-full ${item.sentiment === 'Bullish' ? 'bg-emerald-500/40' : item.sentiment === 'Bearish' ? 'bg-rose-500/40' : 'bg-slate-700'}`} />
 
-                            {/* News Header Metadata */}
+                            {}
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2.5">
                                     <span className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border ${getImpactStyles(item.impact)}`}>
@@ -162,7 +162,7 @@ export default function AnalysisNews() {
                                 </div>
                             </div>
 
-                            {/* Title & Action */}
+                            {}
                             <div className="flex justify-between items-start gap-6">
                                 <h4 className="text-[15px] font-bold text-slate-100 leading-tight group-hover:text-white transition-colors">
                                     {item.title}
@@ -170,7 +170,7 @@ export default function AnalysisNews() {
                                 <ExternalLink size={14} className="mt-1 text-slate-600 group-hover:text-cyan-400 flex-shrink-0 transition-all opacity-0 group-hover:opacity-100" />
                             </div>
 
-                            {/* Related Symbols Chips */}
+                            {}
                             <div className="flex flex-wrap gap-2">
                                 {item.relatedSymbols.map(sym => (
                                     <button 
@@ -182,13 +182,13 @@ export default function AnalysisNews() {
                                 ))}
                             </div>
 
-                            {/* Professional Alpha Insight Box */}
+                            {}
                             <div className="mt-2 p-3 rounded-xl bg-white/[0.04] border-l-2 border-cyan-500/30 flex items-start gap-3 group/insight">
                                 <div className="mt-0.5 text-cyan-500/50">
                                     <Info size={14} />
                                 </div>
                                 <div className="flex flex-col gap-0.5">
-                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-500/60">Alpha Insight</span>
+                                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-cyan-500/60">Trader Insight</span>
                                     <p className="text-[12px] font-medium text-slate-300 leading-relaxed italic">
                                         "{item.insight}"
                                     </p>

@@ -4,7 +4,6 @@ import { TrendingUp, TrendingDown, Target, ShieldAlert, Zap, BarChart3, PlusCirc
 export default function StockCard({ stock, isSelected, onClick, onDeepResearch }) {
   const isPositive = stock.change >= 0;
   
-  // Simple sparkline generator
   const generateSparkline = (data) => {
     if (!data || data.length === 0) return "";
     const min = Math.min(...data.map(d => d.price));
@@ -25,7 +24,7 @@ export default function StockCard({ stock, isSelected, onClick, onDeepResearch }
       className={`trading-card ${isSelected ? "selected" : ""}`}
       onClick={onClick}
     >
-      {/* Header */}
+      {}
       <div className="card-header">
         <div className="card-ticker">
           <span className="symbol-name">{stock.symbol}</span>
@@ -40,7 +39,7 @@ export default function StockCard({ stock, isSelected, onClick, onDeepResearch }
         </div>
       </div>
 
-      {/* Mini Candlestick Sparkline */}
+      {}
       <div className="mini-chart-wrap">
         <svg width="100%" height="100%" viewBox="0 0 280 40" preserveAspectRatio="none">
            <path 
@@ -64,23 +63,23 @@ export default function StockCard({ stock, isSelected, onClick, onDeepResearch }
         </svg>
       </div>
 
-      {/* Levels Grid */}
+      {}
       <div className="levels-grid">
         <div className="level-item">
           <span className="level-label">Entry</span>
-          <span className="level-price text-sky-400">₹{stock.entry}</span>
+          <span className="level-price text-sky-400">â‚¹{stock.entry}</span>
         </div>
         <div className="level-item">
           <span className="level-label">Target</span>
-          <span className="level-price text-emerald-400">₹{stock.target}</span>
+          <span className="level-price text-emerald-400">â‚¹{stock.target}</span>
         </div>
         <div className="level-item">
           <span className="level-label">Stop Loss</span>
-          <span className="level-price text-rose-400">₹{stock.sl}</span>
+          <span className="level-price text-rose-400">â‚¹{stock.sl}</span>
         </div>
       </div>
 
-      {/* Footer / Meta */}
+      {}
       <div className="card-footer">
         <div className="flex flex-col gap-1">
            <span className="signal-badge">{stock.signalType}</span>
@@ -99,7 +98,7 @@ export default function StockCard({ stock, isSelected, onClick, onDeepResearch }
                 {stock.confidence}%
               </span>
            </div>
-           {/* Actions Overlay on Hover */}
+           {}
            <div className="flex gap-2">
              <button 
                title="Detailed Research"
@@ -115,7 +114,7 @@ export default function StockCard({ stock, isSelected, onClick, onDeepResearch }
         </div>
       </div>
       
-      {/* Decorative Glow elements */}
+      {}
       <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/5 blur-[40px] rounded-full -mr-16 -mt-16" />
     </div>
   );

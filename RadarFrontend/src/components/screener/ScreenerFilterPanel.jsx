@@ -45,7 +45,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
 
   return (
     <div className="h-full flex flex-col py-4 screener-filter-panel">
-      {/* Header */}
+      {}
       <div className="px-4 pb-4 flex justify-between items-center border-b border-slate-700">
         <div className="flex items-center gap-2">
           <Sliders className="w-5 h-5 text-cyan-400" />
@@ -59,9 +59,9 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
         </button>
       </div>
 
-      {/* Scroll Content */}
+      {}
       <div className="flex-1 overflow-y-auto">
-        {/* Search */}
+        {}
         <div className="px-4 py-4 border-b border-slate-700/50">
           <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Search</label>
           <input
@@ -73,7 +73,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
           />
         </div>
 
-        {/* Basic Filters */}
+        {}
         <motion.div className="border-b border-slate-700/50">
           <button
             onClick={() => toggleSection('basic')}
@@ -94,7 +94,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
             overflow="hidden"
             className="px-4 pb-4 space-y-4"
           >
-            {/* Sector */}
+            {}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">
                 Asset Sectors
@@ -112,7 +112,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
               </select>
             </div>
 
-            {/* Trend Type */}
+            {}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Market Structure</label>
               <select
@@ -127,7 +127,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
               </select>
             </div>
 
-            {/* Price Change Range */}
+            {}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">
                 Price Change %
@@ -147,7 +147,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
           </motion.div>
         </motion.div>
 
-        {/* Technical Filters */}
+        {}
         <motion.div className="border-b border-slate-700/50">
           <button
             onClick={() => toggleSection('technical')}
@@ -168,7 +168,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
             overflow="hidden"
             className="px-4 pb-4 space-y-4"
           >
-            {/* RSI */}
+            {}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">
                 Momentum Range (RSI): {filters.minRsi} - {filters.maxRsi}
@@ -193,7 +193,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
               </div>
             </div>
 
-            {/* Signal Selection */}
+            {}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Research Signals</label>
               <div className="space-y-2">
@@ -213,7 +213,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
           </motion.div>
         </motion.div>
 
-        {/* Advanced Filters */}
+        {}
         <motion.div className="border-b border-slate-700/50">
           <button
             onClick={() => toggleSection('advanced')}
@@ -234,7 +234,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
             overflow="hidden"
             className="px-4 pb-4 space-y-4"
           >
-            {/* Price Range */}
+            {}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Price Range</label>
               <div className="space-y-2">
@@ -255,7 +255,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
               </div>
             </div>
 
-            {/* Volume */}
+            {}
             <div>
               <label className="block text-xs font-semibold text-slate-300 uppercase mb-2">Min Volume</label>
               <input
@@ -270,7 +270,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
         </motion.div>
       </div>
 
-      {/* Footer */}
+      {}
       <div className="px-4 pt-4 border-t border-slate-700 space-y-2">
         <button
           onClick={() => onActivateScan?.()}

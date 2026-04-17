@@ -1,10 +1,6 @@
-/**
- * Enhanced sorting utilities for watchlist
- * Includes sentiment-based and news-based sorting
- */
+
 
 export const SORT_TYPES = {
-  // Existing sorts
   PRICE_ASC: 'price_asc',
   PRICE_DESC: 'price_desc',
   CHANGE_ASC: 'change_asc',
@@ -16,7 +12,6 @@ export const SORT_TYPES = {
   RSI_ASC: 'rsi_asc',
   RSI_DESC: 'rsi_desc',
   
-  // New sorts
   NEWS_COUNT_DESC: 'news_count_desc',
   NEWS_COUNT_ASC: 'news_count_asc',
   SENTIMENT_DESC: 'sentiment_desc',
@@ -26,21 +21,21 @@ export const SORT_TYPES = {
 };
 
 export const SORT_OPTIONS = [
-  { value: SORT_TYPES.PRICE_DESC, label: 'Price: High to Low', icon: '↓' },
-  { value: SORT_TYPES.PRICE_ASC, label: 'Price: Low to High', icon: '↑' },
-  { value: SORT_TYPES.CHANGE_DESC, label: 'Change: High to Low', icon: '↓' },
-  { value: SORT_TYPES.CHANGE_ASC, label: 'Change: Low to High', icon: '↑' },
-  { value: SORT_TYPES.PERCENT_DESC, label: '% Change: High to Low', icon: '↓' },
-  { value: SORT_TYPES.PERCENT_ASC, label: '% Change: Low to High', icon: '↑' },
-  { value: SORT_TYPES.VOLUME_DESC, label: 'Volume: High to Low', icon: '↓' },
-  { value: SORT_TYPES.VOLUME_ASC, label: 'Volume: Low to High', icon: '↑' },
-  { value: SORT_TYPES.RSI_DESC, label: 'RSI: High to Low', icon: '↓' },
-  { value: SORT_TYPES.RSI_ASC, label: 'RSI: Low to High', icon: '↑' },
-  { value: SORT_TYPES.NEWS_COUNT_DESC, label: 'News Volume: High to Low', icon: '📰↓', new: true },
-  { value: SORT_TYPES.NEWS_COUNT_ASC, label: 'News Volume: Low to High', icon: '📰↑', new: true },
-  { value: SORT_TYPES.SENTIMENT_DESC, label: 'Sentiment: Positive First', icon: '😊↓', new: true },
-  { value: SORT_TYPES.SENTIMENT_ASC, label: 'Sentiment: Negative First', icon: '😞↑', new: true },
-  { value: SORT_TYPES.UNREAD_DESC, label: 'Unread News: Most First', icon: '🔔↓', new: true },
+  { value: SORT_TYPES.PRICE_DESC, label: 'Price: High to Low', icon: 'â†“' },
+  { value: SORT_TYPES.PRICE_ASC, label: 'Price: Low to High', icon: 'â†‘' },
+  { value: SORT_TYPES.CHANGE_DESC, label: 'Change: High to Low', icon: 'â†“' },
+  { value: SORT_TYPES.CHANGE_ASC, label: 'Change: Low to High', icon: 'â†‘' },
+  { value: SORT_TYPES.PERCENT_DESC, label: '% Change: High to Low', icon: 'â†“' },
+  { value: SORT_TYPES.PERCENT_ASC, label: '% Change: Low to High', icon: 'â†‘' },
+  { value: SORT_TYPES.VOLUME_DESC, label: 'Volume: High to Low', icon: 'â†“' },
+  { value: SORT_TYPES.VOLUME_ASC, label: 'Volume: Low to High', icon: 'â†‘' },
+  { value: SORT_TYPES.RSI_DESC, label: 'RSI: High to Low', icon: 'â†“' },
+  { value: SORT_TYPES.RSI_ASC, label: 'RSI: Low to High', icon: 'â†‘' },
+  { value: SORT_TYPES.NEWS_COUNT_DESC, label: 'News Volume: High to Low', icon: 'ðŸ“°â†“', new: true },
+  { value: SORT_TYPES.NEWS_COUNT_ASC, label: 'News Volume: Low to High', icon: 'ðŸ“°â†‘', new: true },
+  { value: SORT_TYPES.SENTIMENT_DESC, label: 'Sentiment: Positive First', icon: 'ðŸ˜Šâ†“', new: true },
+  { value: SORT_TYPES.SENTIMENT_ASC, label: 'Sentiment: Negative First', icon: 'ðŸ˜žâ†‘', new: true },
+  { value: SORT_TYPES.UNREAD_DESC, label: 'Unread News: Most First', icon: 'ðŸ””â†“', new: true },
 ];
 
 export const sortStocks = (stocks, sortType, newsData = {}) => {

@@ -1,8 +1,4 @@
-/**
- * Finnhub Service
- * Free tier: 60 API calls/minute
- * Best for: Real-time quotes, company info
- */
+
 
 const axios = require('axios');
 const logger = require('../utils/logger');
@@ -17,13 +13,9 @@ class FinnhubService {
     this.requestTimestamps = [];
   }
 
-  /**
-   * Check if we can make a request (rate limiting)
-   * @returns {boolean}
-   */
+  
   canMakeRequest() {
     const now = Date.now();
-    // Remove timestamps older than 1 minute
     this.requestTimestamps = this.requestTimestamps.filter(
       timestamp => now - timestamp < this.requestWindow
     );
@@ -31,19 +23,13 @@ class FinnhubService {
     return this.requestTimestamps.length < this.maxRequestsPerWindow;
   }
 
-  /**
-   * Record a request for rate limiting
-   */
+  
   recordRequest() {
     this.requestTimestamps.push(Date.now());
     this.requestCount++;
   }
 
-  /**
-   * Get real-time quote for a symbol
-   * @param {string} symbol - Stock symbol (e.g., 'RELIANCE.NS')
-   * @returns {Promise<Object>}
-   */
+  
   async getQuote(symbol) {
     try {
       if (!this.canMakeRequest()) {
@@ -55,7 +41,6 @@ class FinnhubService {
         };
       }
 
-      // Convert Indian symbols to Finnhub format
       const finnhubSymbol = this.convertToFinnhubSymbol(symbol);
 
       const response = await axios.get(`${this.baseUrl}/quote`, {
@@ -70,7 +55,6 @@ class FinnhubService {
 
       const data = response.data;
 
-      // Check if valid data returned
       if (!data || data.c === 0) {
         return {
           success: false,
@@ -105,11 +89,7 @@ class FinnhubService {
     }
   }
 
-  /**
-   * Get company profile
-   * @param {string} symbol - Stock symbol
-   * @returns {Promise<Object>}
-   */
+  
   async getCompanyProfile(symbol) {
     try {
       if (!this.canMakeRequest()) {
@@ -145,22 +125,12 @@ class FinnhubService {
     }
   }
 
-  /**
-   * Convert symbol to Finnhub format
-   * @param {string} symbol - Original symbol
-   * @returns {string}
-   */
+  
   convertToFinnhubSymbol(symbol) {
-    // Remove .NS/.BO suffix for Indian stocks
-    // Finnhub doesn't support Indian markets well, so this might not work
-    // For demo purposes, we'll keep the format
     return symbol.replace('.NS', '').replace('.BO', '');
   }
 
-  /**
-   * Get rate limit status
-   * @returns {Object}
-   */
+  
   getRateLimitStatus() {
     const now = Date.now();
     this.requestTimestamps = this.requestTimestamps.filter(
@@ -177,10 +147,7 @@ class FinnhubService {
     };
   }
 
-  /**
-   * Test API connection
-   * @returns {Promise<boolean>}
-   */
+  
   async testConnection() {
     try {
       const result = await this.getQuote('AAPL');

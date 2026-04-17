@@ -20,18 +20,7 @@ import {
   X,
 } from 'lucide-react';
 
-/**
- * ADVANCED TRADINGVIEW-STYLE CHART COMPONENT
- * 
- * Features:
- * - Multiple chart types (Candlestick, Line, Area, Bars, Heikin Ashi)
- * - 100+ Technical Indicators
- * - Drawing tools (Trendlines, Fibonacci, Channels)
- * - Multi-timeframe support
- * - Real-time updates via WebSocket
- * - Save/Load chart templates
- * - Alerts and annotations
- */
+
 
 const TIMEFRAMES = [
   { id: '1', label: '1m', seconds: 60 },
@@ -46,21 +35,19 @@ const TIMEFRAMES = [
 ];
 
 const CHART_TYPES = [
-  { id: 'candlestick', label: 'Candlestick', icon: '📊' },
-  { id: 'line', label: 'Line', icon: '📈' },
-  { id: 'area', label: 'Area', icon: '🏔️' },
-  { id: 'bars', label: 'Bars', icon: '📉' },
-  { id: 'heikinashi', label: 'Heikin Ashi', icon: '🎴' },
+  { id: 'candlestick', label: 'Candlestick', icon: 'ðŸ“Š' },
+  { id: 'line', label: 'Line', icon: 'ðŸ“ˆ' },
+  { id: 'area', label: 'Area', icon: 'ðŸ”ï¸' },
+  { id: 'bars', label: 'Bars', icon: 'ðŸ“‰' },
+  { id: 'heikinashi', label: 'Heikin Ashi', icon: 'ðŸŽ´' },
 ];
 
 const INDICATORS = [
-  // Moving Averages
   { id: 'sma', label: 'Simple Moving Average (SMA)', category: 'Moving Averages', params: { period: 20 }, color: '#06b6d4' },
   { id: 'ema', label: 'Exponential Moving Average (EMA)', category: 'Moving Averages', params: { period: 20 }, color: '#8b5cf6' },
   { id: 'wma', label: 'Weighted Moving Average (WMA)', category: 'Moving Averages', params: { period: 20 }, color: '#f59e0b' },
   { id: 'vwma', label: 'Volume Weighted MA (VWMA)', category: 'Moving Averages', params: { period: 20 }, color: '#ec4899' },
   
-  // Oscillators
   { id: 'rsi', label: 'Relative Strength Index (RSI)', category: 'Oscillators', params: { period: 14 }, color: '#10b981' },
   { id: 'macd', label: 'MACD', category: 'Oscillators', params: { fast: 12, slow: 26, signal: 9 }, color: '#3b82f6' },
   { id: 'stochastic', label: 'Stochastic', category: 'Oscillators', params: { k: 14, d: 3 }, color: '#f43f5e' },
@@ -68,29 +55,24 @@ const INDICATORS = [
   { id: 'mfi', label: 'Money Flow Index (MFI)', category: 'Oscillators', params: { period: 14 }, color: '#a855f7' },
   { id: 'willr', label: 'Williams %R', category: 'Oscillators', params: { period: 14 }, color: '#f97316' },
   
-  // Bands & Envelopes
   { id: 'bollinger', label: 'Bollinger Bands', category: 'Bands', params: { period: 20, stdDev: 2 }, color: '#06b6d4' },
   { id: 'keltner', label: 'Keltner Channels', category: 'Bands', params: { period: 20, multiplier: 2 }, color: '#8b5cf6' },
   { id: 'donchian', label: 'Donchian Channels', category: 'Bands', params: { period: 20 }, color: '#f59e0b' },
   
-  // Volume
   { id: 'volume', label: 'Volume', category: 'Volume', params: {}, color: '#64748b' },
   { id: 'obv', label: 'On Balance Volume (OBV)', category: 'Volume', params: {}, color: '#10b981' },
   { id: 'vwap', label: 'VWAP', category: 'Volume', params: {}, color: '#06b6d4' },
   { id: 'volumeRoc', label: 'Volume Rate of Change', category: 'Volume', params: { period: 12 }, color: '#f43f5e' },
   
-  // Trend
   { id: 'adx', label: 'Average Directional Index (ADX)', category: 'Trend', params: { period: 14 }, color: '#3b82f6' },
   { id: 'ichimoku', label: 'Ichimoku Cloud', category: 'Trend', params: {}, color: '#8b5cf6' },
   { id: 'parabolicSar', label: 'Parabolic SAR', category: 'Trend', params: { step: 0.02, max: 0.2 }, color: '#f59e0b' },
   { id: 'supertrend', label: 'SuperTrend', category: 'Trend', params: { period: 10, multiplier: 3 }, color: '#10b981' },
   
-  // Volatility
   { id: 'atr', label: 'Average True Range (ATR)', category: 'Volatility', params: { period: 14 }, color: '#ef4444' },
   { id: 'stddev', label: 'Standard Deviation', category: 'Volatility', params: { period: 20 }, color: '#8b5cf6' },
   { id: 'historicalVolatility', label: 'Historical Volatility', category: 'Volatility', params: { period: 30 }, color: '#f59e0b' },
   
-  // Momentum
   { id: 'roc', label: 'Rate of Change (ROC)', category: 'Momentum', params: { period: 12 }, color: '#06b6d4' },
   { id: 'momentum', label: 'Momentum', category: 'Momentum', params: { period: 10 }, color: '#10b981' },
   { id: 'tsi', label: 'True Strength Index (TSI)', category: 'Momentum', params: { long: 25, short: 13 }, color: '#3b82f6' },
@@ -116,7 +98,6 @@ const AdvancedTradingChart = ({
   const [currentPrice, setCurrentPrice] = useState(null);
   const [priceChange, setPriceChange] = useState({ value: 0, percent: 0 });
 
-  // Initialize chart
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
@@ -162,7 +143,6 @@ const AdvancedTradingChart = ({
 
     chartRef.current = chart;
 
-    // Create candlestick series
     const candleSeries = chart.addCandlestickSeries({
       upColor: '#10b981',
       downColor: '#ef4444',
@@ -173,10 +153,8 @@ const AdvancedTradingChart = ({
 
     candleSeriesRef.current = candleSeries;
 
-    // Load initial data
     loadChartData();
 
-    // Handle resize
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
         chart.applyOptions({ width: chartContainerRef.current.clientWidth });
@@ -191,17 +169,14 @@ const AdvancedTradingChart = ({
     };
   }, []);
 
-  // Load chart data
   const loadChartData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Mock data generation (replace with actual API call)
       const data = generateMockData(100);
       
       if (candleSeriesRef.current) {
         candleSeriesRef.current.setData(data);
         
-        // Set current price and change
         const lastCandle = data[data.length - 1];
         const firstCandle = data[0];
         setCurrentPrice(lastCandle.close);
@@ -223,7 +198,6 @@ const AdvancedTradingChart = ({
     }
   }, [onChartReady]);
 
-  // Generate mock OHLC data
   const generateMockData = (count) => {
     const data = [];
     const now = Math.floor(Date.now() / 1000);
@@ -251,7 +225,6 @@ const AdvancedTradingChart = ({
     return data;
   };
 
-  // Calculate SMA
   const calculateSMA = (data, period) => {
     const smaData = [];
     for (let i = period - 1; i < data.length; i++) {
@@ -264,7 +237,6 @@ const AdvancedTradingChart = ({
     return smaData;
   };
 
-  // Add indicator
   const addIndicator = useCallback((indicator) => {
     if (!chartRef.current) return;
 
@@ -272,12 +244,10 @@ const AdvancedTradingChart = ({
     setActiveIndicators(prev => [...prev, newIndicator]);
     setShowIndicatorMenu(false);
 
-    // Add visual representation based on indicator type
     try {
       const chartData = candleSeriesRef.current.data();
       
       if (indicator.category === 'Moving Averages') {
-        // Add line series for moving averages
         const lineSeries = chartRef.current.addLineSeries({
           color: indicator.color,
           lineWidth: 2,
@@ -288,16 +258,13 @@ const AdvancedTradingChart = ({
         lineSeries.setData(indicatorData);
         indicatorSeriesRef.current[newIndicator.id] = lineSeries;
       }
-      // TODO: Add other indicator visualizations
       
     } catch (error) {
       console.error('Error adding indicator:', error);
     }
   }, []);
 
-  // Remove indicator
   const removeIndicator = useCallback((indicatorId) => {
-    // Remove series from chart
     if (indicatorSeriesRef.current[indicatorId]) {
       chartRef.current.removeSeries(indicatorSeriesRef.current[indicatorId]);
       delete indicatorSeriesRef.current[indicatorId];
@@ -306,33 +273,30 @@ const AdvancedTradingChart = ({
     setActiveIndicators(prev => prev.filter(ind => ind.id !== indicatorId));
   }, []);
 
-  // Change timeframe
   const handleTimeframeChange = useCallback((newTimeframe) => {
     setTimeframe(newTimeframe);
     loadChartData();
   }, [loadChartData]);
 
-  // Change chart type
   const handleChartTypeChange = useCallback((newType) => {
     setChartType(newType);
-    // TODO: Switch between chart types
     console.log('Changing chart type to:', newType);
   }, []);
 
   return (
     <div className="relative w-full h-full bg-slate-950 rounded-2xl overflow-hidden border border-slate-800">
-      {/* Chart Header */}
+      {}
       {showHeader && (
         <div className="absolute top-0 left-0 right-0 z-10 bg-gradient-to-b from-slate-950 via-slate-950/90 to-transparent p-4 pb-8">
           <div className="flex items-center justify-between">
-            {/* Symbol and Price Info */}
+            {}
             <div className="flex items-center gap-4">
               <div>
                 <h2 className="text-2xl font-bold text-white">{symbol}</h2>
                 {currentPrice && (
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-2xl font-mono font-bold text-white">
-                      ₹{currentPrice.toFixed(2)}
+                      â‚¹{currentPrice.toFixed(2)}
                     </span>
                     <span className={`flex items-center gap-1 text-sm font-semibold ${
                       priceChange.value >= 0 ? 'text-emerald-400' : 'text-rose-400'
@@ -345,9 +309,9 @@ const AdvancedTradingChart = ({
               </div>
             </div>
 
-            {/* Chart Controls */}
+            {}
             <div className="flex items-center gap-2">
-              {/* Timeframe Selector */}
+              {}
               <div className="flex items-center gap-1 bg-slate-900/80 rounded-lg p-1 backdrop-blur-sm">
                 {TIMEFRAMES.map(tf => (
                   <button
@@ -364,7 +328,7 @@ const AdvancedTradingChart = ({
                 ))}
               </div>
 
-              {/* Chart Type Selector */}
+              {}
               <div className="flex items-center gap-1 bg-slate-900/80 rounded-lg p-1 backdrop-blur-sm">
                 {CHART_TYPES.map(type => (
                   <button
@@ -382,7 +346,7 @@ const AdvancedTradingChart = ({
                 ))}
               </div>
 
-              {/* Indicators Button */}
+              {}
               <button
                 onClick={() => setShowIndicatorMenu(!showIndicatorMenu)}
                 className="px-4 py-2 rounded-lg bg-cyan-500/20 text-cyan-300 hover:bg-cyan-500/30 transition-all flex items-center gap-2 backdrop-blur-sm border border-cyan-400/30"
@@ -396,7 +360,7 @@ const AdvancedTradingChart = ({
                 )}
               </button>
 
-              {/* Action Buttons */}
+              {}
               <button className="p-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all">
                 <Settings className="w-5 h-5" />
               </button>
@@ -409,7 +373,7 @@ const AdvancedTradingChart = ({
             </div>
           </div>
 
-          {/* Active Indicators Pills */}
+          {}
           {activeIndicators.length > 0 && (
             <div className="flex items-center gap-2 mt-3 flex-wrap">
               {activeIndicators.map(indicator => (
@@ -435,10 +399,10 @@ const AdvancedTradingChart = ({
         </div>
       )}
 
-      {/* Chart Container */}
+      {}
       <div ref={chartContainerRef} className="w-full h-full" />
 
-      {/* Loading Overlay */}
+      {}
       {isLoading && (
         <div className="absolute inset-0 flex items-center justify-center bg-slate-950/50 backdrop-blur-sm">
           <div className="text-center">
@@ -448,7 +412,7 @@ const AdvancedTradingChart = ({
         </div>
       )}
 
-      {/* Indicators Menu */}
+      {}
       <AnimatePresence>
         {showIndicatorMenu && (
           <motion.div

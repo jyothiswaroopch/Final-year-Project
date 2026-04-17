@@ -10,7 +10,7 @@ export default function AnalysisTechnicals() {
     return (
         <div className="flex flex-col gap-12">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Simplified RSI */}
+                {}
                 <div className="rs-card-minimal">
                     <h3 className="rs-label-sm uppercase mb-6 tracking-widest">Relative Strength Index (14)</h3>
                     <div className="h-[240px] w-full">
@@ -32,7 +32,7 @@ export default function AnalysisTechnicals() {
                     </div>
                 </div>
 
-                {/* Simplified Levels */}
+                {}
                 <div className="rs-card-minimal">
                     <h3 className="rs-label-sm uppercase mb-6 tracking-widest">Key Price Levels</h3>
                     <div className="space-y-4">
@@ -44,7 +44,7 @@ export default function AnalysisTechnicals() {
                             <div key={i} className="flex justify-between items-center py-3 border-b border-slate-800 last:border-0">
                                 <span className="text-[14px] font-bold text-slate-400">{node.label}</span>
                                 <span className={`terminal-value text-lg font-bold ${node.type === 'res' ? 'rs-down' : node.type === 'sup' ? 'rs-up' : 'text-slate-200'}`}>
-                                    ₹{node.val}
+                                    â‚¹{node.val}
                                 </span>
                             </div>
                         ))}
@@ -52,7 +52,7 @@ export default function AnalysisTechnicals() {
                 </div>
             </div>
 
-            {/* Moving Averages */}
+            {}
             <section>
                 <h3 className="rs-label-sm uppercase mb-6 tracking-widest">Moving Averages Summary</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -64,7 +64,7 @@ export default function AnalysisTechnicals() {
                     ].map((ma, i) => (
                         <div key={i} className="p-4 bg-white/[0.02] border border-slate-800 rounded">
                             <span className="rs-label-sm block mb-1">{ma.label}</span>
-                            <span className="text-[14px] font-bold text-slate-200 block mb-1">₹{ma.val}</span>
+                            <span className="text-[14px] font-bold text-slate-200 block mb-1">â‚¹{ma.val}</span>
                             <span className={`text-[10px] font-black uppercase ${ma.pos ? 'rs-up' : 'rs-down'}`}>
                                 {ma.pos ? 'Above' : 'Below'} Price
                             </span>

@@ -1,8 +1,4 @@
-/**
- * Twelve Data Service
- * Free tier: 800 API calls/day
- * Best for: Indian stocks, historical data, real-time quotes
- */
+
 
 const axios = require('axios');
 const logger = require('../utils/logger');
@@ -16,15 +12,11 @@ class TwelveDataService {
     this.requestTimestamps = [];
   }
 
-  /**
-   * Check if we can make a request (daily limit)
-   * @returns {boolean}
-   */
+  
   canMakeRequest() {
     const now = Date.now();
     const oneDayAgo = now - 24 * 60 * 60 * 1000;
     
-    // Remove timestamps older than 24 hours
     this.requestTimestamps = this.requestTimestamps.filter(
       timestamp => timestamp > oneDayAgo
     );
@@ -32,19 +24,13 @@ class TwelveDataService {
     return this.requestTimestamps.length < this.dailyLimit;
   }
 
-  /**
-   * Record a request
-   */
+  
   recordRequest() {
     this.requestTimestamps.push(Date.now());
     this.requestCount++;
   }
 
-  /**
-   * Get real-time quote for a symbol
-   * @param {string} symbol - Stock symbol (e.g., 'RELIANCE.NS')
-   * @returns {Promise<Object>}
-   */
+  
   async getQuote(symbol) {
     try {
       if (!this.canMakeRequest()) {
@@ -56,7 +42,6 @@ class TwelveDataService {
         };
       }
 
-      // Twelve Data supports .NS suffix for NSE stocks
       const response = await axios.get(`${this.baseUrl}/quote`, {
         params: {
           symbol: symbol,
@@ -69,7 +54,6 @@ class TwelveDataService {
 
       const data = response.data;
 
-      // Check for errors
       if (data.status === 'error' || !data.close) {
         return {
           success: false,
@@ -104,11 +88,7 @@ class TwelveDataService {
     }
   }
 
-  /**
-   * Get real-time price (faster endpoint)
-   * @param {string} symbol - Stock symbol
-   * @returns {Promise<Object>}
-   */
+  
   async getPrice(symbol) {
     try {
       if (!this.canMakeRequest()) {
@@ -155,13 +135,7 @@ class TwelveDataService {
     }
   }
 
-  /**
-   * Get time series data
-   * @param {string} symbol - Stock symbol
-   * @param {string} interval - Interval (1min, 5min, 15min, 1h, 1day)
-   * @param {number} outputsize - Number of data points (default: 30)
-   * @returns {Promise<Object>}
-   */
+  
   async getTimeSeries(symbol, interval = '1day', outputsize = 30) {
     try {
       if (!this.canMakeRequest()) {
@@ -192,7 +166,6 @@ class TwelveDataService {
         };
       }
 
-      // Convert to OHLC format
       const ohlcData = data.values.map(candle => ({
         timestamp: new Date(candle.datetime),
         open: parseFloat(candle.open),
@@ -217,10 +190,7 @@ class TwelveDataService {
     }
   }
 
-  /**
-   * Get rate limit status
-   * @returns {Object}
-   */
+  
   getRateLimitStatus() {
     const now = Date.now();
     const oneDayAgo = now - 24 * 60 * 60 * 1000;
@@ -239,10 +209,7 @@ class TwelveDataService {
     };
   }
 
-  /**
-   * Test API connection
-   * @returns {Promise<boolean>}
-   */
+  
   async testConnection() {
     try {
       const result = await this.getPrice('RELIANCE.NS');

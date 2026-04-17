@@ -1,12 +1,6 @@
 import { useWatchlistQuotes } from '../../hooks/useRealtimeQuote';
 
-/**
- * Real-Time Watchlist Component
- * 
- * Displays a watchlist with real-time quotes for multiple symbols
- * Uses batch quote fetching with 5-minute cache
- * Auto-refreshes every 5 minutes
- */
+
 const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
     const {
         quotes,
@@ -16,7 +10,6 @@ const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
         refetch,
     } = useWatchlistQuotes(symbols);
 
-    // Loading state
     if (loading && Object.keys(quotes).length === 0) {
         return (
             <div className="bg-white p-6 rounded-lg shadow">
@@ -30,13 +23,12 @@ const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
         );
     }
 
-    // Error state
     if (error) {
         return (
             <div className="bg-white p-6 rounded-lg shadow">
                 <h2 className="text-2xl font-bold mb-4">{title}</h2>
                 <div className="bg-red-50 border border-red-200 p-4 rounded">
-                    <p className="text-red-700">❌ {error}</p>
+                    <p className="text-red-700">âŒ {error}</p>
                     <button
                         onClick={refetch}
                         className="mt-2 text-red-600 underline text-sm"
@@ -48,7 +40,6 @@ const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
         );
     }
 
-    // Empty state
     if (symbols.length === 0) {
         return (
             <div className="bg-white p-6 rounded-lg shadow">
@@ -60,7 +51,7 @@ const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
 
     return (
         <div className="bg-white p-6 rounded-lg shadow">
-            {/* Header */}
+            {}
             <div className="flex justify-between items-center mb-4">
                 <div>
                     <h2 className="text-2xl font-bold">{title}</h2>
@@ -77,7 +68,7 @@ const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
                 </button>
             </div>
 
-            {/* Watchlist Table */}
+            {}
             <div className="overflow-x-auto">
                 <table className="w-full">
                     <thead>
@@ -94,7 +85,6 @@ const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
                         {symbols.map((symbol) => {
                             const quote = quotes[symbol];
 
-                            // Quote not loaded yet
                             if (!quote) {
                                 return (
                                     <tr key={symbol} className="border-b hover:bg-gray-50">
@@ -116,15 +106,15 @@ const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
                                         <div>
                                             <p className="font-semibold">{symbol}</p>
                                             {quote.stale && (
-                                                <span className="text-xs text-yellow-600">⚠️ Stale</span>
+                                                <span className="text-xs text-yellow-600">âš ï¸ Stale</span>
                                             )}
                                         </div>
                                     </td>
                                     <td className="text-right py-3 px-4 font-semibold">
-                                        ₹{quote.price?.toFixed(2) || '—'}
+                                        â‚¹{quote.price?.toFixed(2) || 'â€”'}
                                     </td>
                                     <td className={`text-right py-3 px-4 font-semibold ${changeColor}`}>
-                                        {isPositive ? '▲' : '▼'} {Math.abs(quote.change)?.toFixed(2) || 0}
+                                        {isPositive ? 'â–²' : 'â–¼'} {Math.abs(quote.change)?.toFixed(2) || 0}
                                     </td>
                                     <td className="text-right py-3 px-4">
                                         <span className={`${bgColor} ${changeColor} px-2 py-1 rounded font-semibold`}>
@@ -132,7 +122,7 @@ const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
                                         </span>
                                     </td>
                                     <td className="text-right py-3 px-4 text-sm text-gray-600">
-                                        {quote.volume?.toLocaleString() || '—'}
+                                        {quote.volume?.toLocaleString() || 'â€”'}
                                     </td>
                                     <td className="text-center py-3 px-4">
                                         <span className="text-xs bg-gray-100 px-2 py-1 rounded">
@@ -146,7 +136,7 @@ const RealtimeWatchlist = ({ symbols = [], title = 'My Watchlist' }) => {
                 </table>
             </div>
 
-            {/* Auto-refresh indicator */}
+            {}
             <div className="mt-4 text-xs text-gray-500 text-center">
                 Auto-refreshes every 5 minutes
             </div>

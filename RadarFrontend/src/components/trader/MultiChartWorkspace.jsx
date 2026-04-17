@@ -15,28 +15,18 @@ import {
 } from 'lucide-react';
 import AdvancedTradingChart from './AdvancedTradingChart';
 
-/**
- * MULTI-CHART WORKSPACE COMPONENT
- * 
- * TradingView-style multi-chart layouts with:
- * - 1x1, 1x2, 2x1, 2x2, 1x3, 3x1, 2x3, 3x2, 3x3, 4x4 layouts
- * - Drag & drop chart arrangement
- * - Save/load workspace templates
- * - Sync charts (timeframe, drawings, cursor)
- * - Independent chart settings
- * - Fullscreen individual charts
- */
+
 
 const LAYOUTS = [
-  { id: '1x1', label: '1 Chart', rows: 1, cols: 1, icon: '⬜' },
-  { id: '1x2', label: '1×2', rows: 1, cols: 2, icon: '▯' },
-  { id: '2x1', label: '2×1', rows: 2, cols: 1, icon: '▭' },
-  { id: '2x2', label: '2×2', rows: 2, cols: 2, icon: '⊞' },
-  { id: '1x3', label: '1×3', rows: 1, cols: 3, icon: '☰' },
-  { id: '3x1', label: '3×1', rows: 3, cols: 1, icon: '⋮' },
-  { id: '2x3', label: '2×3', rows: 2, cols: 3, icon: '⊡' },
-  { id: '3x2', label: '3×2', rows: 3, cols: 2, icon: '⊟' },
-  { id: '3x3', label: '3×3', rows: 3, cols: 3, icon: '⊞' },
+  { id: '1x1', label: '1 Chart', rows: 1, cols: 1, icon: 'â¬œ' },
+  { id: '1x2', label: '1Ã—2', rows: 1, cols: 2, icon: 'â–¯' },
+  { id: '2x1', label: '2Ã—1', rows: 2, cols: 1, icon: 'â–­' },
+  { id: '2x2', label: '2Ã—2', rows: 2, cols: 2, icon: 'âŠž' },
+  { id: '1x3', label: '1Ã—3', rows: 1, cols: 3, icon: 'â˜°' },
+  { id: '3x1', label: '3Ã—1', rows: 3, cols: 1, icon: 'â‹®' },
+  { id: '2x3', label: '2Ã—3', rows: 2, cols: 3, icon: 'âŠ¡' },
+  { id: '3x2', label: '3Ã—2', rows: 3, cols: 2, icon: 'âŠŸ' },
+  { id: '3x3', label: '3Ã—3', rows: 3, cols: 3, icon: 'âŠž' },
 ];
 
 const DEFAULT_SYMBOLS = ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'ICICIBANK', 'SBIN', 'BHARTIARTL', 'ITC', 'KOTAKBANK'];
@@ -59,7 +49,6 @@ const MultiChartWorkspace = () => {
   const currentLayout = LAYOUTS.find(l => l.id === layout);
   const totalCharts = currentLayout.rows * currentLayout.cols;
 
-  // Ensure charts array matches layout size
   const displayCharts = [...charts];
   while (displayCharts.length < totalCharts) {
     const nextSymbol = DEFAULT_SYMBOLS[displayCharts.length % DEFAULT_SYMBOLS.length];
@@ -70,19 +59,16 @@ const MultiChartWorkspace = () => {
     });
   }
 
-  // Update chart
   const updateChart = useCallback((chartId, updates) => {
     setCharts(prev => prev.map(chart => 
       chart.id === chartId ? { ...chart, ...updates } : chart
     ));
   }, []);
 
-  // Remove chart
   const removeChart = useCallback((chartId) => {
     setCharts(prev => prev.filter(chart => chart.id !== chartId));
   }, []);
 
-  // Add chart
   const addChart = useCallback(() => {
     const newChart = {
       id: Date.now(),
@@ -92,18 +78,15 @@ const MultiChartWorkspace = () => {
     setCharts(prev => [...prev, newChart]);
   }, [charts.length]);
 
-  // Change layout
   const changeLayout = useCallback((newLayout) => {
     setLayout(newLayout);
     setShowLayoutMenu(false);
   }, []);
 
-  // Toggle fullscreen
   const toggleFullscreen = useCallback((chartId) => {
     setFullscreenChart(fullscreenChart === chartId ? null : chartId);
   }, [fullscreenChart]);
 
-  // Save workspace
   const saveWorkspace = useCallback(() => {
     if (!workspaceName.trim()) return;
 
@@ -125,7 +108,6 @@ const MultiChartWorkspace = () => {
     setShowSaveMenu(false);
   }, [workspaceName, layout, displayCharts, totalCharts, syncEnabled]);
 
-  // Load workspace
   const loadWorkspace = useCallback((workspace) => {
     setLayout(workspace.layout);
     setCharts(workspace.charts);
@@ -133,7 +115,6 @@ const MultiChartWorkspace = () => {
     setShowSaveMenu(false);
   }, []);
 
-  // Delete workspace
   const deleteWorkspace = useCallback((workspaceId) => {
     const saved = JSON.parse(localStorage.getItem('radar-workspaces') || '[]');
     const filtered = saved.filter(w => w.id !== workspaceId);
@@ -141,7 +122,6 @@ const MultiChartWorkspace = () => {
     setSavedWorkspaces(filtered);
   }, []);
 
-  // Load saved workspaces on mount
   React.useEffect(() => {
     const saved = JSON.parse(localStorage.getItem('radar-workspaces') || '[]');
     setSavedWorkspaces(saved);
@@ -149,7 +129,7 @@ const MultiChartWorkspace = () => {
 
   return (
     <div className="h-full bg-slate-950 flex flex-col">
-      {/* Toolbar */}
+      {}
       <div className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-bold text-white flex items-center gap-2">
@@ -158,13 +138,13 @@ const MultiChartWorkspace = () => {
           </h1>
           {syncEnabled && (
             <span className="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-semibold border border-cyan-400/30">
-              🔗 Sync Enabled
+              ðŸ”— Sync Enabled
             </span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Layout Selector */}
+          {}
           <div className="relative">
             <button
               onClick={() => setShowLayoutMenu(!showLayoutMenu)}
@@ -205,7 +185,7 @@ const MultiChartWorkspace = () => {
             </AnimatePresence>
           </div>
 
-          {/* Sync Toggle */}
+          {}
           <button
             onClick={() => setSyncEnabled(!syncEnabled)}
             className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
@@ -218,7 +198,7 @@ const MultiChartWorkspace = () => {
             <span className="text-sm font-semibold">Sync</span>
           </button>
 
-          {/* Save/Load */}
+          {}
           <div className="relative">
             <button
               onClick={() => setShowSaveMenu(!showSaveMenu)}
@@ -236,7 +216,7 @@ const MultiChartWorkspace = () => {
                   exit={{ opacity: 0, y: -10 }}
                   className="absolute top-full mt-2 right-0 w-80 bg-slate-800 rounded-xl border border-slate-700 shadow-2xl overflow-hidden z-50"
                 >
-                  {/* Save New Workspace */}
+                  {}
                   <div className="p-4 border-b border-slate-700">
                     <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
                       Save Current Workspace
@@ -259,7 +239,7 @@ const MultiChartWorkspace = () => {
                     </div>
                   </div>
 
-                  {/* Saved Workspaces */}
+                  {}
                   <div className="p-2 max-h-80 overflow-y-auto">
                     <div className="text-xs font-bold text-slate-500 uppercase tracking-wider px-3 py-2">
                       Saved Workspaces ({savedWorkspaces.length})
@@ -282,7 +262,7 @@ const MultiChartWorkspace = () => {
                               {workspace.name}
                             </div>
                             <div className="text-xs text-slate-500">
-                              {workspace.layout} • {workspace.charts.length} charts
+                              {workspace.layout} â€¢ {workspace.charts.length} charts
                             </div>
                           </button>
                           <button
@@ -302,10 +282,9 @@ const MultiChartWorkspace = () => {
         </div>
       </div>
 
-      {/* Charts Grid */}
+      {}
       <div className="flex-1 p-4 overflow-auto">
         {fullscreenChart ? (
-          // Fullscreen Chart
           <div className="h-full">
             <div className="h-full bg-slate-900 rounded-2xl overflow-hidden relative">
               <button
@@ -322,7 +301,6 @@ const MultiChartWorkspace = () => {
             </div>
           </div>
         ) : (
-          // Grid Layout
           <div 
             className="grid gap-4 h-full"
             style={{
@@ -338,7 +316,7 @@ const MultiChartWorkspace = () => {
                 transition={{ delay: index * 0.05 }}
                 className="relative bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 group"
               >
-                {/* Chart Controls Overlay */}
+                {}
                 <div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
                     onClick={() => toggleFullscreen(chart.id)}
@@ -358,7 +336,7 @@ const MultiChartWorkspace = () => {
                   )}
                 </div>
 
-                {/* Symbol Selector */}
+                {}
                 <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
                   <select
                     value={chart.symbol}

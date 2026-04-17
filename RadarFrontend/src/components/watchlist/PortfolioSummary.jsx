@@ -16,7 +16,6 @@ const PortfolioSummary = ({ stocks }) => {
       prev.change < current.change ? prev : current
     );
 
-    // Mock sector allocation
     const sectors = [
       { name: 'Banking', value: 25, color: '#3b82f6' },
       { name: 'IT', value: 20, color: '#8b5cf6' },
@@ -70,14 +69,14 @@ const PortfolioSummary = ({ stocks }) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3">
-          {/* Total Value */}
+          {}
           <motion.div
             variants={itemVariants}
             className="rounded-2xl border border-cyan-400/10 bg-[#07111f] p-4 hover:border-cyan-300/30 transition-all"
           >
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-2">Portfolio value</p>
             <div className="space-y-2">
-              <p className="text-3xl font-black text-white">₹{stats.totalValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
+              <p className="text-3xl font-black text-white">â‚¹{stats.totalValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}</p>
               <div className="flex items-center gap-1.5 text-sm font-semibold text-cyan-300">
                 <TrendingUp size={16} />
                 Frontend snapshot
@@ -85,7 +84,7 @@ const PortfolioSummary = ({ stocks }) => {
             </div>
           </motion.div>
 
-          {/* Daily P&L */}
+          {}
           <motion.div
             variants={itemVariants}
             className={`rounded-xl border backdrop-blur p-4 transition-all ${
@@ -97,7 +96,7 @@ const PortfolioSummary = ({ stocks }) => {
             <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-[0.2em] mb-2">Daily P&amp;L</p>
             <div className="space-y-1">
               <p className={`text-3xl font-black ${stats.totalChange > 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
-                {stats.totalChange > 0 ? '+' : ''}₹{Math.abs(stats.totalChange).toFixed(2)}
+                {stats.totalChange > 0 ? '+' : ''}â‚¹{Math.abs(stats.totalChange).toFixed(2)}
               </p>
               <div className={`flex items-center gap-1.5 text-sm font-semibold ${stats.totalPercent > 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
                 {stats.totalPercent > 0 ? <TrendingUp size={16} /> : <TrendingDown size={16} />}
@@ -106,7 +105,7 @@ const PortfolioSummary = ({ stocks }) => {
             </div>
           </motion.div>
 
-          {/* Top Gainer */}
+          {}
           <motion.div
             variants={itemVariants}
             className="rounded-2xl border border-emerald-500/20 bg-emerald-500/8 backdrop-blur p-4 hover:border-emerald-500/40 transition-all"
@@ -121,7 +120,7 @@ const PortfolioSummary = ({ stocks }) => {
             </div>
           </motion.div>
 
-          {/* Top Loser */}
+          {}
           <motion.div
             variants={itemVariants}
             className="rounded-2xl border border-rose-500/20 bg-rose-500/8 backdrop-blur p-4 hover:border-rose-500/40 transition-all"
@@ -136,7 +135,7 @@ const PortfolioSummary = ({ stocks }) => {
             </div>
           </motion.div>
 
-          {/* Sector Allocation */}
+          {}
           <motion.div
             variants={itemVariants}
             className="rounded-2xl border border-slate-700/40 bg-[#07111f] backdrop-blur p-4 hover:border-violet-400/25 transition-all"

@@ -1,27 +1,8 @@
 import api from './api';
 
-/**
- * Real-Time Quotes API - Sprint 2 Integration
- * 
- * This service provides real-time stock quotes from multiple free API sources:
- * - Finnhub (60 calls/min)
- * - Twelve Data (800 calls/day)
- * - Yahoo Finance (fallback)
- * 
- * Features:
- * - Multi-source fallback chain
- * - 1-minute quote caching
- * - Automatic source selection
- * - Offline mode support
- */
 
-/**
- * Get real-time quote for a single symbol
- * @param {string} symbol - Stock symbol (e.g., 'RELIANCE.NS')
- * @param {object} options - Query options
- * @param {number} options.maxAge - Max cache age in ms (default: 60000 = 1 min)
- * @returns {Promise} Real-time quote data
- */
+
+
 export const fetchRealtimeQuote = async (symbol, options = {}) => {
     try {
         const { maxAge = 60000 } = options;
@@ -75,13 +56,7 @@ export const fetchRealtimeQuote = async (symbol, options = {}) => {
     }
 };
 
-/**
- * Get batch quotes for multiple symbols
- * @param {Array<string>} symbols - Array of stock symbols
- * @param {object} options - Query options
- * @param {number} options.maxAge - Max cache age in ms
- * @returns {Promise} Map of symbol -> quote data
- */
+
 export const fetchBatchQuotes = async (symbols, options = {}) => {
     try {
         const { maxAge = 60000 } = options;
@@ -166,10 +141,7 @@ export const fetchBatchQuotes = async (symbols, options = {}) => {
     }
 };
 
-/**
- * Get API statistics (rate limits, cache performance)
- * @returns {Promise} API statistics
- */
+
 export const fetchQuoteStats = async () => {
     try {
         const response = await api.get('/quotes/stats/all');
@@ -186,10 +158,7 @@ export const fetchQuoteStats = async () => {
     }
 };
 
-/**
- * Get rate limit status for all API sources
- * @returns {Promise} Rate limit information
- */
+
 export const fetchRateLimits = async () => {
     try {
         const response = await api.get('/quotes/ratelimits');
@@ -206,10 +175,7 @@ export const fetchRateLimits = async () => {
     }
 };
 
-/**
- * Test API connections
- * @returns {Promise} Connection status for all sources
- */
+
 export const testQuoteConnections = async () => {
     try {
         const response = await api.get('/quotes/test/connections');
@@ -226,10 +192,7 @@ export const testQuoteConnections = async () => {
     }
 };
 
-/**
- * Reset quote statistics
- * @returns {Promise} Reset confirmation
- */
+
 export const resetQuoteStats = async () => {
     try {
         const response = await api.post('/quotes/stats/reset');
@@ -240,25 +203,13 @@ export const resetQuoteStats = async () => {
     }
 };
 
-/**
- * Get watchlist quotes (batch fetch with auto-refresh)
- * Optimized for watchlist display with 5-minute cache
- * @param {Array<string>} symbols - Watchlist symbols
- * @returns {Promise} Watchlist quotes
- */
+
 export const fetchWatchlistQuotes = async (symbols) => {
-    // Use 5-minute cache for watchlist
     return fetchBatchQuotes(symbols, { maxAge: 300000 });
 };
 
-/**
- * Get Nifty 50 quotes (batch fetch with 1-minute cache)
- * Optimized for real-time tracking
- * @param {Array<string>} symbols - Nifty 50 symbols
- * @returns {Promise} Nifty 50 quotes
- */
+
 export const fetchNifty50Quotes = async (symbols) => {
-    // Use 1-minute cache for Nifty 50
     return fetchBatchQuotes(symbols, { maxAge: 60000 });
 };
 

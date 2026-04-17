@@ -29,7 +29,7 @@ const compactCurrency = (value) => {
   return amount.toFixed(0);
 };
 
-const formatMoney = (value) => `₹${Number(value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+const formatMoney = (value) => `â‚¹${Number(value || 0).toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
 const makeSeed = (text) => String(text || '').split('').reduce((sum, character) => sum + character.charCodeAt(0), 0);
 
@@ -314,7 +314,7 @@ const WatchlistTable = ({
                   <button type="button" onClick={() => onSort(column.key)} className="group inline-flex items-center gap-1.5 transition-colors hover:text-cyan-200">
                     <span>{column.label}</span>
                     {sortConfig.key === column.key && (
-                      <span className="text-cyan-300">{sortConfig.direction === 'asc' ? '↑' : '↓'}</span>
+                      <span className="text-cyan-300">{sortConfig.direction === 'asc' ? 'â†‘' : 'â†“'}</span>
                     )}
                   </button>
                 ) : (
@@ -407,7 +407,7 @@ const WatchlistTable = ({
                     <div className="text-sm font-semibold text-slate-200">{formatMoney(stock.low52w)}</div>
                     <div className="text-sm font-semibold text-slate-200">{formatMoney(stock.vwap)}</div>
 
-                    {/* NEW: News Badge */}
+                    {}
                     <div className="flex items-center justify-center">
                       {(() => {
                         const newsInfo = getNewsInfo(stock.symbol);
@@ -425,7 +425,7 @@ const WatchlistTable = ({
                       })()}
                     </div>
 
-                    {/* NEW: Sentiment Display */}
+                    {}
                     <div className="flex items-center justify-center">
                       {(() => {
                         const newsInfo = getNewsInfo(stock.symbol);

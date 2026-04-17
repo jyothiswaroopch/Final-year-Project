@@ -1,8 +1,4 @@
-/**
- * Offline Mode Service
- * Graceful degradation when APIs fail
- * Serves cached data with staleness warnings
- */
+
 
 const enhancedCacheService = require('./enhancedCacheService');
 const ohlcService = require('./ohlcService');
@@ -17,22 +13,14 @@ class OfflineModeService {
     this.checkInterval = 60000; // 1 minute
   }
 
-  /**
-   * Get quote with offline fallback
-   * @param {string} symbol - Stock symbol
-   * @param {Function} onlineFetcher - Function to fetch online data
-   * @returns {Promise<Object>}
-   */
+  
   async getQuoteWithFallback(symbol, onlineFetcher) {
     try {
-      // Try online first
       const onlineData = await onlineFetcher(symbol);
       
       if (onlineData && onlineData.success) {
-        // Online fetch successful
         this.recordSuccess();
         
-        // Cache the fresh data
         enhancedCacheService.set('quotes', symbol, onlineData.data, 300);
         
         return {
@@ -43,7 +31,6 @@ class OfflineModeService {
           stale: false,
         };
       } else {
-        // Online fetch failed, try offline
         this.recordFailure();
         return await this.getOfflineData(symbol, 'quote');
       }
@@ -54,22 +41,14 @@ class OfflineModeService {
     }
   }
 
-  /**
-   * Get OHLC data with offline fallback
-   * @param {string} symbol - Stock symbol
-   * @param {string} timeframe - Timeframe
-   * @param {Function} onlineFetcher - Function to fetch online data
-   * @returns {Promise<Object>}
-   */
+  
   async getOHLCWithFallback(symbol, timeframe, onlineFetcher) {
     try {
-      // Try online first
       const onlineData = await onlineFetcher(symbol, timeframe);
       
       if (onlineData && onlineData.success) {
         this.recordSuccess();
         
-        // Cache the data
         const cacheKey = `${symbol}:${timeframe}`;
         enhancedCacheService.set('ohlc', cacheKey, onlineData.data, 300);
         
@@ -91,19 +70,12 @@ class OfflineModeService {
     }
   }
 
-  /**
-   * Get offline/cached data
-   * @param {string} symbol - Stock symbol
-   * @param {string} dataType - Data type (quote, ohlc)
-   * @param {string} timeframe - Optional timeframe for OHLC
-   * @returns {Promise<Object>}
-   */
+  
   async getOfflineData(symbol, dataType = 'quote', timeframe = '1d') {
     logger.info(`Attempting offline fallback for ${symbol} (${dataType})`);
 
     try {
       if (dataType === 'quote') {
-        // Try cache first
         const cached = enhancedCacheService.get('quotes', symbol);
         if (cached) {
           return {
@@ -116,7 +88,6 @@ class OfflineModeService {
           };
         }
 
-        // Try OHLC database as fallback
         const ohlcData = await ohlcService.getLatest(symbol, timeframe);
         if (ohlcData.success && ohlcData.data) {
           const quoteFromOHLC = this.convertOHLCToQuote(ohlcData.data, symbol);
@@ -131,7 +102,6 @@ class OfflineModeService {
           };
         }
       } else if (dataType === 'ohlc') {
-        // Try cache
         const cacheKey = `${symbol}:${timeframe}`;
         const cached = enhancedCacheService.get('ohlc', cacheKey);
         if (cached) {
@@ -145,7 +115,6 @@ class OfflineModeService {
           };
         }
 
-        // Try database
         const dbData = await ohlcService.getOHLCData({
           symbol,
           timeframe,
@@ -164,7 +133,6 @@ class OfflineModeService {
         }
       }
 
-      // No data available anywhere
       return {
         success: false,
         message: 'No cached or database data available',
@@ -181,12 +149,7 @@ class OfflineModeService {
     }
   }
 
-  /**
-   * Convert OHLC data to quote format
-   * @param {Object} ohlc - OHLC data
-   * @param {string} symbol - Symbol
-   * @returns {Object}
-   */
+  
   convertOHLCToQuote(ohlc, symbol) {
     return {
       symbol,
@@ -202,21 +165,13 @@ class OfflineModeService {
     };
   }
 
-  /**
-   * Check if data is stale (older than 1 hour)
-   * @param {Date|string} timestamp - Data timestamp
-   * @returns {boolean}
-   */
+  
   isDataStale(timestamp) {
     const age = Date.now() - new Date(timestamp).getTime();
     return age > 3600000; // 1 hour
   }
 
-  /**
-   * Get human-readable data age
-   * @param {Date|string} timestamp - Data timestamp
-   * @returns {string}
-   */
+  
   getDataAge(timestamp) {
     const ageMs = Date.now() - new Date(timestamp).getTime();
     const minutes = Math.floor(ageMs / 60000);
@@ -229,9 +184,7 @@ class OfflineModeService {
     return 'Just now';
   }
 
-  /**
-   * Record successful API call
-   */
+  
   recordSuccess() {
     this.failureCount = 0;
     if (!this.isOnline) {
@@ -240,9 +193,7 @@ class OfflineModeService {
     }
   }
 
-  /**
-   * Record failed API call
-   */
+  
   recordFailure() {
     this.failureCount++;
     
@@ -252,10 +203,7 @@ class OfflineModeService {
     }
   }
 
-  /**
-   * Get offline mode status
-   * @returns {Object}
-   */
+  
   getStatus() {
     return {
       isOnline: this.isOnline,
@@ -269,18 +217,14 @@ class OfflineModeService {
     };
   }
 
-  /**
-   * Force online mode
-   */
+  
   forceOnline() {
     this.isOnline = true;
     this.failureCount = 0;
     logger.info('Forced system online');
   }
 
-  /**
-   * Force offline mode
-   */
+  
   forceOffline() {
     this.isOnline = false;
     logger.info('Forced system offline');

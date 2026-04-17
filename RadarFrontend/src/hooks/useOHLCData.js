@@ -2,14 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { fetchOHLCData, fetchLatestOHLC } from '../api/ohlcApi';
 import { fetchEnhancedMarketHistory, hasCachedData } from '../api/enhancedMarketApi';
 
-/**
- * Custom hook for fetching and managing OHLC historical data
- * Provides automatic loading states, error handling, and caching
- * 
- * @param {string} symbol - Stock symbol
- * @param {object} options - Configuration options
- * @returns {object} { data, loading, error, refetch, hasCached }
- */
+
 export const useOHLCData = (symbol, options = {}) => {
     const {
         exchange = 'NSE',
@@ -67,12 +60,7 @@ export const useOHLCData = (symbol, options = {}) => {
     };
 };
 
-/**
- * Hook for fetching latest OHLC candle
- * @param {string} symbol - Stock symbol
- * @param {object} options - Configuration options
- * @returns {object} { data, loading, error, refetch }
- */
+
 export const useLatestOHLC = (symbol, options = {}) => {
     const {
         exchange = 'NSE',
@@ -116,7 +104,6 @@ export const useLatestOHLC = (symbol, options = {}) => {
             fetchData();
         }
 
-        // Set up auto-refresh if specified
         if (refreshInterval && refreshInterval > 0) {
             const intervalId = setInterval(fetchData, refreshInterval);
             return () => clearInterval(intervalId);
@@ -131,13 +118,7 @@ export const useLatestOHLC = (symbol, options = {}) => {
     };
 };
 
-/**
- * Hook for fetching chart-ready data with automatic source selection
- * Uses OHLC storage when available, falls back to external API
- * @param {string} symbol - Stock symbol
- * @param {object} options - Configuration options
- * @returns {object} { data, loading, error, refetch, isCached }
- */
+
 export const useChartData = (symbol, options = {}) => {
     const {
         type = 'STOCK',
@@ -158,7 +139,6 @@ export const useChartData = (symbol, options = {}) => {
         setError(null);
 
         try {
-            // Use enhanced API that tries OHLC first
             const result = await fetchEnhancedMarketHistory(symbol, type, interval, { limit });
 
             setData(result.data || []);
@@ -188,11 +168,7 @@ export const useChartData = (symbol, options = {}) => {
     };
 };
 
-/**
- * Hook to check if symbol has cached OHLC data
- * @param {string} symbol - Stock symbol
- * @returns {object} { hasCached, loading }
- */
+
 export const useHasCachedData = (symbol) => {
     const [hasCached, setHasCached] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -221,12 +197,7 @@ export const useHasCachedData = (symbol) => {
     return { hasCached, loading };
 };
 
-/**
- * Hook for multiple symbols (batch fetching)
- * @param {Array<string>} symbols - Array of stock symbols
- * @param {object} options - Configuration options
- * @returns {object} { dataMap, loading, errors }
- */
+
 export const useMultipleOHLC = (symbols = [], options = {}) => {
     const {
         exchange = 'NSE',
@@ -247,7 +218,6 @@ export const useMultipleOHLC = (symbols = [], options = {}) => {
         const newDataMap = {};
         const newErrors = {};
 
-        // Fetch data for all symbols
         await Promise.all(
             symbols.map(async (symbol) => {
                 try {

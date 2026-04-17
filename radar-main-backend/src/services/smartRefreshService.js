@@ -1,10 +1,4 @@
-/**
- * Smart Refresh Service
- * Tiered refresh strategy based on symbol importance
- * Tier 1: Nifty 50 (Real-time, < 1 min)
- * Tier 2: User Watchlist (Frequent, 1-5 min)
- * Tier 3: Other stocks (Periodic, 5-15 min)
- */
+
 
 const freeApiAggregator = require('./freeApiAggregator');
 const incrementalUpdateService = require('./incrementalUpdateService');
@@ -42,9 +36,7 @@ class SmartRefreshService {
     };
   }
 
-  /**
-   * Start smart refresh service
-   */
+  
   start() {
     if (this.isRunning) {
       logger.warn('Smart refresh already running');
@@ -54,31 +46,23 @@ class SmartRefreshService {
     this.isRunning = true;
     logger.info('Starting smart refresh service');
 
-    // Start refresh loops for each tier
     this.startTierRefresh('tier1', this.refreshIntervals.tier1);
     this.startTierRefresh('tier2', this.refreshIntervals.tier2);
     this.startTierRefresh('tier3', this.refreshIntervals.tier3);
   }
 
-  /**
-   * Stop smart refresh service
-   */
+  
   stop() {
     this.isRunning = false;
     logger.info('Smart refresh service stopped');
   }
 
-  /**
-   * Start refresh loop for a specific tier
-   * @param {string} tier - Tier name
-   * @param {number} interval - Refresh interval in ms
-   */
+  
   startTierRefresh(tier, interval) {
     const refresh = async () => {
       if (!this.isRunning) return;
 
       try {
-        // Only refresh during market hours for tier1 and tier2
         if ((tier === 'tier1' || tier === 'tier2') && !marketHoursService.shouldFetchUpdates()) {
           logger.debug(`${tier}: Market closed, skipping refresh`);
           setTimeout(refresh, interval);
@@ -101,37 +85,28 @@ class SmartRefreshService {
         this.stats.errors++;
       }
 
-      // Schedule next refresh
       setTimeout(refresh, interval);
     };
 
-    // Start the refresh loop
     setTimeout(refresh, 1000); // Start after 1 second
   }
 
-  /**
-   * Refresh all symbols in a tier
-   * @param {string} tier - Tier name
-   * @param {Array<string>} symbols - Symbols to refresh
-   */
+  
   async refreshTier(tier, symbols) {
     const startTime = Date.now();
     let successCount = 0;
     let failCount = 0;
 
-    // Batch process symbols (10 at a time to avoid overwhelming APIs)
     const batchSize = 10;
     for (let i = 0; i < symbols.length; i += batchSize) {
       const batch = symbols.slice(i, i + batchSize);
 
       for (const symbol of batch) {
         try {
-          // Check if symbol needs refresh
           if (!this.needsRefresh(tier, symbol)) {
             continue;
           }
 
-          // For tier1 (real-time), use quote API
           if (tier === 'tier1') {
             const result = await freeApiAggregator.getQuote(`${symbol}.NS`, {
               preferredSource: 'auto',
@@ -145,7 +120,6 @@ class SmartRefreshService {
               failCount++;
             }
           } else {
-            // For tier2/tier3, use incremental update
             const result = await incrementalUpdateService.updateSymbol(symbol, '1d');
             
             if (result.success) {
@@ -156,7 +130,6 @@ class SmartRefreshService {
             }
           }
 
-          // Small delay between requests
           await this.sleep(200);
         } catch (error) {
           logger.error(`Error refreshing ${symbol}:`, error.message);
@@ -169,12 +142,7 @@ class SmartRefreshService {
     logger.info(`${tier}: Refreshed ${successCount}/${symbols.length} symbols in ${Math.round(duration / 1000)}s`);
   }
 
-  /**
-   * Check if symbol needs refresh
-   * @param {string} tier - Tier name
-   * @param {string} symbol - Symbol to check
-   * @returns {boolean}
-   */
+  
   needsRefresh(tier, symbol) {
     const lastRefreshTime = this.lastRefresh[tier][symbol];
     if (!lastRefreshTime) return true;
@@ -183,11 +151,7 @@ class SmartRefreshService {
     return timeSinceRefresh >= this.refreshIntervals[tier];
   }
 
-  /**
-   * Add symbol to tier
-   * @param {string} symbol - Symbol to add
-   * @param {number} tier - Tier number (1, 2, or 3)
-   */
+  
   addSymbolToTier(symbol, tier = 2) {
     const tierKey = `tier${tier}`;
     
@@ -196,12 +160,10 @@ class SmartRefreshService {
       return false;
     }
 
-    // Remove from other tiers
     Object.keys(this.symbolTiers).forEach(key => {
       this.symbolTiers[key] = this.symbolTiers[key].filter(s => s !== symbol);
     });
 
-    // Add to specified tier
     if (!this.symbolTiers[tierKey].includes(symbol)) {
       this.symbolTiers[tierKey].push(symbol);
       logger.info(`Added ${symbol} to ${tierKey}`);
@@ -211,19 +173,12 @@ class SmartRefreshService {
     return false;
   }
 
-  /**
-   * Add multiple symbols to tier
-   * @param {Array<string>} symbols - Symbols to add
-   * @param {number} tier - Tier number
-   */
+  
   addSymbolsToTier(symbols, tier = 2) {
     symbols.forEach(symbol => this.addSymbolToTier(symbol, tier));
   }
 
-  /**
-   * Remove symbol from all tiers
-   * @param {string} symbol - Symbol to remove
-   */
+  
   removeSymbol(symbol) {
     Object.keys(this.symbolTiers).forEach(tier => {
       this.symbolTiers[tier] = this.symbolTiers[tier].filter(s => s !== symbol);
@@ -232,11 +187,7 @@ class SmartRefreshService {
     logger.info(`Removed ${symbol} from all tiers`);
   }
 
-  /**
-   * Get symbol tier
-   * @param {string} symbol - Symbol to check
-   * @returns {number|null}
-   */
+  
   getSymbolTier(symbol) {
     for (const [tier, symbols] of Object.entries(this.symbolTiers)) {
       if (symbols.includes(symbol)) {
@@ -246,10 +197,7 @@ class SmartRefreshService {
     return null;
   }
 
-  /**
-   * Get refresh status
-   * @returns {Object}
-   */
+  
   getStatus() {
     const marketStatus = marketHoursService.getMarketStatus();
 
@@ -280,10 +228,7 @@ class SmartRefreshService {
     };
   }
 
-  /**
-   * Get statistics
-   * @returns {Object}
-   */
+  
   getStats() {
     return {
       ...this.stats,
@@ -306,10 +251,7 @@ class SmartRefreshService {
     };
   }
 
-  /**
-   * Get Nifty 50 symbols
-   * @returns {Array<string>}
-   */
+  
   getNifty50Symbols() {
     return [
       'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ICICIBANK',
@@ -325,10 +267,7 @@ class SmartRefreshService {
     ];
   }
 
-  /**
-   * Sleep utility
-   * @param {number} ms - Milliseconds
-   */
+  
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

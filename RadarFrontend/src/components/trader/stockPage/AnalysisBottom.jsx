@@ -22,7 +22,7 @@ export default function AnalysisBottom({ stock }) {
 
     return (
         <div className="flex flex-col gap-8 mt-12 pb-24">
-            {/* PRICE PERFORMANCE TRACKER */}
+            {}
             <section>
                 <div className="flex justify-between items-center mb-4">
                     <h4 className="alpha-label px-1">Performance Benchmarks</h4>
@@ -38,7 +38,7 @@ export default function AnalysisBottom({ stock }) {
             </section>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* COMPANY OVERVIEW */}
+                {}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="alpha-card p-6 bg-white/[0.02]">
                         <h4 className="alpha-label mb-4 text-white">Company Overview</h4>
@@ -65,7 +65,7 @@ export default function AnalysisBottom({ stock }) {
                         </div>
                     </div>
 
-                    {/* FUNDAMENTALS SNAPSHOT */}
+                    {}
                     <div className="alpha-card p-6 bg-gradient-to-br from-blue-500/[0.03] to-transparent">
                         <h4 className="alpha-label mb-6 text-white flex items-center gap-2">
                              <TrendingUp size={14} className="text-blue-500" /> Fundamentals Snapshot
@@ -73,12 +73,12 @@ export default function AnalysisBottom({ stock }) {
                         <div className="grid grid-cols-3 gap-8">
                             <div className="flex flex-col gap-1">
                                 <span className="alpha-label">Revenue (TTM)</span>
-                                <span className="text-xl font-black text-white terminal-value">₹9.8T</span>
+                                <span className="text-xl font-black text-white terminal-value">â‚¹9.8T</span>
                                 <span className="text-[10px] font-bold text-emerald-500">+15.2% YoY</span>
                             </div>
                             <div className="flex flex-col gap-1">
                                 <span className="alpha-label">Net Profit</span>
-                                <span className="text-xl font-black text-white terminal-value">₹780B</span>
+                                <span className="text-xl font-black text-white terminal-value">â‚¹780B</span>
                                 <span className="text-[10px] font-bold text-emerald-500">+11.8% YoY</span>
                             </div>
                             <div className="flex flex-col gap-1">
@@ -90,7 +90,7 @@ export default function AnalysisBottom({ stock }) {
                     </div>
                 </div>
 
-                {/* RECENT NEWS SECTION */}
+                {}
                 <div className="alpha-card flex flex-col bg-[#0a0a0c]/40">
                     <div className="p-4 border-b border-white/5 bg-white/[0.02] flex items-center justify-between">
                         <h4 className="alpha-label">Market Catalysts</h4>

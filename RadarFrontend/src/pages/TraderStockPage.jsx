@@ -65,43 +65,43 @@ export default function TraderStockPage({ overrideSymbol, onBack }) {
                     </button>
                 </div>
 
-                {/* 1. Header Section */}
+                {}
                 <ResearchHeaderSection stock={researchData.stock} />
 
                 <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_360px]">
                     <div className="space-y-5">
-                        {/* 2. Main Chart Section */}
+                        {}
                         <MainChartSection chart={researchData.chart} />
 
-                        {/* 3. Technical Snapshot */}
+                        {}
                         <TechnicalSnapshotSection snapshot={researchData.technicalSnapshot} />
 
-                        {/* 4. Why This Stock */}
+                        {}
                         <WhyThisStockSection points={researchData.whyThisStock} />
 
-                        {/* 5. Smart Insights */}
+                        {}
                         <SmartInsightsSection insights={researchData.smartInsights} />
 
-                        {/* 6. Key Levels */}
+                        {}
                         <KeyLevelsSection levels={researchData.keyLevels} />
 
-                        {/* 7. Sector Strength */}
+                        {}
                         <SectorStrengthSection sectorStrength={researchData.sectorStrength} />
 
-                        {/* 8. Related Setups */}
+                        {}
                         <RelatedSetupsSection setups={researchData.relatedSetups} />
 
-                        {/* 9. Unusual Activity */}
+                        {}
                         <UnusualActivitySection items={researchData.unusualActivity} />
 
-                        {/* 10. Performance Benchmarks */}
+                        {}
                         <PerformanceBenchmarksSection performance={researchData.performanceBenchmarks} />
 
-                        {/* 11. Fundamentals Compact */}
+                        {}
                         <FundamentalsCompactSection fundamentals={researchData.fundamentals} />
                     </div>
 
-                    {/* 12. News Panel (Right Side) */}
+                    {}
                     <NewsPanelSection news={researchData.news} />
                 </div>
             </div>

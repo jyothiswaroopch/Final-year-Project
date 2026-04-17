@@ -1,17 +1,11 @@
-/**
- * Smart Refresh Admin Routes
- * Manage tiered refresh system
- */
+
 
 const express = require('express');
 const router = express.Router();
 const smartRefreshService = require('../services/smartRefreshService');
 const logger = require('../utils/logger');
 
-/**
- * GET /api/admin/refresh/status
- * Get smart refresh status
- */
+
 router.get('/status', (req, res) => {
   try {
     const status = smartRefreshService.getStatus();
@@ -30,10 +24,7 @@ router.get('/status', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/refresh/start
- * Start smart refresh service
- */
+
 router.post('/start', (req, res) => {
   try {
     smartRefreshService.start();
@@ -52,10 +43,7 @@ router.post('/start', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/refresh/stop
- * Stop smart refresh service
- */
+
 router.post('/stop', (req, res) => {
   try {
     smartRefreshService.stop();
@@ -74,10 +62,7 @@ router.post('/stop', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/refresh/add-symbol
- * Add symbol to a tier
- */
+
 router.post('/add-symbol', (req, res) => {
   try {
     const { symbol, tier = 2 } = req.body;
@@ -119,10 +104,7 @@ router.post('/add-symbol', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/refresh/add-symbols
- * Add multiple symbols to a tier
- */
+
 router.post('/add-symbols', (req, res) => {
   try {
     const { symbols, tier = 2 } = req.body;
@@ -162,10 +144,7 @@ router.post('/add-symbols', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/refresh/remove-symbol
- * Remove symbol from all tiers
- */
+
 router.post('/remove-symbol', (req, res) => {
   try {
     const { symbol } = req.body;
@@ -193,10 +172,7 @@ router.post('/remove-symbol', (req, res) => {
   }
 });
 
-/**
- * GET /api/admin/refresh/symbol/:symbol
- * Get symbol tier
- */
+
 router.get('/symbol/:symbol', (req, res) => {
   try {
     const { symbol } = req.params;
@@ -227,10 +203,7 @@ router.get('/symbol/:symbol', (req, res) => {
   }
 });
 
-/**
- * GET /api/admin/refresh/stats
- * Get refresh statistics
- */
+
 router.get('/stats', (req, res) => {
   try {
     const stats = smartRefreshService.getStats();

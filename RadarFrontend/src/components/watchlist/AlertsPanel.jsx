@@ -14,7 +14,7 @@ const AlertsPanel = ({ alerts }) => {
 
   return (
     <>
-      {/* Bell Icon - Fixed Bottom Right */}
+      {}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
         className="fixed bottom-8 right-8 p-3.5 rounded-full bg-gradient-to-br from-blue-500/80 to-blue-600 border border-blue-400/50 text-white shadow-lg hover:shadow-blue-500/50 transition-all z-30"
@@ -33,7 +33,7 @@ const AlertsPanel = ({ alerts }) => {
         )}
       </motion.button>
 
-      {/* Alerts Toast */}
+      {}
       <AnimatePresence>
         {activeAlerts.length > 0 && (
           <motion.div
@@ -42,7 +42,7 @@ const AlertsPanel = ({ alerts }) => {
             exit={{ opacity: 0, y: 20 }}
             className="fixed bottom-24 right-8 w-96 rounded-xl border border-slate-700/50 bg-slate-800/30 backdrop-blur-xl shadow-2xl overflow-hidden z-30"
           >
-            {/* Header */}
+            {}
             <div className="bg-gradient-to-r from-slate-900/80 to-slate-900/40 border-b border-slate-700/30 px-4 py-3 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <AlertCircle size={18} className="text-blue-400" />
@@ -56,7 +56,7 @@ const AlertsPanel = ({ alerts }) => {
               </button>
             </div>
 
-            {/* Alerts List */}
+            {}
             <div className="max-h-80 overflow-y-auto divide-y divide-slate-700/30">
               {activeAlerts.map((alert, index) => (
                 <motion.div

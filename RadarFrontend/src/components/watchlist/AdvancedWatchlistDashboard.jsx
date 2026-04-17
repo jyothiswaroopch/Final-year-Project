@@ -30,7 +30,6 @@ import { useWatchlistEnhancements } from '../../hooks/useWatchlistEnhancements';
 import { useKeyboardShortcuts, KEYBOARD_SHORTCUTS_HELP } from '../../hooks/useKeyboardShortcuts';
 import { sortStocks, SORT_OPTIONS } from '../../hooks/watchlistSorting';
 
-// Mock data for watchlist
 const MOCK_STOCKS = [
   {
     id: 1,
@@ -174,7 +173,6 @@ export default function AdvancedWatchlistDashboard() {
   const [showNotificationBanner, setShowNotificationBanner] = useState(true);
   const searchInputRef = useRef(null);
 
-  // NEW: Use watchlist enhancements hook
   const {
     newsData,
     getNewsInfo,
@@ -187,7 +185,6 @@ export default function AdvancedWatchlistDashboard() {
     exportToCSV,
   } = useWatchlistEnhancements(stocks);
 
-  // Simulate real-time updates
   useEffect(() => {
     const interval = setInterval(() => {
       setStocks((prev) =>
@@ -204,10 +201,8 @@ export default function AdvancedWatchlistDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Filter and search stocks
   const filteredStocks = useMemo(() => {
     let result = stocks.filter((stock) => {
-      // Search filter
       if (
         searchQuery &&
         !stock.symbol.toLowerCase().includes(searchQuery.toLowerCase()) &&
@@ -216,7 +211,6 @@ export default function AdvancedWatchlistDashboard() {
         return false;
       }
 
-      // NEW: News filter
       if (showOnlyWithNews) {
         const newsInfo = getNewsInfo(stock.symbol);
         if (!newsInfo || newsInfo.count === 0) {
@@ -224,27 +218,22 @@ export default function AdvancedWatchlistDashboard() {
         }
       }
 
-      // Tab filter
       if (activeTab === 'gainers' && stock.change <= 0) return false;
       if (activeTab === 'losers' && stock.change >= 0) return false;
       if (activeTab === 'highVolume' && stock.volume < 2000000) return false;
       if (activeTab === 'breakouts' && stock.status !== 'breakout') return false;
 
-      // Price range filter
       if (stock.price < filters.priceRange[0] || stock.price > filters.priceRange[1]) {
         return false;
       }
 
-      // Volume filter
       if (stock.volume < filters.volumeMin) return false;
 
-      // RSI filter
       if (stock.rsi < filters.rsiMin || stock.rsi > filters.rsiMax) return false;
 
       return true;
     });
 
-    // NEW: Smart sorting with news data
     return sortStocks(result, sortType, newsData);
   }, [stocks, activeTab, searchQuery, filters, showOnlyWithNews, sortType, newsData, getNewsInfo]);
 
@@ -290,7 +279,6 @@ export default function AdvancedWatchlistDashboard() {
     setAlerts((prev) => prev.filter((alert) => alert.symbol !== stockToRemove.symbol));
   }, [selectedStock]);
 
-  // NEW: Keyboard shortcuts handlers
   const keyboardCallbacks = useMemo(() => ({
     onNavigateDown: () => {
       setSelectedStockIndex((prev) => Math.min(prev + 1, filteredStocks.length - 1));
@@ -340,7 +328,6 @@ export default function AdvancedWatchlistDashboard() {
     },
   }), [filteredStocks, selectedStockIndex, toggleViewMode, exportToCSV, newsData]);
 
-  // NEW: Initialize keyboard shortcuts
   useKeyboardShortcuts(keyboardCallbacks);
 
   return (
@@ -396,7 +383,7 @@ export default function AdvancedWatchlistDashboard() {
           </div>
         </motion.section>
 
-        {/* NEW: Notification Permission Banner */}
+        {}
         <AnimatePresence>
           {showNotificationBanner && !notificationsEnabled && (
             <NotificationBanner
@@ -411,7 +398,7 @@ export default function AdvancedWatchlistDashboard() {
           )}
         </AnimatePresence>
 
-        {/* NEW: Keyboard Shortcuts Help Modal */}
+        {}
         <AnimatePresence>
           {showKeyboardHelp && (
             <motion.div
@@ -437,7 +424,7 @@ export default function AdvancedWatchlistDashboard() {
                     onClick={() => setShowKeyboardHelp(false)}
                     className="text-slate-400 hover:text-white transition-colors"
                   >
-                    ✕
+                    âœ•
                   </button>
                 </div>
                 <div className="space-y-2">
@@ -490,7 +477,7 @@ export default function AdvancedWatchlistDashboard() {
                   />
                 </div>
 
-                {/* NEW: News Filter Button */}
+                {}
                 <button
                   onClick={() => setShowOnlyWithNews(!showOnlyWithNews)}
                   className={`h-12 px-4 rounded-2xl border font-semibold flex items-center justify-center gap-2 transition-colors ${
@@ -512,7 +499,7 @@ export default function AdvancedWatchlistDashboard() {
                   Filters
                 </button>
 
-                {/* NEW: Enhanced Export with Menu */}
+                {}
                 <div className="relative">
                   <button
                     onClick={() => setShowExportMenu(!showExportMenu)}
@@ -545,7 +532,7 @@ export default function AdvancedWatchlistDashboard() {
                   </AnimatePresence>
                 </div>
 
-                {/* NEW: View Mode Toggle */}
+                {}
                 <button
                   onClick={toggleViewMode}
                   className="h-12 px-4 rounded-2xl border border-white/10 bg-white/5 text-slate-200 font-semibold flex items-center justify-center gap-2 hover:border-sky-400/30 hover:bg-sky-400/10 transition-colors"
@@ -608,7 +595,7 @@ export default function AdvancedWatchlistDashboard() {
                   })}
                 </div>
 
-                {/* NEW: Smart Sort Dropdown */}
+                {}
                 <div className="flex items-center gap-2 ml-auto">
                   <span className="text-xs text-slate-400">Sort:</span>
                   <select
@@ -618,7 +605,7 @@ export default function AdvancedWatchlistDashboard() {
                   >
                     {SORT_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
-                        {option.icon} {option.label} {option.new ? '✨' : ''}
+                        {option.icon} {option.label} {option.new ? 'âœ¨' : ''}
                       </option>
                     ))}
                   </select>

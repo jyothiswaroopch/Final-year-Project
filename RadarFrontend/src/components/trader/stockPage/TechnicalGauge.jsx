@@ -15,14 +15,14 @@ export default function TechnicalGauge({ status = 'Buy', score = 75 }) {
     return (
         <div className="alpha-bento-card h-full flex flex-col area-signals bg-gradient-to-br from-white/[0.03] to-transparent">
             <div className="p-4 border-b border-white/5 flex items-center justify-between">
-                <h4 className="terminal-label">Alpha Sentiment</h4>
+                <h4 className="terminal-label">Trader Sentiment</h4>
                 <div className="flex items-center gap-1.5">
                      <span className="text-[10px] font-black text-emerald-400">75/100</span>
                 </div>
             </div>
 
             <div className="flex-1 relative flex flex-col items-center justify-center p-6 overflow-hidden">
-                {/* SVG Gauge */}
+                {}
                 <div className="relative w-full max-w-[200px] aspect-[1.8/1]">
                     <svg viewBox="0 0 200 110" className="w-full h-full drop-shadow-[0_0_15px_rgba(0,243,255,0.1)]">
                         <defs>
@@ -50,7 +50,7 @@ export default function TechnicalGauge({ status = 'Buy', score = 75 }) {
                             opacity="0.2"
                         />
                         
-                        {/* THE NEEDLE */}
+                        {}
                         <motion.g
                             initial={{ rotate: -90 }}
                             animate={{ rotate: getRotation() }}
@@ -69,12 +69,12 @@ export default function TechnicalGauge({ status = 'Buy', score = 75 }) {
                     </div>
                 </div>
 
-                {/* LEGEND overlay */}
+                {}
                 <div className="absolute bottom-4 left-6 text-[8px] font-black text-rose-500 uppercase">Extreme Fear</div>
                 <div className="absolute bottom-4 right-6 text-[8px] font-black text-emerald-500 uppercase">Extreme Greed</div>
             </div>
 
-            {/* BREAKDOWN LIST */}
+            {}
             <div className="p-4 border-t border-white/5 space-y-2.5 bg-white/[0.01]">
                 <div className="flex justify-between items-center text-[10px]">
                     <span className="text-slate-500 font-bold uppercase flex items-center gap-2"><Zap size={10} className="text-emerald-400" /> RSI (14)</span>

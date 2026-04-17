@@ -10,7 +10,6 @@ import {
   Trash2,
 } from "lucide-react";
 
-// Intelligence Utilities
 import {
   calculateTradeScore,
   getSignalTags,
@@ -19,7 +18,6 @@ import {
   calculateRSI
 } from "../../utils/traderLogic";
 
-// Context & Sub-components
 import { useAsset } from "../../context/AssetContext";
 import StockDetailsPanel from "../watchlist/StockDetailsPanel";
 
@@ -99,7 +97,6 @@ const buildDecoratedRow = (row) => {
   const changePercent = Number(row.changePercent || 0);
   const price = Number(row.price || 0);
   
-  // Simulated high-fidelity chart data for technical analysis
   const chart = Array.from({ length: 20 }).map((_, i) => {
     const wave = Math.sin((seed + i * 11) * 0.2) * 5;
     const trendValue = changePercent * i * 0.4;
@@ -117,13 +114,11 @@ const buildDecoratedRow = (row) => {
   const levels = calculateTradeLevels(price, trend);
   const aiInsight = generateAIInsight(row.symbol, tradeScore, signals, trend);
 
-  // Fundamental Mocks
   const peRatio = (15 + (seed % 25)).toFixed(1);
   const divYield = (0.5 + (seed % 4) * 0.8).toFixed(2) + "%";
   const eps = (20 + (seed % 100)).toFixed(1);
   const marketCap = (seed % 2 === 0 ? "7.2T" : "1.4T");
 
-  // Research Mocks
   const rsRating = (40 + (seed % 50)).toFixed(1);
   const monthPerformance = (changePercent * 1.5 + (seed % 5) - 2.5).toFixed(2);
 
@@ -189,7 +184,6 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
     return () => window.clearTimeout(timer);
   }, []);
 
-  // Load notes from localStorage
   useEffect(() => {
     try {
       const savedNotes = localStorage.getItem(NOTES_KEY);
@@ -201,13 +195,11 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
     }
   }, []);
 
-  // Live Market Simulation Pulse
   useEffect(() => {
     if (isLoading || rows.length === 0) return;
 
     const interval = setInterval(() => {
       setRows(prevRows => {
-        // Randomly pick 2-3 symbols to update
         const count = Math.min(prevRows.length, 2 + Math.floor(Math.random() * 2));
         const indices = new Set();
         while (indices.size < count) indices.add(Math.floor(Math.random() * prevRows.length));
@@ -216,7 +208,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
         const nextRows = prevRows.map((row, idx) => {
           if (!indices.has(idx)) return row;
 
-          const change = 1 + (Math.random() * 0.003 - 0.0015); // ±0.15% fluctuation
+          const change = 1 + (Math.random() * 0.003 - 0.0015); // Â±0.15% fluctuation
           const nextPrice = row.price * change;
           const tickDir = nextPrice > row.price ? 'up' : 'down';
           nextTickState[row.symbol] = tickDir;
@@ -230,7 +222,6 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
             percent: row.percent + (change - 1) * 100,
             chart: nextChart,
             rsi: nextRsi,
-            // Dynamically recalculate Setup Score and AI Insights
             tradeScore: calculateTradeScore(nextPrice, nextRsi, row.trend, nextPrice > row.price * 1.001),
             aiInsight: generateAIInsight(row.symbol, row.tradeScore, row.signals, row.trend),
           };
@@ -246,7 +237,6 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
     return () => clearInterval(interval);
   }, [isLoading, rows.length]);
 
-  // Persist Rows sporadically
   useEffect(() => {
     if (!isLoading && rows.length > 0) {
       localStorage.setItem(WATCHLIST_KEY, JSON.stringify(rows));
@@ -259,12 +249,10 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
     pushNotice._t = window.setTimeout(() => setUiNotice(null), action ? 5000 : 2200);
   };
 
-  // Handler for Focused Rows button
   const handleFocusedRowsToggle = () => {
     setFocusedRowsMode(!focusedRowsMode);
     if (!focusedRowsMode) {
       pushNotice("Focused Rows mode ON - Select rows to focus");
-      // Auto-focus high trade score rows when enabling
       const highScoreSymbols = new Set(
         rows
           .filter(r => r.tradeScore > 75)
@@ -278,7 +266,6 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
     }
   };
 
-  // Handler for Row Drawer button
   const handleRowDrawerToggle = () => {
     setRowDrawerOpen(!rowDrawerOpen);
     if (!rowDrawerOpen && !selectedRow) {
@@ -286,7 +273,6 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
     }
   };
 
-  // Handler for Notes button
   const handleNotesToggle = () => {
     if (!selectedRow) {
       pushNotice("Select a row first to add notes");
@@ -296,7 +282,6 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
     setNotesModalOpen(true);
   };
 
-  // Save note for a symbol
   const saveNote = (symbol, noteText) => {
     const updatedNotes = { ...notes, [symbol]: noteText };
     setNotes(updatedNotes);
@@ -304,7 +289,6 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
     pushNotice(`Note saved for ${symbol}`);
   };
 
-  // Toggle a symbol as focused
   const toggleFocusedSymbol = (symbol) => {
     const updated = new Set(focusedSymbols);
     if (updated.has(symbol)) {
@@ -379,26 +363,18 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
     );
   }
   return (
-    <div 
-      className="relative w-full overflow-hidden px-6 py-6 min-h-screen text-slate-200" 
-      style={{ background: "linear-gradient(180deg, #020617 0%, #051025 50%, #0a1e3d 100%)" }}
-    >
-      {/* Visual Environment */}
-      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(30,58,138,0.15),transparent_70%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(30,58,138,0.1),transparent_50%)]" />
-      </div>
+    <div className="relative w-full overflow-hidden px-6 py-6 min-h-screen text-slate-200">
 
-      {/* Primary Terminal Container */}
+      {}
       <div className="relative z-10 space-y-8">
-        {/* Terminal Header - Alpha Alignment */}
+        {}
         <div className="flex items-center justify-between gap-4 flex-wrap px-1">
           <div className="flex items-center gap-4">
              <div className="flex items-center gap-2 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-emerald-400">
                <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" /> Market Open
              </div>
              <div className="flex flex-col">
-                <h3 className="text-[13px] font-black tracking-[0.2em] text-white/90 uppercase">Alpha Research Watchlist</h3>
+                <h3 className="text-[13px] font-black tracking-[0.2em] text-white/90 uppercase">Trader Dashboard Watchlist</h3>
                 <p className="text-[10px] font-medium text-slate-500 mt-0.5">Fast-moving watchlist, note-taking, live stats, and row-level drawer details in a denser terminal layout.</p>
              </div>
           </div>
@@ -426,7 +402,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
           </div>
         </div>
 
-        {/* Intelligence Filters Bar */}
+        {}
         <div className="flex flex-col gap-4">
            <div className="flex items-center justify-between">
               <div className="flex bg-slate-900/80 border border-white/5 p-1 rounded-xl gap-1">
@@ -443,7 +419,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
            </div>
         </div>
 
-        {/* 7-Card Intelligence Dashboard */}
+        {}
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-3 px-1">
            <div className="col-span-1 lg:col-span-2 rounded-xl border border-white/5 bg-slate-900/40 p-4 transition-all hover:border-slate-700">
               <div className="text-[9px] uppercase font-black tracking-widest text-[#2ecc71]">Top Gainer</div>
@@ -490,7 +466,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
            </div>
         </div>
 
-        {/* Global Toolbar */}
+        {}
         <div className="flex items-center justify-between gap-4 border-b border-white/5 pb-4 px-4">
            <div className="relative group">
               <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500 group-focus-within:text-cyan-400 transition-colors" />
@@ -520,7 +496,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
            </div>
         </div>
 
-        {/* Watchlist Alpha Grid */}
+        {}
         <div className="grid grid-cols-12 gap-6">
           <div className="col-span-12 xl:col-span-9 space-y-4">
               <div className={`${TAB_CONFIGS[activeTab]?.gridClass || 'grid grid-cols-[220px_140px_100px_100px_140px_120px_80px_120px]'} gap-4 px-4 text-[10px] font-black uppercase tracking-[0.2em] text-slate-600 border-b border-white/5 pb-3 mb-2`}>
@@ -561,7 +537,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                        }`}
                      >
                        <div className={`${TAB_CONFIGS[activeTab]?.gridClass || 'grid grid-cols-[220px_140px_100px_100px_140px_120px_80px_120px]'} gap-4 items-center`}>
-                         {/* 1. High-Fidelity Symbol Cell */}
+                         {}
                          <div className="flex items-center gap-4">
                            <div className={`h-11 w-11 flex items-center justify-center rounded-xl font-black text-xs border border-white/10 bg-white/5 text-emerald-400`}>
                              {row.symbol.charAt(0)}
@@ -585,7 +561,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                            </div>
                          </div>
 
-                         {/* 2. Price Cell - Bold Terminal style */}
+                         {}
                          <div className="text-right flex flex-col items-end">
                            <motion.span 
                              key={row.price}
@@ -593,25 +569,25 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                              animate={{ color: "#fff" }}
                              className="text-lg font-black tracking-tighter"
                            >
-                             ₹{row.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                             â‚¹{row.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                            </motion.span>
                          </div>
 
-                         {/* 3. Change % */}
+                         {}
                          <div className="flex justify-center">
                             <span className={`text-[13px] font-black ${isPositive ? 'text-[#2ecc71]' : 'text-rose-500'}`}>
                                {isPositive ? '+' : ''}{row.percent.toFixed(2)}%
                             </span>
                          </div>
 
-                         {/* 4. Volume Column */}
+                         {}
                          <div className="text-center">
                             <span className="text-[11px] font-bold text-slate-400">
                                {(row.volume / 10000000).toFixed(1)}Cr
                             </span>
                          </div>
 
-                         {/* 5. Custom Perspective Column */}
+                         {}
                          <div className="flex justify-center flex-col items-center">
                             {activeTab === "Overview" ? (
                                <div className="flex items-center gap-3">
@@ -619,11 +595,11 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                                   <Sparkline data={row.chart} color={isPositive ? "#10b981" : "#f43f5e"} />
                                </div>
                             ) : (
-                               <span className="text-[11px] font-bold text-slate-300">₹{row.vwapVal || row.peRatio}</span>
+                               <span className="text-[11px] font-bold text-slate-300">â‚¹{row.vwapVal || row.peRatio}</span>
                             )}
                          </div>
 
-                         {/* 6. Note Action */}
+                         {}
                          <div className="flex justify-center">
                             <button 
                               onClick={(e) => {
@@ -639,7 +615,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                             </button>
                          </div>
 
-                         {/* 7. Open Action */}
+                         {}
                          <div className="flex justify-center">
                             <button 
                                onClick={(e) => { e.stopPropagation(); openSymbol(row); }}
@@ -649,7 +625,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                             </button>
                          </div>
 
-                         {/* 8. Actions Column */}
+                         {}
                          <div className="flex justify-center">
                             <div className="inline-flex items-center gap-1 opacity-100 transition-opacity duration-150">
                                <button
@@ -657,21 +633,21 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-cyan-900/10 border border-cyan-400/10 text-cyan-300/60 hover:text-cyan-300 hover:bg-cyan-900/30"
                                  title="Set Alert"
                                >
-                                 <span className="text-xs">🔔</span>
+                                 <span className="text-xs">ðŸ””</span>
                                </button>
                                <button
                                  onClick={(e) => { e.stopPropagation(); openSymbol(row); }}
                                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/10 text-slate-400 hover:text-white hover:border-white/30"
                                  title="View"
                                >
-                                 <span className="text-sm">›</span>
+                                 <span className="text-sm">â€º</span>
                                </button>
                                <button
                                  onClick={(e) => handleDeleteSymbol(e, row.symbol)}
                                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-rose-900/20 border border-rose-400/30 text-rose-300 hover:text-rose-200 hover:bg-rose-900/35"
                                  title="Delete"
                                >
-                                 <span className="text-xs">✕</span>
+                                 <span className="text-xs">âœ•</span>
                                </button>
                             </div>
                          </div>
@@ -683,7 +659,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
               </div>
            </div>
 
-           {/* Right Column: Mini Dashboard / Details */}
+           {}
            <div className={`col-span-12 xl:col-span-3 min-h-[500px] transition-all ${!rowDrawerOpen && 'hidden xl:block'}`}>
              <AnimatePresence mode="wait">
                {selectedRow && rowDrawerOpen ? (
@@ -733,7 +709,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                    </div>
 
                    <div className="pt-4 border-t border-white/5">
-                       <div className="text-[9px] font-black uppercase tracking-widest text-[#5d6b7a] mb-2">Alpha Engine</div>
+                       <div className="text-[9px] font-black uppercase tracking-widest text-[#5d6b7a] mb-2">Trader Engine</div>
                        <div className="flex items-center gap-2">
                            <div className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                            <span className="text-[10px] font-bold text-slate-400">Core v4.1 Ready</span>
@@ -745,7 +721,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
            </div>
         </div>
 
-        {/* Notes Modal */}
+        {}
         <AnimatePresence>
           {notesModalOpen && selectedRow && (
             <>
@@ -791,7 +767,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
           )}
         </AnimatePresence>
 
-        {/* UI Notice Toast */}
+        {}
         <AnimatePresence>
           {uiNotice && (
             <motion.div

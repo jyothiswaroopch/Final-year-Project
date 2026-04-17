@@ -14,7 +14,7 @@ export default function FiltersPanel({ filters, setFilters, onApply, onReset, is
     <div className="flex flex-col h-full bg-transparent">
       <div className="flex-1 overflow-y-auto p-4 space-y-6 custom-scrollbar">
         
-        {/* Sector Selection Grid */}
+        {}
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <Layers className="h-3 w-3 text-blue-500" />
@@ -37,7 +37,7 @@ export default function FiltersPanel({ filters, setFilters, onApply, onReset, is
           </div>
         </section>
 
-        {/* Intraday Params */}
+        {}
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <Zap className="h-3 w-3 text-amber-500" />
@@ -70,7 +70,7 @@ export default function FiltersPanel({ filters, setFilters, onApply, onReset, is
           </div>
         </section>
 
-        {/* Volatility & Momentum */}
+        {}
         <section className="space-y-3">
           <div className="flex items-center gap-2">
             <BarChart className="h-3 w-3 text-green-500" />
@@ -93,7 +93,7 @@ export default function FiltersPanel({ filters, setFilters, onApply, onReset, is
           </div>
         </section>
 
-        {/* Hard Technicals */}
+        {}
         <section className="space-y-3">
           <label className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-500">Trend Overlays</label>
           <div className="space-y-2.5">
@@ -116,7 +116,7 @@ export default function FiltersPanel({ filters, setFilters, onApply, onReset, is
         </section>
       </div>
 
-      {/* Footer Actions */}
+      {}
       <div className="p-4 border-t border-white/[0.03] bg-black/40 flex flex-col gap-2">
         <button
           onClick={onApply}

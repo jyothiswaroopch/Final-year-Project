@@ -1,8 +1,4 @@
-/**
- * Incremental Update Service
- * Fetches only new OHLC candles since last update
- * Optimized for minimal API calls
- */
+
 
 const ohlcService = require('./ohlcService');
 const yahooFinanceService = require('./yahooFinanceService');
@@ -24,11 +20,7 @@ class IncrementalUpdateService {
     };
   }
 
-  /**
-   * Update all Nifty 50 symbols with latest data
-   * @param {Object} options
-   * @returns {Promise<Object>}
-   */
+  
   async updateAllSymbols(options = {}) {
     const {
       symbols = this.getNifty50Symbols(),
@@ -36,7 +28,6 @@ class IncrementalUpdateService {
       force = false,
     } = options;
 
-    // Check if we should update
     if (!force && !marketHoursService.shouldFetchUpdates()) {
       logger.info('Market closed - skipping incremental update');
       return {
@@ -70,7 +61,6 @@ class IncrementalUpdateService {
           const result = await this.updateSymbol(symbol, timeframe);
           results.push(result);
           
-          // Rate limiting: 300ms between symbols
           await this.sleep(300);
         } catch (error) {
           logger.error(`Failed to update symbol ${symbol}:`, error.message);
@@ -119,32 +109,23 @@ class IncrementalUpdateService {
     }
   }
 
-  /**
-   * Update a single symbol with latest data
-   * @param {string} symbol 
-   * @param {string} timeframe 
-   * @returns {Promise<Object>}
-   */
+  
   async updateSymbol(symbol, timeframe = '1d') {
     try {
-      // Get last candle from database
       const lastCandleResult = await ohlcService.getLatest(symbol, timeframe);
       const lastCandle = lastCandleResult?.data;
       
       let startDate;
       if (lastCandle) {
-        // Start from the day after last candle
         startDate = new Date(lastCandle.timestamp);
         startDate.setDate(startDate.getDate() + 1);
       } else {
-        // No data exists - fetch last 7 days
         startDate = new Date();
         startDate.setDate(startDate.getDate() - 7);
       }
 
       const endDate = new Date();
 
-      // Only fetch if there's a gap
       const daysDiff = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
       if (daysDiff < 0) {
         return {
@@ -155,7 +136,6 @@ class IncrementalUpdateService {
         };
       }
 
-      // Fetch new data from Yahoo Finance
       const symbolWithSuffix = `${symbol}.NS`; // NSE suffix
       const newData = await yahooFinanceService.fetchHistoricalData(
         symbolWithSuffix,
@@ -173,7 +153,6 @@ class IncrementalUpdateService {
         };
       }
 
-      // Save to database
       const savePromises = newData.map(candle => 
         ohlcService.saveOHLC({
           ...candle,
@@ -204,29 +183,17 @@ class IncrementalUpdateService {
     }
   }
 
-  /**
-   * Update specific symbols
-   * @param {Array<string>} symbols 
-   * @param {string} timeframe 
-   * @returns {Promise<Object>}
-   */
+  
   async updateSpecificSymbols(symbols, timeframe = '1d') {
     return this.updateAllSymbols({ symbols, timeframe, force: true });
   }
 
-  /**
-   * Force update (ignore market hours)
-   * @param {Object} options 
-   * @returns {Promise<Object>}
-   */
+  
   async forceUpdate(options = {}) {
     return this.updateAllSymbols({ ...options, force: true });
   }
 
-  /**
-   * Get update statistics
-   * @returns {Object}
-   */
+  
   getStats() {
     return {
       ...this.stats,
@@ -238,9 +205,7 @@ class IncrementalUpdateService {
     };
   }
 
-  /**
-   * Reset statistics
-   */
+  
   resetStats() {
     this.stats = {
       totalUpdates: 0,
@@ -253,21 +218,14 @@ class IncrementalUpdateService {
     this.errorCount = 0;
   }
 
-  /**
-   * Check if update is needed based on last update time
-   * @param {number} intervalMinutes 
-   * @returns {boolean}
-   */
+  
   isUpdateNeeded(intervalMinutes = 5) {
     const now = new Date();
     const minutesSinceLastUpdate = (now - this.lastUpdateTime) / (1000 * 60);
     return minutesSinceLastUpdate >= intervalMinutes;
   }
 
-  /**
-   * Get Nifty 50 symbols list
-   * @returns {Array<string>}
-   */
+  
   getNifty50Symbols() {
     return [
       'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ICICIBANK',
@@ -283,11 +241,7 @@ class IncrementalUpdateService {
     ];
   }
 
-  /**
-   * Sleep utility
-   * @param {number} ms 
-   * @returns {Promise}
-   */
+  
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

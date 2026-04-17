@@ -1,27 +1,19 @@
 const OHLC = require('../models/OHLC');
 const logger = require('../config/logger');
 
-/**
- * OHLC Service - Handle historical market data storage and retrieval
- * Optimized for Indian stocks (NSE/BSE)
- */
+
 
 class OHLCService {
-    /**
-     * Store OHLC data in time-series collection
-     * @param {Array} dataArray - Array of OHLC records
-     * @returns {Object} Result with count of inserted records
-     */
+    
     async bulkInsertOHLC(dataArray) {
         try {
             if (!Array.isArray(dataArray) || dataArray.length === 0) {
                 return { success: false, message: 'No data provided' };
             }
 
-            // Use insertMany for bulk insertion (faster)
             const result = await OHLC.insertMany(dataArray, { ordered: false });
             
-            logger.info(`✅ Inserted ${result.length} OHLC records`);
+            logger.info(`âœ… Inserted ${result.length} OHLC records`);
             
             return {
                 success: true,
@@ -29,7 +21,6 @@ class OHLCService {
                 message: `Successfully inserted ${result.length} records`,
             };
         } catch (error) {
-            // Handle duplicate key errors (data already exists)
             if (error.code === 11000) {
                 logger.warn('Some OHLC records already exist, skipping duplicates');
                 return {
@@ -47,16 +38,7 @@ class OHLCService {
         }
     }
 
-    /**
-     * Get OHLC data for a specific symbol
-     * @param {String} symbol - Stock symbol (e.g., 'RELIANCE.NS')
-     * @param {String} exchange - Exchange (NSE, BSE, etc.)
-     * @param {String} timeframe - Timeframe (1d, 1h, etc.)
-     * @param {Date} startDate - Start date
-     * @param {Date} endDate - End date
-     * @param {Number} limit - Maximum records to return
-     * @returns {Array} OHLC data
-     */
+    
     async getOHLCData({
         symbol,
         exchange = 'NSE',
@@ -72,7 +54,6 @@ class OHLCService {
                 timeframe,
             };
 
-            // Add date range if provided
             if (startDate || endDate) {
                 query.timestamp = {};
                 if (startDate) query.timestamp.$gte = new Date(startDate);
@@ -101,13 +82,7 @@ class OHLCService {
         }
     }
 
-    /**
-     * Get latest OHLC data for a symbol
-     * @param {String} symbol - Stock symbol
-     * @param {String} exchange - Exchange
-     * @param {String} timeframe - Timeframe
-     * @returns {Object} Latest OHLC record
-     */
+    
     async getLatestOHLC(symbol, exchange = 'NSE', timeframe = '1d') {
         try {
             const data = await OHLC.findOne({
@@ -131,22 +106,12 @@ class OHLCService {
         }
     }
 
-    /**
-     * Get latest OHLC data (alias for getLatestOHLC)
-     * @param {String} symbol - Stock symbol
-     * @param {String} timeframe - Timeframe
-     * @param {String} exchange - Exchange
-     * @returns {Object} Latest OHLC record
-     */
+    
     async getLatest(symbol, timeframe = '1d', exchange = 'NSE') {
         return this.getLatestOHLC(symbol, exchange, timeframe);
     }
 
-    /**
-     * Save a single OHLC record
-     * @param {Object} ohlcData - OHLC data object
-     * @returns {Object} Result
-     */
+    
     async saveOHLC(ohlcData) {
         try {
             const record = new OHLC(ohlcData);
@@ -157,7 +122,6 @@ class OHLCService {
                 data: record,
             };
         } catch (error) {
-            // Handle duplicate key errors silently
             if (error.code === 11000) {
                 return {
                     success: true,
@@ -173,15 +137,7 @@ class OHLCService {
         }
     }
 
-    /**
-     * Check if data exists for a symbol in a date range
-     * @param {String} symbol - Stock symbol
-     * @param {String} exchange - Exchange
-     * @param {String} timeframe - Timeframe
-     * @param {Date} startDate - Start date
-     * @param {Date} endDate - End date
-     * @returns {Boolean} True if data exists
-     */
+    
     async hasData(symbol, exchange, timeframe, startDate, endDate) {
         try {
             const count = await OHLC.countDocuments({
@@ -201,11 +157,7 @@ class OHLCService {
         }
     }
 
-    /**
-     * Delete old OHLC data (older than specified days)
-     * @param {Number} daysOld - Delete data older than this many days
-     * @returns {Object} Result
-     */
+    
     async deleteOldData(daysOld = 365) {
         try {
             const cutoffDate = new Date();
@@ -230,11 +182,7 @@ class OHLCService {
         }
     }
 
-    /**
-     * Get available symbols in the database
-     * @param {String} exchange - Filter by exchange (optional)
-     * @returns {Array} List of symbols
-     */
+    
     async getAvailableSymbols(exchange = null) {
         try {
             const match = exchange ? { exchange: exchange.toUpperCase() } : {};

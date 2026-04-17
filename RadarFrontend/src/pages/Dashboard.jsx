@@ -19,6 +19,7 @@ import { updateUserMode } from "../api/userApi";
 import { fetchMarketData, fetchTrendingSearches, logSearchQuery, fetchUniversalSymbolSearch } from "../api/marketApi";
 import { useHeaderData } from "../hooks/useHeaderData";
 import MarketTicker from "../components/dashboard/MarketTicker";
+import ProfileDropdown from "../components/common/ProfileDropdown";
 import "./Dashboard.css";
 
 const TraderView = lazy(() => import("./TraderDashboard"));
@@ -73,6 +74,14 @@ const MenuItem = ({ icon: Icon, label, onClick }) => (
   </button>
 );
 
+const MenuList = ({ onClose }) => (
+  <div className="dropdown-menu-list">
+    <MenuItem icon={User} label="My Profile" onClick={onClose} />
+    <MenuItem icon={Settings} label="Settings" onClick={onClose} />
+    <MenuItem icon={HelpCircle} label="Help & Support" onClick={onClose} />
+  </div>
+);
+
 const ToggleSwitch = ({ activeOption, onSelect }) => {
   const options = ["Investor", "Trader"];
 
@@ -97,15 +106,33 @@ const ToggleSwitch = ({ activeOption, onSelect }) => {
   );
 };
 
-const DropdownCard = ({ children }) => (
-  <div className="trader-profile-popover profile-dropdown dropdown-profile-card">{children}</div>
+const ToggleSection = ({ isTraderMode, onToggleMode }) => (
+  <div className="dropdown-interface-section">
+    <p className="dropdown-interface-title">CHOOSE YOUR INTERFACE</p>
+    <ToggleSwitch
+      activeOption={isTraderMode ? "Trader" : "Investor"}
+      onSelect={(option) => {
+        const shouldTraderMode = option === "Trader";
+        if (shouldTraderMode !== isTraderMode) {
+          onToggleMode();
+        }
+      }}
+    />
+  </div>
+);
+
+const FooterActions = ({ onSignOut }) => (
+  <button type="button" onClick={onSignOut} className="dropdown-signout-btn">
+    <LogOut size={15} />
+    <span>Sign Out</span>
+  </button>
 );
 
 export default function Dashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isTraderMode, setIsTraderMode] = useState(
-    localStorage.getItem("mode") === "TRADER"
+    String(localStorage.getItem("mode") || "").toUpperCase() === "TRADER"
   );
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -133,18 +160,15 @@ export default function Dashboard() {
 
 
   useEffect(() => {
-    // 1. Module Routing
     const params = new URLSearchParams(location.search);
     const moduleParam = String(params.get("module") || "").toUpperCase();
     if (["DASHBOARD", "WATCHLIST", "SCREENERS", "NEWS"].includes(moduleParam)) {
       setActiveModule(moduleParam);
     }
 
-    // 2. Forced Onboarding for First-Time Users
     const token = localStorage.getItem("token");
     const hasCompletedAssessment = localStorage.getItem("hasCompletedAssessment") === "true";
     
-    // Only redirect if they are logged in but haven't finished assessment
     if (token && !hasCompletedAssessment) {
       navigate("/onboarding");
     }
@@ -154,7 +178,7 @@ export default function Dashboard() {
       document.body.style.backgroundColor = "";
       document.body.style.backgroundImage = "none";
     } else {
-      document.body.style.backgroundColor = "#0F172A";
+      document.body.style.backgroundColor = "#020617";
       document.body.style.backgroundImage = "none";
     }
     return () => {
@@ -184,9 +208,6 @@ export default function Dashboard() {
     const handler = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
         setIsNotificationsOpen(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setIsProfileOpen(false);
       }
       if (traderSearchContainerRef.current && !traderSearchContainerRef.current.contains(e.target)) {
         setShowTraderSearchDropdown(false);
@@ -378,7 +399,7 @@ export default function Dashboard() {
                   transition={{ delay: 0.6, duration: 0.5 }}
                   className="text-xs md:text-sm text-[#00f3ff] font-bold tracking-[0.3em] uppercase"
                 >
-                  Switching to Alpha Research
+                  Switching to Trader Dashboard
                 </motion.p>
               </div>
               <div className="w-32 h-[2px] bg-white/5 rounded-full overflow-hidden relative">
@@ -439,10 +460,10 @@ export default function Dashboard() {
 
               {}
               <div className="flex items-center gap-6">
-                <div className="relative group w-80 hidden xl:block" ref={traderSearchContainerRef}>
-                  <div className="w-full h-10 rounded-full border border-[#243047] bg-[#0f172a] flex items-center pl-3 pr-1.5 gap-2">
-                    <div className="text-[#00f3ff]">
-                      <Search size={14} />
+                <div className="trader-search-shell-wrap relative hidden xl:block" ref={traderSearchContainerRef}>
+                  <div className="trader-search-shell">
+                    <div className="trader-search-icon" aria-hidden="true">
+                      <Search size={16} />
                     </div>
                     <input
                       type="text"
@@ -494,12 +515,13 @@ export default function Dashboard() {
                           setTraderHighlightedIndex(-1);
                         }
                       }}
-                      className="flex-1 min-w-0 bg-transparent border-0 outline-none text-sm text-white placeholder:text-gray-500"
+                      className="trader-search-input"
                     />
+                    <span className="trader-search-shortcut">Ctrl+K</span>
                     <button
                       type="button"
                       onClick={submitTraderSearch}
-                      className="h-7 min-w-[44px] px-2 rounded-full inline-flex items-center justify-center text-[10px] font-bold uppercase tracking-wide text-[#00f3ff] border border-[#243047] bg-[#0b1224]"
+                      className="trader-search-go"
                     >
                       Go
                     </button>
@@ -624,89 +646,30 @@ export default function Dashboard() {
                   <div className="profile-wrapper" ref={profileRef}>
                     <div
                       onClick={() => setIsProfileOpen(!isProfileOpen)}
-                      className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#00f3ff] to-[#bc13fe] flex items-center justify-center text-xs font-bold text-white cursor-pointer shadow-lg hover:scale-105 transition-transform"
+                      className="w-8 h-8 rounded-full bg-[linear-gradient(135deg,#00c6ff_0%,#0072ff_100%)] flex items-center justify-center text-xs font-bold text-white cursor-pointer shadow-[0_0_10px_rgba(0,198,255,0.4)] hover:scale-105 hover:shadow-[0_0_16px_rgba(0,198,255,0.58)] transition-all duration-300"
                     >
                       {userInitial}
                     </div>
 
-                    {}
-                    {isProfileOpen && (
-                      <DropdownCard>
-                        <ProfileHeader
-                          initial={userInitial}
-                          email={profile?.email || "demo.user@radar.ai"}
-                        />
-
-                        <div className="profile-divider" />
-
-                        <div className="dropdown-menu-list">
-                          <MenuItem icon={User} label="My Profile" onClick={() => setIsProfileOpen(false)} />
-                          <MenuItem icon={Settings} label="Settings" onClick={() => setIsProfileOpen(false)} />
-                          <MenuItem icon={HelpCircle} label="Help & Support" onClick={() => setIsProfileOpen(false)} />
-                        </div>
-
-<<<<<<< Updated upstream
-                        {}
-                        <div className="py-2">
-                          <Link 
-                            to="/profile"
-                            onClick={() => setIsProfileOpen(false)}
-                            className="w-full text-left px-4 py-2 text-sm flex items-center gap-3 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
-                          >
-                            <User size={16} /> My Profile
-                          </Link>
-                          <Link 
-                            to="/settings"
-                            onClick={() => setIsProfileOpen(false)}
-                            className="w-full text-left px-4 py-2 text-sm flex items-center gap-3 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
-                          >
-                            <Settings size={16} /> Settings
-                          </Link>
-                          <Link 
-                            to="/help"
-                            onClick={() => setIsProfileOpen(false)}
-                            className="w-full text-left px-4 py-2 text-sm flex items-center gap-3 text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
-                          >
-                            <HelpCircle size={16} /> Help &amp; Support
-                          </Link>
-=======
-                        <div className="profile-divider" />
-
-                        <div className="dropdown-interface-section">
-                          <p className="dropdown-interface-title">CHOOSE YOUR INTERFACE</p>
-                          <ToggleSwitch
-                            activeOption={isTraderMode ? "Trader" : "Investor"}
-                            onSelect={(option) => {
-                              const shouldTraderMode = option === "Trader";
-                              if (shouldTraderMode !== isTraderMode) {
-                                toggleMode();
-                              }
-                            }}
-                          />
->>>>>>> Stashed changes
-                        </div>
-
-                        <div className="profile-divider" />
-
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setIsProfileOpen(false);
-                            setShowLogoutModal(true);
-                          }}
-                          className="dropdown-signout-btn"
-                        >
-                          <LogOut size={15} />
-                          <span>Sign Out</span>
-                        </button>
-                      </DropdownCard>
-                    )}
+                    <ProfileDropdown
+                      isOpen={isProfileOpen}
+                      onClose={() => setIsProfileOpen(false)}
+                      avatarRef={profileRef}
+                      profile={profile}
+                      userInitial={userInitial}
+                      isTraderMode={isTraderMode}
+                      onToggleMode={toggleMode}
+                      onSignOut={() => {
+                        setIsProfileOpen(false);
+                        setShowLogoutModal(true);
+                      }}
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </header>
-          {/* MarketTicker removed here to prevent duplication with TraderView */}
+          {}
         </>
       )}
 

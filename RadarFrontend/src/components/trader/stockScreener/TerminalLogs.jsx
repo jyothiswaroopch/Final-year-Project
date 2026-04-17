@@ -27,7 +27,7 @@ function TerminalLogs({ mode = "standard", scanTimestamp }) {
             id: `system-${Date.now()}`,
             time,
             symbol: "SCANNER",
-            message: "⚡ ALPHA SCAN INITIATED: Synchronizing asset sector parameters...",
+          message: "⚡ TRADER SCAN INITIATED: Synchronizing asset sector parameters...",
             type: "neutral"
         };
         setLogs(prev => [...prev, newLog]);

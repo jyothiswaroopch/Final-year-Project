@@ -2,11 +2,7 @@ const asyncHandler = require('express-async-handler');
 const ohlcService = require('../services/ohlcService');
 const logger = require('../config/logger');
 
-/**
- * @desc    Get historical OHLC data for a symbol
- * @route   GET /api/ohlc/:symbol
- * @access  Public
- */
+
 const getHistoricalData = asyncHandler(async (req, res) => {
     const { symbol } = req.params;
     const {
@@ -17,13 +13,11 @@ const getHistoricalData = asyncHandler(async (req, res) => {
         limit = 365,
     } = req.query;
 
-    // Validate symbol
     if (!symbol) {
         res.status(400);
         throw new Error('Symbol is required');
     }
 
-    // Get data from service
     const result = await ohlcService.getOHLCData({
         symbol,
         exchange,
@@ -48,11 +42,7 @@ const getHistoricalData = asyncHandler(async (req, res) => {
     });
 });
 
-/**
- * @desc    Get latest OHLC candle for a symbol
- * @route   GET /api/ohlc/:symbol/latest
- * @access  Public
- */
+
 const getLatestCandle = asyncHandler(async (req, res) => {
     const { symbol } = req.params;
     const { exchange = 'NSE', timeframe = '1d' } = req.query;
@@ -83,11 +73,7 @@ const getLatestCandle = asyncHandler(async (req, res) => {
     });
 });
 
-/**
- * @desc    Get list of available symbols
- * @route   GET /api/ohlc/symbols/list
- * @access  Public
- */
+
 const getAvailableSymbols = asyncHandler(async (req, res) => {
     const { exchange } = req.query;
 

@@ -6,16 +6,7 @@ import {
     fetchRateLimits,
 } from '../api/quotesApi';
 
-/**
- * Custom hook for fetching real-time quotes with auto-refresh
- * 
- * @param {string} symbol - Stock symbol (e.g., 'RELIANCE.NS')
- * @param {object} options - Configuration options
- * @param {boolean} options.autoFetch - Auto-fetch on mount (default: true)
- * @param {number} options.refreshInterval - Auto-refresh interval in ms (default: 60000 = 1 min)
- * @param {number} options.maxAge - Max cache age in ms (default: 60000)
- * @returns {object} { quote, loading, error, refetch, isStale }
- */
+
 export const useRealtimeQuote = (symbol, options = {}) => {
     const {
         autoFetch = true,
@@ -59,7 +50,6 @@ export const useRealtimeQuote = (symbol, options = {}) => {
             fetchQuote();
         }
 
-        // Set up auto-refresh
         if (refreshInterval && refreshInterval > 0) {
             const intervalId = setInterval(fetchQuote, refreshInterval);
             return () => clearInterval(intervalId);
@@ -72,7 +62,6 @@ export const useRealtimeQuote = (symbol, options = {}) => {
         error,
         refetch: fetchQuote,
         isStale,
-        // Convenience accessors
         price: quote?.price,
         change: quote?.change,
         changePercent: quote?.changePercent,
@@ -81,14 +70,7 @@ export const useRealtimeQuote = (symbol, options = {}) => {
     };
 };
 
-/**
- * Custom hook for fetching batch quotes (multiple symbols)
- * Optimized for watchlists and portfolio displays
- * 
- * @param {Array<string>} symbols - Array of stock symbols
- * @param {object} options - Configuration options
- * @returns {object} { quotes, loading, error, refetch, stats }
- */
+
 export const useBatchQuotes = (symbols = [], options = {}) => {
     const {
         autoFetch = true,
@@ -135,7 +117,6 @@ export const useBatchQuotes = (symbols = [], options = {}) => {
             fetchQuotes();
         }
 
-        // Set up auto-refresh
         if (refreshInterval && refreshInterval > 0) {
             const intervalId = setInterval(fetchQuotes, refreshInterval);
             return () => clearInterval(intervalId);
@@ -152,13 +133,7 @@ export const useBatchQuotes = (symbols = [], options = {}) => {
     };
 };
 
-/**
- * Custom hook for watchlist with real-time quotes
- * Optimized with 5-minute cache and auto-refresh
- * 
- * @param {Array<string>} watchlistSymbols - Watchlist symbols
- * @returns {object} { quotes, loading, error, refetch }
- */
+
 export const useWatchlistQuotes = (watchlistSymbols) => {
     return useBatchQuotes(watchlistSymbols, {
         autoFetch: true,
@@ -167,13 +142,7 @@ export const useWatchlistQuotes = (watchlistSymbols) => {
     });
 };
 
-/**
- * Custom hook for portfolio with real-time quotes
- * Similar to watchlist but optimized for portfolio tracking
- * 
- * @param {Array<string>} portfolioSymbols - Portfolio symbols
- * @returns {object} { quotes, loading, error, refetch, totalValue }
- */
+
 export const usePortfolioQuotes = (portfolioSymbols) => {
     const batchResult = useBatchQuotes(portfolioSymbols, {
         autoFetch: true,
@@ -181,7 +150,6 @@ export const usePortfolioQuotes = (portfolioSymbols) => {
         maxAge: 300000,
     });
 
-    // Calculate total portfolio value
     const totalValue = Object.values(batchResult.quotes).reduce(
         (sum, quote) => sum + (quote?.price || 0),
         0
@@ -193,11 +161,7 @@ export const usePortfolioQuotes = (portfolioSymbols) => {
     };
 };
 
-/**
- * Custom hook for API statistics and monitoring
- * @param {number} refreshInterval - Auto-refresh interval (default: 30s)
- * @returns {object} { stats, loading, error, refetch }
- */
+
 export const useQuoteStats = (refreshInterval = 30000) => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -235,11 +199,7 @@ export const useQuoteStats = (refreshInterval = 30000) => {
     };
 };
 
-/**
- * Custom hook for rate limits monitoring
- * @param {number} refreshInterval - Auto-refresh interval (default: 60s)
- * @returns {object} { limits, loading, error, refetch }
- */
+
 export const useRateLimits = (refreshInterval = 60000) => {
     const [limits, setLimits] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -277,13 +237,7 @@ export const useRateLimits = (refreshInterval = 60000) => {
     };
 };
 
-/**
- * Hook to compare real-time quote with OHLC latest
- * Useful for showing "live price vs last close" comparisons
- * 
- * @param {string} symbol - Stock symbol
- * @returns {object} { current, previous, change, changePercent, loading }
- */
+
 export const usePriceComparison = (symbol) => {
     const { quote, loading: quoteLoading } = useRealtimeQuote(symbol);
 

@@ -195,10 +195,7 @@ body {
 }
 
 .dashboard-container.trader-theme {
-  background: var(--bg-primary);
-  background-image:
-    radial-gradient(ellipse 70% 40% at 15% 20%, rgba(16, 185, 129, 0.05), transparent),
-    radial-gradient(ellipse 60% 50% at 85% 80%, rgba(56, 189, 248, 0.04), transparent);
+  background: #020617;
   color: var(--text-primary);
 }
 
@@ -293,7 +290,7 @@ body {
 
 
 .dashboard-container.trader-theme .navbar {
-  background: rgba(11, 15, 23, 0.8) !important;
+  background: transparent !important;
   border: 1px solid #1F2937;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
@@ -2444,8 +2441,15 @@ body {
 
 /* Restored trader full-page look: flat, non-green, non-sticky */
 .dashboard-container.trader-theme {
-  background-color: #0F172A !important;
+  background-color: #020617 !important;
+  background: #020617 !important;
   color: #E6EDF7 !important;
+}
+
+body:has(.dashboard-container.trader-theme),
+body:has(.dashboard-container.trader-theme) #root {
+  background-color: #020617 !important;
+  background-image: none !important;
 }
 
 .dashboard-container.trader-theme::before,
@@ -2454,13 +2458,14 @@ body {
 }
 
 .dashboard-container.trader-theme .navbar {
-  background: rgba(11, 16, 32, 0.88) !important;
-  border: 1px solid #243047 !important;
+  background: rgba(2, 6, 23, 0.82) !important;
+  border: 1px solid rgba(36, 48, 71, 0.9) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
   position: static !important;
   top: auto !important;
+  margin: 0 1rem 0.75rem !important;
 }
 
 .dashboard-container.trader-theme .trader-glass-bar,
@@ -2469,8 +2474,8 @@ body {
 .dashboard-container.trader-theme .panel,
 .dashboard-container.trader-theme .trader-search-dropdown,
 .dashboard-container.trader-theme .trader-logout-modal {
-  background: #111A2E;
-  border-color: #243047;
+  background: rgba(2, 6, 23, 0.82);
+  border-color: rgba(36, 48, 71, 0.9);
 }
 
 .dashboard-container.trader-theme .sidebar-item:hover,
@@ -2481,7 +2486,7 @@ body {
 }
 
 .dashboard-container.trader-theme .main-content-area {
-  background: #0F172A !important;
+  background: transparent !important;
 }
 
 .dashboard-container.trader-theme .nav-link:hover {
@@ -2502,25 +2507,168 @@ body {
 }
 
 .dashboard-container.trader-theme .trader-search-dropdown {
-  background: rgba(11, 16, 32, 0.98) !important;
+  background: rgba(2, 6, 23, 0.96) !important;
   border: 1px solid rgba(34, 211, 238, 0.24) !important;
 }
 
 .dashboard-container.trader-theme .trader-profile-popover {
   width: 320px !important;
+  min-width: 280px !important;
   max-width: min(320px, calc(100vw - 24px)) !important;
+}
+
+/* Premium Trader Search Bar */
+.dashboard-container.trader-theme .trader-search-shell-wrap {
+  width: 380px;
+}
+
+.dashboard-container.trader-theme .trader-search-shell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 8px 10px 8px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 8px 24px rgba(0, 0, 0, 0.32), 0 0 0 1px rgba(34, 211, 238, 0.04);
+  transition: all 0.3s ease;
+}
+
+.dashboard-container.trader-theme .trader-search-shell::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: 999px;
+  background: linear-gradient(120deg, rgba(0, 198, 255, 0.2), rgba(0, 114, 255, 0.22), rgba(0, 198, 255, 0.1));
+  opacity: 0.3;
+  z-index: -1;
+  transition: opacity 0.3s ease;
+}
+
+.dashboard-container.trader-theme .trader-search-shell:focus-within {
+  border-color: rgba(0, 198, 255, 0.58);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 16px rgba(0, 198, 255, 0.2);
+}
+
+.dashboard-container.trader-theme .trader-search-shell:focus-within::before {
+  opacity: 0.55;
+}
+
+.dashboard-container.trader-theme .trader-search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #67e8f9;
+  opacity: 0.95;
+  transform-origin: center;
+  transition: transform 0.3s ease, filter 0.3s ease, color 0.3s ease;
+}
+
+.dashboard-container.trader-theme .trader-search-shell:hover .trader-search-icon {
+  filter: drop-shadow(0 0 8px rgba(34, 211, 238, 0.45));
+}
+
+.dashboard-container.trader-theme .trader-search-shell:focus-within .trader-search-icon {
+  transform: scale(1.08);
+  color: #a5f3fc;
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.6));
+}
+
+.dashboard-container.trader-theme .trader-search-input {
+  flex: 1;
+  min-width: 0;
+  width: 92%;
+  background: transparent;
+  border: 0;
+  outline: 0;
+  color: #e7f2ff;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  caret-color: #22d3ee;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.15);
+  transition: width 0.3s ease, color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.dashboard-container.trader-theme .trader-search-input::placeholder {
+  color: #8ea3c2;
+}
+
+.dashboard-container.trader-theme .trader-search-shell:focus-within .trader-search-input {
+  width: 100%;
+  color: #f0f9ff;
+  text-shadow: 0 0 10px rgba(34, 211, 238, 0.22);
+}
+
+.dashboard-container.trader-theme .trader-search-shortcut {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(173, 208, 255, 0.72);
+  border: 1px solid rgba(138, 176, 225, 0.32);
+  border-radius: 999px;
+  padding: 2px 8px;
+  background: rgba(12, 18, 34, 0.45);
+  white-space: nowrap;
+}
+
+.dashboard-container.trader-theme .trader-search-shell:focus-within .trader-search-shortcut {
+  color: rgba(208, 242, 255, 0.9);
+  border-color: rgba(34, 211, 238, 0.45);
+}
+
+.dashboard-container.trader-theme .trader-search-go {
+  height: 30px;
+  min-width: 56px;
+  border: 0;
+  border-radius: 999px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #f5fdff;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  box-shadow: 0 0 8px rgba(0, 198, 255, 0.34), 0 5px 14px rgba(0, 114, 255, 0.28);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, filter 0.3s ease;
+}
+
+.dashboard-container.trader-theme .trader-search-go:hover {
+  transform: scale(1.05);
+  filter: brightness(1.04);
+  box-shadow: 0 0 11px rgba(0, 198, 255, 0.45), 0 7px 18px rgba(0, 114, 255, 0.35);
+}
+
+.dashboard-container.trader-theme .trader-search-go:active {
+  transform: scale(0.98);
+}
+
+@media (max-width: 1680px) {
+  .dashboard-container.trader-theme .trader-search-shell-wrap {
+    width: 340px;
+  }
+
+  .dashboard-container.trader-theme .trader-search-shortcut {
+    display: none;
+  }
 }
 
 .dropdown-profile-card {
   padding: 20px;
   border-radius: 16px;
-  border: 1px solid rgba(203, 213, 225, 0.25);
-  background: linear-gradient(162deg, rgba(15, 23, 42, 0.96) 0%, rgba(30, 41, 59, 0.92) 100%);
+  border: 1px solid rgba(36, 48, 71, 0.9);
+  background: rgba(2, 6, 23, 0.95);
   box-shadow: 0 18px 40px rgba(2, 6, 23, 0.35);
   backdrop-filter: blur(10px);
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .dropdown-profile-header {
@@ -2573,7 +2721,7 @@ body {
 .dropdown-menu-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
 }
 
 .dropdown-menu-item {
@@ -2614,7 +2762,7 @@ body {
 .dropdown-interface-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .dropdown-interface-title {
@@ -2629,6 +2777,8 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
+  align-items: center;
+  justify-items: stretch;
 }
 
 .dropdown-toggle-option {
@@ -2662,7 +2812,7 @@ body {
   padding: 10px 12px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
@@ -2716,6 +2866,7 @@ body {
 }
 
 .dashboard-container.trader-theme .navbar {
+  margin: 0.9rem 1rem 0.75rem !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
   box-shadow: 0 4px 32px rgba(0, 0, 0, 0.5) !important;
@@ -2724,18 +2875,29 @@ body {
 
 .dashboard-container.trader-theme .profile-wrapper {
   position: relative;
+  overflow: visible;
 }
 
 .dashboard-container.trader-theme .profile-dropdown {
   position: absolute !important;
-  top: 48px;
+  top: 100%;
   right: 0;
+  margin-top: 10px;
   width: 320px !important;
+  min-width: 280px;
   max-width: min(320px, calc(100vw - 24px));
   background: transparent;
   border-radius: 16px;
   box-shadow: none;
-  z-index: 1000 !important;
+  z-index: 1200 !important;
+}
+
+@media (max-width: 420px) {
+  .dashboard-container.trader-theme .profile-dropdown {
+    width: min(320px, calc(100vw - 16px)) !important;
+    min-width: min(280px, calc(100vw - 16px));
+    max-width: calc(100vw - 16px);
+  }
 }
 
 /* Premium fade-in for bento cards */

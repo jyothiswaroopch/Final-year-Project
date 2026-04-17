@@ -14,7 +14,7 @@ export default function ExecutionPanel() {
             </div>
 
             <div className="flex-1 p-4 flex flex-col gap-5">
-                {/* SELECTOR */}
+                {}
                 <div className="flex bg-white/5 p-1 rounded-lg">
                     {['Market', 'Limit', 'SL'].map(type => (
                         <button 
@@ -63,19 +63,19 @@ export default function ExecutionPanel() {
                 </div>
             </div>
 
-            {/* RISK SUMMARY */}
+            {}
             <div className="p-4 bg-white/[0.02] border-t border-white/10 space-y-3">
                 <div className="flex justify-between items-center text-[10px]">
                     <span className="text-slate-500 font-bold uppercase flex items-center gap-1.5">
                         <Shield size={12} className="text-emerald-500" /> Max Risk
                     </span>
-                    <span className="font-bold text-slate-300">₹1,250.00</span>
+                    <span className="font-bold text-slate-300">â‚¹1,250.00</span>
                 </div>
                 <div className="flex justify-between items-center text-[10px]">
                     <span className="text-slate-500 font-bold uppercase flex items-center gap-1.5">
                         <Target size={12} className="text-cyan-500" /> Target
                     </span>
-                    <span className="font-bold text-slate-300">₹3,420.00</span>
+                    <span className="font-bold text-slate-300">â‚¹3,420.00</span>
                 </div>
             </div>
         </div>

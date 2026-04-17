@@ -33,7 +33,7 @@ const SIGNAL_TABS = [
   { id: "momentum", label: "Momentum", icon: <Zap className="h-4 w-4" /> },
   { id: "breakout", label: "Breakout", icon: <Flame className="h-4 w-4" /> },
   { id: "pullback", label: "Pullback", icon: <RefreshCw className="h-4 w-4" /> },
-  { id: "fakeout", label: "Fakeout 🚨", icon: <AlertTriangle className="h-4 w-4 text-amber-500" /> },
+  { id: "fakeout", label: "Fakeout ðŸš¨", icon: <AlertTriangle className="h-4 w-4 text-amber-500" /> },
 ];
 
 const DEFAULT_FILTERS = {
@@ -123,7 +123,6 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
         const searchMatch = stock.symbol.toLowerCase().includes(appliedFilters.search.toLowerCase());
         const sectorMatch = appliedFilters.sector === "All" || stock.sector === appliedFilters.sector;
         
-        // Advanced Filters
         const rvolMatch = !appliedFilters.rvol || stock.rvol >= Number(appliedFilters.rvol);
         const gapMatch = !appliedFilters.gapMin || stock.gap >= Number(appliedFilters.gapMin);
         const sma50Match = !appliedFilters.sma50 || stock.sma50;
@@ -162,7 +161,6 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
   const handleActivateScan = () => {
     setIsLoading(true);
     setAppliedFilters(filters);
-    // Simulation of a heavy scan
     setTimeout(() => {
       setIsLoading(false);
     }, 800);
@@ -173,7 +171,7 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
   };
 
   const handleSave = () => {
-    alert("Screener configuration saved to your Alpha Profile.");
+    alert("Screener configuration saved to your Trader Dashboard profile.");
   };
 
   const handleNewScreener = () => {
@@ -184,11 +182,11 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
 
   return (
     <div className={`relative screener-v2-layout overflow-hidden bg-gradient-to-br from-[#020617] via-[#020617] to-[#0f172a] text-[#dce9ff] ${sidebarCollapsed ? "sidebar-closed" : ""}`}>
-      {/* Background Blobs for depth */}
+      {}
       <div className="pointer-events-none absolute -left-24 -top-20 h-80 w-80 rounded-full bg-cyan-500/10 blur-3xl" />
       <div className="pointer-events-none absolute right-8 top-24 h-72 w-72 rounded-full bg-blue-500/10 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-120px] left-1/3 h-80 w-80 rounded-full bg-emerald-500/10 blur-3xl" />
-      {/* Sidebar: Specialized Filters */}
+      {}
       <aside className="screener-v2-sidebar">
         <div className="sidebar-header">
            <div className="flex items-center gap-2">
@@ -216,9 +214,9 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
         )}
       </aside>
 
-      {/* Main Trading Area */}
+      {}
       <main className="screener-v2-main">
-        {/* Top Intelligence Bar */}
+        {}
         <div className="intelligence-bar">
           <div className="market-status-group">
             <div className="market-stat-item">
@@ -253,7 +251,7 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
           </div>
         </div>
 
-        {/* Signal Tab Navigation */}
+        {}
         <div className="signal-tabs-container">
           <div className="signal-tabs">
             {SIGNAL_TABS.map((tab) => (
@@ -277,7 +275,7 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
           </div>
         </div>
 
-        {/* Main Content: Card Grid */}
+        {}
         <div 
           className="content-area custom-scrollbar" 
           onScroll={handleScroll}
@@ -288,7 +286,7 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
                <div className="loading-orbit">
                   <div className="orbit-dot" />
                </div>
-               <span className="mt-8 text-[11px] font-bold text-blue-500/50 uppercase tracking-[0.3em]">Calibrating Alpha</span>
+              <span className="mt-8 text-[11px] font-bold text-blue-500/50 uppercase tracking-[0.3em]">Calibrating Trader Dashboard</span>
             </div>
           ) : (
             <>
@@ -306,7 +304,7 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
             </>
           )}
 
-          {/* Research Side Drawer */}
+          {}
           <AnimatePresence>
             {selectedStock && (
               <motion.div
@@ -327,7 +325,7 @@ export default function EnhancedStockScreener({ onStockDeepAnalysis }) {
           </AnimatePresence>
         </div>
 
-        {/* Actionable Live scanner */}
+        {}
         <div className="actionable-feed-container">
            <div className="feed-header">
               <div className="flex items-center gap-2">

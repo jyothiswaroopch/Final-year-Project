@@ -66,6 +66,19 @@ const rotateRows = (rows, count, offset) => {
   return ordered.slice(0, count);
 };
 
+const ensureMinimumRows = (rows, minimum = 20) => {
+  if (!Array.isArray(rows) || rows.length === 0) return [];
+  if (rows.length >= minimum) return rows;
+
+  const expanded = [...rows];
+  let cursor = 0;
+  while (expanded.length < minimum) {
+    expanded.push(rows[cursor % rows.length]);
+    cursor += 1;
+  }
+  return expanded;
+};
+
 const MarketTicker = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [lastUpdatedAt, setLastUpdatedAt] = useState(null);
@@ -102,8 +115,8 @@ const MarketTicker = () => {
 
         const benchmarkSymbols = new Set(benchmarks.map((item) => item.symbol));
         const cleanMovers = movers.filter((item) => !benchmarkSymbols.has(item.symbol));
-        const rotatingMovers = rotateRows(cleanMovers, Math.max(0, 12 - benchmarks.length), rotationOffset);
-        const mergedRows = [...benchmarks, ...rotatingMovers];
+        const rotatedMovers = rotateRows(cleanMovers, cleanMovers.length, rotationOffset);
+        const mergedRows = ensureMinimumRows([...benchmarks, ...rotatedMovers], 20);
 
         if (mergedRows.length > 0 && isMounted) {
           setStocks(mergedRows);
@@ -131,38 +144,32 @@ const MarketTicker = () => {
     };
   }, []);
 
-  const lastUpdateText = lastUpdatedAt
-    ? lastUpdatedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : '--:--';
+  const tickerSequence = stocks.map((item, idx) => ({
+    key: `${item.symbol}-${idx}`,
+    item,
+  }));
+  const loopingSequence = [...tickerSequence, ...tickerSequence];
 
   return (
     <div className="market-ticker-shell">
       <div className="market-ticker-container">
-        <div className="ticker-left-status">
-          <span className={`ticker-status-dot ${error ? 'offline' : 'live'}`}></span>
-          <div className="ticker-status-copy">
-            <span className="ticker-status-text">{error ? 'Feed Offline' : isLoading ? 'Syncing' : 'Live Market'}</span>
-            <span className="ticker-status-time">Updated {lastUpdateText}</span>
-          </div>
-        </div>
-
         <div className="ticker-center-scroll-wrap">
           <div className="ticker-center-fade ticker-center-fade--left" aria-hidden="true"></div>
-          <div className="ticker-wrapper-track" role="list" aria-label="Market ticker">
-          {error && (
-            <div className="ticker-banner">Fallback feed active</div>
-          )}
-          {stocks.map((s, idx) => (
-            <div className="ticker-item-simple" key={`${s.symbol}-${idx}`} role="listitem">
-              <span className="ticker-sym">{s.symbol}</span>
-              <div className="ticker-item-right">
-                <span className="ticker-val">{s.price}</span>
-                <span className={`ticker-chg ${s.change >= 0 ? 'up' : 'down'}`}>
-                  {formatPercent(s.change)}
+          <div className="ticker-track ticker-wrapper-track ticker-wrapper-track--animated" role="list" aria-label="Market ticker">
+          {loopingSequence.map((entry, idx) => {
+            const s = entry.item;
+            const direction = s.change > 0 ? '▲' : s.change < 0 ? '▼' : '•';
+            return (
+              <div className="ticker-item ticker-item-simple" key={`${entry.key}-${idx}`} role="listitem" aria-hidden={idx >= tickerSequence.length}>
+                <span className="symbol ticker-sym">{s.symbol}</span>
+                <span className="price ticker-val">₹{s.price}</span>
+                <span className={`ticker-chg ${s.change > 0 ? 'up green' : s.change < 0 ? 'down red' : ''}`}>
+                    <span className="ticker-chg-arrow" aria-hidden="true">{direction}</span>
+                    {formatPercent(s.change)}
                 </span>
               </div>
-            </div>
-          ))}
+            );
+          })}
           </div>
           <div className="ticker-center-fade ticker-center-fade--right" aria-hidden="true"></div>
         </div>

@@ -12,16 +12,7 @@ import {
     forceOnline,
 } from '../api/adminApi';
 
-/**
- * Admin Dashboard - Phase 2 Monitoring & Control
- * 
- * This component provides complete monitoring and control for:
- * - Auto-update system (Sprint 1)
- * - Smart refresh tiers (Sprint 3)
- * - Cache performance (Sprint 4)
- * - Offline mode status (Sprint 4)
- * - Real-time API usage (Sprint 2)
- */
+
 const AdminDashboard = () => {
     const {
         autoUpdate,
@@ -38,14 +29,13 @@ const AdminDashboard = () => {
     const [actionLoading, setActionLoading] = useState(false);
     const [actionMessage, setActionMessage] = useState('');
 
-    // Action handlers
     const handleTriggerUpdate = async () => {
         setActionLoading(true);
         try {
             const result = await triggerManualUpdate();
-            setActionMessage(`✅ Update triggered: ${result.message}`);
+            setActionMessage(`âœ… Update triggered: ${result.message}`);
         } catch (error) {
-            setActionMessage(`❌ Error: ${error.message}`);
+            setActionMessage(`âŒ Error: ${error.message}`);
         }
         setActionLoading(false);
     };
@@ -54,10 +44,10 @@ const AdminDashboard = () => {
         setActionLoading(true);
         try {
             const result = await startUpdateCron();
-            setActionMessage(`✅ ${result.message}`);
+            setActionMessage(`âœ… ${result.message}`);
             autoUpdate.refetch();
         } catch (error) {
-            setActionMessage(`❌ Error: ${error.message}`);
+            setActionMessage(`âŒ Error: ${error.message}`);
         }
         setActionLoading(false);
     };
@@ -66,10 +56,10 @@ const AdminDashboard = () => {
         setActionLoading(true);
         try {
             const result = await stopUpdateCron();
-            setActionMessage(`✅ ${result.message}`);
+            setActionMessage(`âœ… ${result.message}`);
             autoUpdate.refetch();
         } catch (error) {
-            setActionMessage(`❌ Error: ${error.message}`);
+            setActionMessage(`âŒ Error: ${error.message}`);
         }
         setActionLoading(false);
     };
@@ -78,10 +68,10 @@ const AdminDashboard = () => {
         setActionLoading(true);
         try {
             const result = await startSmartRefresh();
-            setActionMessage(`✅ ${result.message}`);
+            setActionMessage(`âœ… ${result.message}`);
             smartRefresh.refetch();
         } catch (error) {
-            setActionMessage(`❌ Error: ${error.message}`);
+            setActionMessage(`âŒ Error: ${error.message}`);
         }
         setActionLoading(false);
     };
@@ -90,10 +80,10 @@ const AdminDashboard = () => {
         setActionLoading(true);
         try {
             const result = await stopSmartRefresh();
-            setActionMessage(`✅ ${result.message}`);
+            setActionMessage(`âœ… ${result.message}`);
             smartRefresh.refetch();
         } catch (error) {
-            setActionMessage(`❌ Error: ${error.message}`);
+            setActionMessage(`âŒ Error: ${error.message}`);
         }
         setActionLoading(false);
     };
@@ -102,10 +92,10 @@ const AdminDashboard = () => {
         setActionLoading(true);
         try {
             const result = await clearCache();
-            setActionMessage(`✅ ${result.message}`);
+            setActionMessage(`âœ… ${result.message}`);
             cache.refetch();
         } catch (error) {
-            setActionMessage(`❌ Error: ${error.message}`);
+            setActionMessage(`âŒ Error: ${error.message}`);
         }
         setActionLoading(false);
     };
@@ -114,10 +104,10 @@ const AdminDashboard = () => {
         setActionLoading(true);
         try {
             const result = await warmCache();
-            setActionMessage(`✅ Cache warmed: ${result.warmed} symbols`);
+            setActionMessage(`âœ… Cache warmed: ${result.warmed} symbols`);
             cache.refetch();
         } catch (error) {
-            setActionMessage(`❌ Error: ${error.message}`);
+            setActionMessage(`âŒ Error: ${error.message}`);
         }
         setActionLoading(false);
     };
@@ -126,15 +116,14 @@ const AdminDashboard = () => {
         setActionLoading(true);
         try {
             const result = await forceOnline();
-            setActionMessage(`✅ ${result.message}`);
+            setActionMessage(`âœ… ${result.message}`);
             offline.refetch();
         } catch (error) {
-            setActionMessage(`❌ Error: ${error.message}`);
+            setActionMessage(`âŒ Error: ${error.message}`);
         }
         setActionLoading(false);
     };
 
-    // Health indicator colors
     const healthColors = {
         healthy: 'bg-green-500',
         degraded: 'bg-yellow-500',
@@ -145,23 +134,23 @@ const AdminDashboard = () => {
     };
 
     const healthLabels = {
-        healthy: '✅ All Systems Operational',
-        degraded: '⚠️ Degraded Performance',
-        critical: '🚨 Critical Issues',
-        loading: '⏳ Loading...',
-        unknown: '❓ Unknown',
-        error: '❌ System Error',
+        healthy: 'âœ… All Systems Operational',
+        degraded: 'âš ï¸ Degraded Performance',
+        critical: 'ðŸš¨ Critical Issues',
+        loading: 'â³ Loading...',
+        unknown: 'â“ Unknown',
+        error: 'âŒ System Error',
     };
 
     return (
         <div className="min-h-screen bg-gray-50 p-6">
-            {/* Header */}
+            {}
             <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
                 <p className="text-gray-600">Phase 2 System Monitoring & Control</p>
             </div>
 
-            {/* Overall Health Status */}
+            {}
             <div className={`mb-6 p-6 rounded-lg ${healthColors[overallHealth]} text-white`}>
                 <h2 className="text-2xl font-bold mb-2">{healthLabels[overallHealth]}</h2>
                 <p className="text-sm opacity-90">
@@ -171,7 +160,7 @@ const AdminDashboard = () => {
                 </p>
             </div>
 
-            {/* Action Message */}
+            {}
             {actionMessage && (
                 <div className="mb-6 p-4 bg-blue-100 border border-blue-300 rounded-lg">
                     <p className="text-blue-900">{actionMessage}</p>
@@ -184,9 +173,9 @@ const AdminDashboard = () => {
                 </div>
             )}
 
-            {/* Grid Layout */}
+            {}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Auto-Update System */}
+                {}
                 <div className="bg-white p-6 rounded-lg shadow">
                     <h3 className="text-xl font-bold mb-4 flex items-center">
                         <span className={`w-3 h-3 rounded-full mr-2 ${autoUpdate.isRunning ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -197,8 +186,8 @@ const AdminDashboard = () => {
                     ) : (
                         <>
                             <div className="space-y-2 mb-4">
-                                <p><strong>Status:</strong> {autoUpdate.isRunning ? '🟢 Running' : '🔴 Stopped'}</p>
-                                <p><strong>Market:</strong> {autoUpdate.isMarketOpen ? '🟢 Open' : '🔴 Closed'}</p>
+                                <p><strong>Status:</strong> {autoUpdate.isRunning ? 'ðŸŸ¢ Running' : 'ðŸ”´ Stopped'}</p>
+                                <p><strong>Market:</strong> {autoUpdate.isMarketOpen ? 'ðŸŸ¢ Open' : 'ðŸ”´ Closed'}</p>
                                 <p><strong>Last Update:</strong> {autoUpdate.lastUpdate || 'Never'}</p>
                                 <p><strong>Success Rate:</strong> {autoUpdate.stats?.successRate?.toFixed(1) || 0}%</p>
                                 <p><strong>Total Updates:</strong> {autoUpdate.stats?.totalUpdates || 0}</p>
@@ -233,7 +222,7 @@ const AdminDashboard = () => {
                     )}
                 </div>
 
-                {/* Smart Refresh System */}
+                {}
                 <div className="bg-white p-6 rounded-lg shadow">
                     <h3 className="text-xl font-bold mb-4 flex items-center">
                         <span className={`w-3 h-3 rounded-full mr-2 ${smartRefresh.isRunning ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -244,7 +233,7 @@ const AdminDashboard = () => {
                     ) : (
                         <>
                             <div className="space-y-2 mb-4">
-                                <p><strong>Status:</strong> {smartRefresh.isRunning ? '🟢 Running' : '🔴 Stopped'}</p>
+                                <p><strong>Status:</strong> {smartRefresh.isRunning ? 'ðŸŸ¢ Running' : 'ðŸ”´ Stopped'}</p>
                                 <div className="mt-3">
                                     <p className="font-semibold">Tier Symbols:</p>
                                     <p className="text-sm">Tier 1 (1-min): {smartRefresh.tiers?.tier1?.length || 0} symbols</p>
@@ -278,9 +267,9 @@ const AdminDashboard = () => {
                     )}
                 </div>
 
-                {/* Cache Performance */}
+                {}
                 <div className="bg-white p-6 rounded-lg shadow">
-                    <h3 className="text-xl font-bold mb-4">📦 Cache Performance</h3>
+                    <h3 className="text-xl font-bold mb-4">ðŸ“¦ Cache Performance</h3>
                     {cache.loading ? (
                         <p>Loading...</p>
                     ) : (
@@ -316,7 +305,7 @@ const AdminDashboard = () => {
                     )}
                 </div>
 
-                {/* Offline Mode Status */}
+                {}
                 <div className="bg-white p-6 rounded-lg shadow">
                     <h3 className="text-xl font-bold mb-4 flex items-center">
                         <span className={`w-3 h-3 rounded-full mr-2 ${offline.isOnline ? 'bg-green-500' : 'bg-red-500'}`} />
@@ -327,12 +316,12 @@ const AdminDashboard = () => {
                     ) : (
                         <>
                             <div className="space-y-2 mb-4">
-                                <p><strong>Status:</strong> {offline.isOnline ? '🟢 Online' : '🔴 Offline'}</p>
+                                <p><strong>Status:</strong> {offline.isOnline ? 'ðŸŸ¢ Online' : 'ðŸ”´ Offline'}</p>
                                 <p><strong>Failure Count:</strong> {offline.failureCount}</p>
                                 <p><strong>Last Failure:</strong> {offline.lastFailure || 'None'}</p>
                                 {!offline.isOnline && (
                                     <p className="text-red-600 font-semibold">
-                                        ⚠️ System in offline mode - using cached data
+                                        âš ï¸ System in offline mode - using cached data
                                     </p>
                                 )}
                             </div>
@@ -349,14 +338,14 @@ const AdminDashboard = () => {
                     )}
                 </div>
 
-                {/* API Usage Stats */}
+                {}
                 <div className="bg-white p-6 rounded-lg shadow lg:col-span-2">
-                    <h3 className="text-xl font-bold mb-4">📊 Real-Time API Usage</h3>
+                    <h3 className="text-xl font-bold mb-4">ðŸ“Š Real-Time API Usage</h3>
                     {!quoteStats ? (
                         <p>Loading...</p>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Finnhub */}
+                            {}
                             <div className="border p-4 rounded">
                                 <h4 className="font-semibold mb-2">Finnhub (US Stocks)</h4>
                                 <p className="text-sm">Calls: {quoteStats.finnhub?.calls || 0}</p>
@@ -365,7 +354,7 @@ const AdminDashboard = () => {
                                 <p className="text-sm">Limit: {rateLimits?.finnhub?.remaining || 0} / {rateLimits?.finnhub?.limit || 60} per min</p>
                             </div>
 
-                            {/* Twelve Data */}
+                            {}
                             <div className="border p-4 rounded">
                                 <h4 className="font-semibold mb-2">Twelve Data (Indian Stocks)</h4>
                                 <p className="text-sm">Calls: {quoteStats.twelveData?.calls || 0}</p>
@@ -374,13 +363,13 @@ const AdminDashboard = () => {
                                 <p className="text-sm">Limit: {rateLimits?.twelveData?.remaining || 0} / 800 per day</p>
                             </div>
 
-                            {/* Yahoo Finance */}
+                            {}
                             <div className="border p-4 rounded">
                                 <h4 className="font-semibold mb-2">Yahoo Finance (Fallback)</h4>
                                 <p className="text-sm">Calls: {quoteStats.yahoo?.calls || 0}</p>
                                 <p className="text-sm">Success: {quoteStats.yahoo?.success || 0}</p>
                                 <p className="text-sm">Failed: {quoteStats.yahoo?.failed || 0}</p>
-                                <p className="text-sm">Limit: Unlimited ♾️</p>
+                                <p className="text-sm">Limit: Unlimited â™¾ï¸</p>
                             </div>
                         </div>
                     )}

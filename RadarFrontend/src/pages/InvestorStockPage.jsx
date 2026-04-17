@@ -45,7 +45,6 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
-// Enhanced Mock Data for different chart types
 const chartData = [
   { time: '9:30', price: 480, open: 470, high: 490, low: 465, close: 480 },
   { time: '10:30', price: 512, open: 480, high: 520, low: 475, close: 512 },
@@ -75,14 +74,12 @@ const InvestorStockPage = () => {
   const [isAlertOn, setIsAlertOn] = useState(false);
   const [isInWatchlist, setIsInWatchlist] = useState(false);
 
-  // New Dynamic Data States
   const [financialData, setFinancialData] = useState(null);
   const [newsImpactData, setNewsImpactData] = useState(null);
   const [isLoadingMetrics, setIsLoadingMetrics] = useState(true);
   const [errorMetrics, setErrorMetrics] = useState(null);
 
   useEffect(() => {
-    // Synchronize with the Dashboard's premium "Minimalist Sky" gradient
     const fullBackground = 'linear-gradient(180deg, #f0f9ff 0%, #e1effe 100%)';
     document.body.style.backgroundColor = '#f0f9ff';
     document.body.style.backgroundImage = fullBackground;
@@ -97,7 +94,6 @@ const InvestorStockPage = () => {
     };
   }, []);
 
-  // Fetch Logic
   useEffect(() => {
     const fetchDynamicData = async () => {
       try {
@@ -203,9 +199,9 @@ const InvestorStockPage = () => {
           <Tooltip 
             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontSize: '12px', fontWeight: '700' }} 
           />
-          {/* Candle Wicks (High/Low) */}
+          {}
           <Bar dataKey={(d) => [d.low, d.high]} fill="#cbd5e1" barSize={2} />
-          {/* Candle Body (Open/Close) */}
+          {}
           <Bar 
             dataKey={(d) => [d.open, d.close]} 
             barSize={14}
@@ -268,9 +264,9 @@ const InvestorStockPage = () => {
             </div>
 
             <div className="card-price-section">
-              <span className="card-price-main">₹562.90</span>
+              <span className="card-price-main">â‚¹562.90</span>
               <span className="card-price-change">+77.00 (15.84%)</span>
-              <span className="card-price-time">Live • Real-time Data</span>
+              <span className="card-price-time">Live â€¢ Real-time Data</span>
             </div>
 
             <div className="chart-body">
@@ -359,15 +355,15 @@ const InvestorStockPage = () => {
                         <span className="po-range-label">Today's Range</span>
                       </div>
                       <div className="po-visual-track-wrap">
-                        <span className="po-limit-price">₹485.00</span>
+                        <span className="po-limit-price">â‚¹485.00</span>
                         <div className="po-track-main today-gradient">
                           <div className="po-marker-assembly" style={{ left: '85%' }}>
-                            <div className="po-floating-price">₹562.90 • Current</div>
+                            <div className="po-floating-price">â‚¹562.90 â€¢ Current</div>
                             <div className="po-marker-v-line"></div>
                             <div className="po-marker-dot"></div>
                           </div>
                         </div>
-                        <span className="po-limit-price">₹570.00</span>
+                        <span className="po-limit-price">â‚¹570.00</span>
                       </div>
                     </div>
 
@@ -377,13 +373,13 @@ const InvestorStockPage = () => {
                         <span className="po-context-indicator">Near 52W High</span>
                       </div>
                       <div className="po-visual-track-wrap">
-                        <span className="po-limit-price">₹212.10</span>
+                        <span className="po-limit-price">â‚¹212.10</span>
                         <div className="po-track-main fiftytwo-gradient">
                           <div className="po-marker-assembly" style={{ left: '92%' }}>
                             <div className="po-marker-dot marker-muted"></div>
                           </div>
                         </div>
-                        <span className="po-limit-price">₹585.00</span>
+                        <span className="po-limit-price">â‚¹585.00</span>
                       </div>
                     </div>
                   </div>
@@ -393,14 +389,14 @@ const InvestorStockPage = () => {
                       <div className="ps-icon-circle bg-blue-soft"><Clock size={16} /></div>
                       <div className="ps-data">
                         <span className="ps-label">Open</span>
-                        <span className="ps-value">₹492.10</span>
+                        <span className="ps-value">â‚¹492.10</span>
                       </div>
                     </div>
                     <div className="po-stat-card-luxury">
                       <div className="ps-icon-circle bg-green-soft"><TrendingUp size={16} /></div>
                       <div className="ps-data">
                         <span className="ps-label">Prev Close</span>
-                        <span className="ps-value">₹485.90</span>
+                        <span className="ps-value">â‚¹485.90</span>
                       </div>
                     </div>
                     <div className="po-stat-card-luxury">
@@ -414,7 +410,7 @@ const InvestorStockPage = () => {
                       <div className="ps-icon-circle bg-orange-soft"><ShieldCheck size={16} /></div>
                       <div className="ps-data">
                         <span className="ps-label">Circuit Range</span>
-                        <span className="ps-value text-sm-luxury">₹450 – ₹675</span>
+                        <span className="ps-value text-sm-luxury">â‚¹450 â€“ â‚¹675</span>
                       </div>
                     </div>
                   </div>
@@ -423,7 +419,7 @@ const InvestorStockPage = () => {
 
               <div className="key-metrics-compact-row animate-fade-in">
                 {[
-                  { label: 'Market Cap', val: '₹1,708 Cr', tag: 'Mid Cap', hint: 'Top 250 Company', type: 'neutral' },
+                  { label: 'Market Cap', val: 'â‚¹1,708 Cr', tag: 'Mid Cap', hint: 'Top 250 Company', type: 'neutral' },
                   { label: 'P/E Ratio', val: '9.2', tag: 'Undervalued', hint: 'Below Industry Avg', type: 'green' },
                   { label: 'ROE', val: '14.7%', tag: 'Strong', hint: 'Consistent returns', type: 'green' },
                   { label: 'Debt to Equity', val: '0.12', tag: 'Low Risk', hint: 'Very healthy', type: 'green' },
@@ -509,7 +505,7 @@ const InvestorStockPage = () => {
                               <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} dy={10} />
                               <Tooltip cursor={{fill: '#f8fafc', radius: 4}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 15px rgba(0,0,0,0.05)' }} />
                               <Bar 
-                                name={finTab === 'Shareholding' ? 'Ownership %' : `${finTab} (₹ Cr)`} 
+                                name={finTab === 'Shareholding' ? 'Ownership %' : `${finTab} (â‚¹ Cr)`} 
                                 dataKey="value" 
                                 fill={finTab === 'Profit' ? '#10b981' : '#3b82f6'} 
                                 radius={[6, 6, 0, 0]} 
@@ -624,7 +620,7 @@ const InvestorStockPage = () => {
 
           {activeTab === 'Signals' && (
             <div className="signals-tab-content animate-fade-in">
-              {/* 1. SIGNAL SUMMARY CARD (ACTIONABLE TOP LAYER) */}
+              {}
               <div className="signal-summary-card shadow-premium">
                 <div className="ss-top-row">
                   <div className="ss-sentiment-box">
@@ -658,7 +654,7 @@ const InvestorStockPage = () => {
                 </div>
               </div>
 
-              {/* 2. TIMEFRAME SWITCHER */}
+              {}
               <div className="signals-timeframe-bar">
                 {['Short Term', 'Medium Term', 'Long Term'].map(t => (
                   <button key={t} className={`st-pill ${t === 'Short Term' ? 'active' : ''}`}>
@@ -667,9 +663,9 @@ const InvestorStockPage = () => {
                 ))}
               </div>
 
-              {/* 3. CORE SIGNAL CATEGORIES */}
+              {}
               <div className="signals-grid">
-                {/* A. Trend Signals */}
+                {}
                 <div className="sig-category-card">
                   <div className="rc-header">
                     <div className="rc-header-left">
@@ -680,7 +676,7 @@ const InvestorStockPage = () => {
                   <div className="sig-list">
                     {[
                       { name: 'MA Trend', val: 'Moving Avg', status: 'BULLISH', s: 'green', imp: 'Price is sustaining above 50 & 200 DMA' },
-                      { name: 'Price vs 200DMA', val: '₹488.20', status: 'STRONG', s: 'green', imp: 'Trading 15% above the long-term baseline' },
+                      { name: 'Price vs 200DMA', val: 'â‚¹488.20', status: 'STRONG', s: 'green', imp: 'Trading 15% above the long-term baseline' },
                       { name: 'Trend Strength', val: 'ADX: 28', status: 'BULLISH', s: 'green', imp: 'Trend is gaining significant strength' },
                     ].map((s, i) => (
                       <div key={i} className="sig-item-card">
@@ -695,7 +691,7 @@ const InvestorStockPage = () => {
                   </div>
                 </div>
 
-                {/* B. Momentum Signals */}
+                {}
                 <div className="sig-category-card">
                   <div className="rc-header">
                     <div className="rc-header-left">
@@ -721,7 +717,7 @@ const InvestorStockPage = () => {
                   </div>
                 </div>
 
-                {/* C. Volatility & Risk */}
+                {}
                 <div className="sig-category-card">
                   <div className="rc-header">
                     <div className="rc-header-left">
@@ -748,7 +744,7 @@ const InvestorStockPage = () => {
                 </div>
               </div>
 
-              {/* 4. KEY LEVELS & VOLUME INSIGHTS */}
+              {}
               <div className="signals-row-flex mb-8">
                 <div className="sig-card-mid flex-equal">
                   <div className="rc-header">
@@ -759,19 +755,19 @@ const InvestorStockPage = () => {
                   </div>
                   <div className="kl-visual-range">
                     <div className="kl-track">
-                      <div className="kl-marker kl-s2" style={{ left: '10%' }}><span>₹512 (S2)</span></div>
-                      <div className="kl-marker kl-s1" style={{ left: '30%' }}><span>₹535 (S1)</span></div>
+                      <div className="kl-marker kl-s2" style={{ left: '10%' }}><span>â‚¹512 (S2)</span></div>
+                      <div className="kl-marker kl-s1" style={{ left: '30%' }}><span>â‚¹535 (S1)</span></div>
                       <div className="kl-current-thumb" style={{ left: '72%' }}>
-                        <div className="kl-p-label">₹562.90</div>
+                        <div className="kl-p-label">â‚¹562.90</div>
                         <div className="kl-p-dot"></div>
                       </div>
-                      <div className="kl-marker kl-r1" style={{ left: '85%' }}><span>₹585 (R1)</span></div>
-                      <div className="kl-marker kl-r2" style={{ left: '95%' }}><span>₹612 (R2)</span></div>
+                      <div className="kl-marker kl-r1" style={{ left: '85%' }}><span>â‚¹585 (R1)</span></div>
+                      <div className="kl-marker kl-r2" style={{ left: '95%' }}><span>â‚¹612 (R2)</span></div>
                     </div>
                   </div>
                   <div className="kl-interpretation-footer mt-4">
                     <p className="text-xs text-slate-500 font-medium">
-                      Price is currently <span className="text-blue-600">approaching resistance R1</span>. Strong support cluster observed near ₹535.
+                      Price is currently <span className="text-blue-600">approaching resistance R1</span>. Strong support cluster observed near â‚¹535.
                     </p>
                   </div>
                 </div>
@@ -801,7 +797,7 @@ const InvestorStockPage = () => {
                 </div>
               </div>
 
-              {/* 5. PRICE BEHAVIOR & MARKET PARTICIPATION */}
+              {}
               <div className="signals-row-flex mb-8">
                 <div className="sig-card-mid flex-equal">
                   <div className="rc-header">
@@ -852,7 +848,7 @@ const InvestorStockPage = () => {
                 </div>
               </div>
 
-              {/* 6. TREND ALIGNMENT & SIGNAL CONSISTENCY */}
+              {}
               <div className="signals-row-flex mb-8">
                 <div className="sig-card-mid flex-equal">
                   <div className="rc-header">
@@ -891,7 +887,7 @@ const InvestorStockPage = () => {
                 </div>
               </div>
 
-              {/* 7. RISK ALERTS & RECENT CHANGES */}
+              {}
               <div className="signals-row-flex mb-8">
                 <div className="sig-card-mid risk-alerts-card flex-grow-side">
                   <div className="rc-header">
@@ -907,7 +903,7 @@ const InvestorStockPage = () => {
                     </div>
                     <div className="ra-item alert-purple">
                         <div className="ra-dot"></div>
-                        <p><strong>Volatility:</strong> ATR is rising — expect sharper intraday moves.</p>
+                        <p><strong>Volatility:</strong> ATR is rising â€” expect sharper intraday moves.</p>
                     </div>
                   </div>
                 </div>
@@ -920,7 +916,7 @@ const InvestorStockPage = () => {
                   <div className="recent-changes-list">
                     <div className="rc-item-s">
                       <span className="rc-time-s">TODAY</span>
-                      <p className="rc-desc-s">Price successfully crossed the <strong>50 DMA (₹542)</strong> with rising volume.</p>
+                      <p className="rc-desc-s">Price successfully crossed the <strong>50 DMA (â‚¹542)</strong> with rising volume.</p>
                     </div>
                     <div className="rc-item-s">
                       <span className="rc-time-s">YESTERDAY</span>
@@ -930,7 +926,7 @@ const InvestorStockPage = () => {
                 </div>
               </div>
 
-              {/* 8. WHAT THIS MEANS SECTION */}
+              {}
               <div className="sig-meaning-box animate-fade-in">
                 <div className="sm-header">
                   <Lightbulb className="text-amber-500" size={20} />
@@ -939,7 +935,7 @@ const InvestorStockPage = () => {
                 <div className="sm-content-layout">
                   <ul className="sm-list">
                     <li>The stock is in a strong momentum-driven uptrend, supported by institutional accumulation.</li>
-                    <li>While long-term outlook remains bullish, stay cautious of short-term consolidation near the ₹585 resistance.</li>
+                    <li>While long-term outlook remains bullish, stay cautious of short-term consolidation near the â‚¹585 resistance.</li>
                     <li>Trend synchronization across short and long timeframes suggests a high-probability bullish structure.</li>
                   </ul>
                   <div className="sm-disclaimer mt-6">
@@ -953,18 +949,18 @@ const InvestorStockPage = () => {
 
           {activeTab === 'Fundamentals' && (
             <div className="fundamentals-tab-rich animate-fade-in">
-              {/* 1. GROWW-STYLE COMPANY FUNDAMENTALS TABLE */}
+              {}
               <div className="ft-main-snapshot-card shadow-premium">
                 <div className="ft-header-row-snap">
                   <div className="ft-title-group">
                     <Activity size={20} className="text-blue-600" />
                     <h2>Company Fundamentals</h2>
                   </div>
-                  <span className="ft-sub-text">All figures in ₹ Cr unless specified</span>
+                  <span className="ft-sub-text">All figures in â‚¹ Cr unless specified</span>
                 </div>
 
                 <div className="ft-rich-table-grid">
-                  {/* Left Column of Table */}
+                  {}
                   <div className="ft-table-side">
                     {[
                       { name: 'Market Cap', val: '1,708', status: 'Mid Cap', type: 'neutral', hint: 'Top 250 Company', info: 'Total market value of all outstanding shares.' },
@@ -995,7 +991,7 @@ const InvestorStockPage = () => {
                     ))}
                   </div>
 
-                  {/* Right Column of Table */}
+                  {}
                   <div className="ft-table-side">
                     {[
                       { name: 'Debt to Equity', val: '0.12', status: 'Low Risk', type: 'green', hint: 'Healthy balance sheet', info: 'Proportion of debt relative to equity.' },
@@ -1028,7 +1024,7 @@ const InvestorStockPage = () => {
                 </div>
               </div>
 
-              {/* 2. DETAILED ANALYSIS SECTION */}
+              {}
               <div className="ft-detailed-header mt-12 mb-6">
                 <div className="ft-title-row">
                   <TrendingUp size={20} className="text-blue-500" />
@@ -1038,7 +1034,7 @@ const InvestorStockPage = () => {
               </div>
 
               <div className="ft-detailed-layout-grid">
-                {/* A. Valuation */}
+                {}
                 <div className="ft-analysis-card">
                   <div className="fac-header">Valuation Metrics</div>
                   <div className="fac-list">
@@ -1062,7 +1058,7 @@ const InvestorStockPage = () => {
                   </div>
                 </div>
 
-                {/* B. Profitability */}
+                {}
                 <div className="ft-analysis-card">
                   <div className="fac-header">Profitability</div>
                   <div className="fac-list">
@@ -1086,7 +1082,7 @@ const InvestorStockPage = () => {
                   </div>
                 </div>
 
-                {/* C. Growth */}
+                {}
                 <div className="ft-analysis-card">
                   <div className="fac-header">Growth Profile</div>
                   <div className="fac-list">
@@ -1109,7 +1105,7 @@ const InvestorStockPage = () => {
                   </div>
                 </div>
 
-                {/* D. Financial Health */}
+                {}
                 <div className="ft-analysis-card">
                   <div className="fac-header">Financial Health</div>
                   <div className="fac-list">
@@ -1132,7 +1128,7 @@ const InvestorStockPage = () => {
                   </div>
                 </div>
 
-                {/* E. Shareholder Metrics */}
+                {}
                 <div className="ft-analysis-card">
                   <div className="fac-header">Shareholder Metrics</div>
                   <div className="fac-list">
@@ -1155,7 +1151,7 @@ const InvestorStockPage = () => {
                   </div>
                 </div>
 
-                {/* F. Peer Comparison (NEW SECTION) */}
+                {}
                 <div className="ft-analysis-card ft-peer-card">
                   <div className="fac-header d-flex justify-between">
                     <span>Peer Comparison</span>
@@ -1196,7 +1192,7 @@ const InvestorStockPage = () => {
           )}
           {activeTab === 'News & Events' && (
             <div className="news-events-tab animate-fade-in">
-              {/* 1. Header with Filters */}
+              {}
               <div className="ne-header-bar shadow-premium">
                 <div className="ne-title-row">
                   <div className="ne-title-group">
@@ -1228,7 +1224,7 @@ const InvestorStockPage = () => {
               </div>
 
               <div className="ne-content-layout mt-8">
-                {/* 2. Upcoming Events (Timeline View) */}
+                {}
                 <div className="ne-events-section mb-10">
                   <div className="ne-section-header">
                     <Clock size={18} className="text-indigo-500" />
@@ -1239,7 +1235,7 @@ const InvestorStockPage = () => {
                     {[
                       { date: '12 May', title: 'Q4 Earnings Release', desc: 'Financial results for the quarter ended March 2024.', tag: 'QUARTERLY RESULTS', icon: 'bar', imp: 'Strong growth expected', s: 'green' },
                       { date: '28 May', title: 'Annual General Meeting', desc: 'Strategic roadmap and expansion plans discussion.', tag: 'AGM', icon: 'users', imp: 'Neutral impact on stock', s: 'amber' },
-                      { date: '04 Jun', title: 'Dividend Payout', desc: 'Final dividend of ₹2.50 per share proposed.', tag: 'DIVIDEND', icon: 'coin', imp: 'Positive for shareholders', s: 'green' },
+                      { date: '04 Jun', title: 'Dividend Payout', desc: 'Final dividend of â‚¹2.50 per share proposed.', tag: 'DIVIDEND', icon: 'coin', imp: 'Positive for shareholders', s: 'green' },
                     ].map((e, idx) => (
                       <div key={idx} className="ne-timeline-item">
                         <div className="ne-t-left">
@@ -1269,7 +1265,7 @@ const InvestorStockPage = () => {
                   </div>
                 </div>
 
-                {/* 3. Latest News (Card View) */}
+                {}
                 <div className="ne-news-section">
                   <div className="ne-section-header">
                     <TrendingUp size={18} className="text-blue-500" />
@@ -1278,7 +1274,7 @@ const InvestorStockPage = () => {
 
                   <div className="ne-news-stack">
                     {[
-                      { source: 'Reuters', time: '2h ago', head: 'Jindal Drilling bags new offshore contract worth ₹450Cr', desc: 'The contract involves deployment of the jack-up rig "Jindal Pioneer" for a period of 3 years.', imp: 'Positive for long-term growth', s: 'green' },
+                      { source: 'Reuters', time: '2h ago', head: 'Jindal Drilling bags new offshore contract worth â‚¹450Cr', desc: 'The contract involves deployment of the jack-up rig "Jindal Pioneer" for a period of 3 years.', imp: 'Positive for long-term growth', s: 'green' },
                       { source: 'Economic Times', time: '5h ago', head: 'Energy service sector awaits policy clarity on offshore taxes', desc: 'Industry leaders seek rationalization of GST on offshore drilling services in upcoming budget.', imp: 'Short-term volatility expected', s: 'amber' },
                       { source: 'Mint', time: 'Yesterday', head: 'JDIL shares surge 15% on strong volume breakout', desc: 'Technicals suggest strong accumulation by mid-cap focused funds.', imp: 'Momentum expected to continue', s: 'green' },
                     ].map((n, idx) => (

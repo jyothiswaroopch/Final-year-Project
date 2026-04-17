@@ -1,7 +1,4 @@
-/**
- * Cache Admin Routes
- * Manage enhanced caching system
- */
+
 
 const express = require('express');
 const router = express.Router();
@@ -9,10 +6,7 @@ const enhancedCacheService = require('../services/enhancedCacheService');
 const offlineModeService = require('../services/offlineModeService');
 const logger = require('../utils/logger');
 
-/**
- * GET /api/admin/cache/stats
- * Get cache statistics
- */
+
 router.get('/stats', (req, res) => {
   try {
     const stats = enhancedCacheService.getStats();
@@ -31,10 +25,7 @@ router.get('/stats', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/cache/clear
- * Clear cache
- */
+
 router.post('/clear', (req, res) => {
   try {
     const { cacheType } = req.body;
@@ -57,10 +48,7 @@ router.post('/clear', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/cache/warm
- * Warm up cache
- */
+
 router.post('/warm', async (req, res) => {
   try {
     const freeApiAggregator = require('../services/freeApiAggregator');
@@ -87,10 +75,7 @@ router.post('/warm', async (req, res) => {
   }
 });
 
-/**
- * GET /api/admin/cache/keys/:cacheType
- * Get cache keys for a type
- */
+
 router.get('/keys/:cacheType', (req, res) => {
   try {
     const { cacheType } = req.params;
@@ -112,10 +97,7 @@ router.get('/keys/:cacheType', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/cache/reset-stats
- * Reset cache statistics
- */
+
 router.post('/reset-stats', (req, res) => {
   try {
     enhancedCacheService.resetStats();
@@ -134,10 +116,7 @@ router.post('/reset-stats', (req, res) => {
   }
 });
 
-/**
- * GET /api/admin/offline/status
- * Get offline mode status
- */
+
 router.get('/offline/status', (req, res) => {
   try {
     const status = offlineModeService.getStatus();
@@ -156,10 +135,7 @@ router.get('/offline/status', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/offline/force-online
- * Force system online
- */
+
 router.post('/offline/force-online', (req, res) => {
   try {
     offlineModeService.forceOnline();
@@ -178,10 +154,7 @@ router.post('/offline/force-online', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/offline/force-offline
- * Force system offline (testing)
- */
+
 router.post('/offline/force-offline', (req, res) => {
   try {
     offlineModeService.forceOffline();

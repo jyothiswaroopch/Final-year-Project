@@ -1,22 +1,8 @@
 import api from './api';
 
-/**
- * OHLC API - Historical market data from MongoDB time-series collection
- * This provides much faster access to historical data compared to external APIs
- * Data is pre-loaded and stored locally in the database
- */
 
-/**
- * Get historical OHLC data for a symbol
- * @param {string} symbol - Stock symbol (e.g., 'RELIANCE', 'TCS')
- * @param {object} options - Query options
- * @param {string} options.exchange - Exchange (NSE, BSE) - default: 'NSE'
- * @param {string} options.timeframe - Timeframe (1d, 1h, 15m, 5m) - default: '1d'
- * @param {string} options.startDate - Start date (ISO string)
- * @param {string} options.endDate - End date (ISO string)
- * @param {number} options.limit - Max records to return - default: 365
- * @returns {Promise} OHLC data array
- */
+
+
 export const fetchOHLCData = async (symbol, options = {}) => {
     try {
         const {
@@ -27,7 +13,6 @@ export const fetchOHLCData = async (symbol, options = {}) => {
             limit = 365,
         } = options;
 
-        // Remove .NS or .BO suffix if present
         const cleanSymbol = symbol.replace(/\.(NS|BO)$/i, '');
 
         const params = {
@@ -55,7 +40,6 @@ export const fetchOHLCData = async (symbol, options = {}) => {
     } catch (error) {
         console.error(`Error fetching OHLC data for ${symbol}:`, error);
         
-        // Return empty data structure on error
         return {
             symbol,
             exchange: options.exchange || 'NSE',
@@ -67,14 +51,7 @@ export const fetchOHLCData = async (symbol, options = {}) => {
     }
 };
 
-/**
- * Get latest OHLC candle for a symbol
- * @param {string} symbol - Stock symbol
- * @param {object} options - Query options
- * @param {string} options.exchange - Exchange (NSE, BSE) - default: 'NSE'
- * @param {string} options.timeframe - Timeframe (1d, 1h, 15m, 5m) - default: '1d'
- * @returns {Promise} Latest OHLC candle
- */
+
 export const fetchLatestOHLC = async (symbol, options = {}) => {
     try {
         const {
@@ -110,11 +87,7 @@ export const fetchLatestOHLC = async (symbol, options = {}) => {
     }
 };
 
-/**
- * Get list of available symbols with OHLC data
- * @param {string} exchange - Filter by exchange (optional)
- * @returns {Promise} Array of symbols
- */
+
 export const fetchAvailableOHLCSymbols = async (exchange = null) => {
     try {
         const params = exchange ? { exchange } : {};
@@ -141,12 +114,7 @@ export const fetchAvailableOHLCSymbols = async (exchange = null) => {
     }
 };
 
-/**
- * Check if OHLC data is available for a symbol
- * @param {string} symbol - Stock symbol
- * @param {string} exchange - Exchange (NSE, BSE)
- * @returns {Promise<boolean>} True if data exists
- */
+
 export const hasOHLCData = async (symbol, exchange = 'NSE') => {
     try {
         const result = await fetchAvailableOHLCSymbols(exchange);
@@ -158,12 +126,7 @@ export const hasOHLCData = async (symbol, exchange = 'NSE') => {
     }
 };
 
-/**
- * Get OHLC data formatted for charting libraries (like Recharts)
- * @param {string} symbol - Stock symbol
- * @param {object} options - Query options
- * @returns {Promise} Array formatted for charts
- */
+
 export const fetchOHLCForChart = async (symbol, options = {}) => {
     try {
         const result = await fetchOHLCData(symbol, options);
@@ -172,7 +135,6 @@ export const fetchOHLCForChart = async (symbol, options = {}) => {
             return [];
         }
 
-        // Format for chart libraries
         return result.data.map(candle => ({
             date: new Date(candle.timestamp).toLocaleDateString(),
             timestamp: candle.timestamp,
@@ -181,7 +143,6 @@ export const fetchOHLCForChart = async (symbol, options = {}) => {
             low: candle.low,
             close: candle.close,
             volume: candle.volume || 0,
-            // Additional fields for technical analysis
             price: candle.close, // Alias for close
         }));
     } catch (error) {
@@ -190,13 +151,7 @@ export const fetchOHLCForChart = async (symbol, options = {}) => {
     }
 };
 
-/**
- * Get price history (simplified - just close prices with timestamps)
- * Useful for simple line charts
- * @param {string} symbol - Stock symbol
- * @param {object} options - Query options
- * @returns {Promise} Array of {timestamp, price}
- */
+
 export const fetchPriceHistory = async (symbol, options = {}) => {
     try {
         const result = await fetchOHLCData(symbol, options);
@@ -216,12 +171,7 @@ export const fetchPriceHistory = async (symbol, options = {}) => {
     }
 };
 
-/**
- * Trigger backfill for a specific symbol (admin function)
- * @param {string} symbol - Stock symbol with suffix (e.g., 'TATAMOTORS.NS')
- * @param {object} options - Backfill options
- * @returns {Promise} Backfill result
- */
+
 export const triggerBackfill = async (symbol, options = {}) => {
     try {
         const {

@@ -45,7 +45,6 @@ const ScreenerPage = () => {
   const contentRef = useRef(null);
   const noticeTimerRef = useRef(null);
 
-  // Mock data - Replace with real API calls
   const MOCK_STOCKS = [
     {
       id: 1,
@@ -241,7 +240,6 @@ const ScreenerPage = () => {
     },
   ];
 
-  // Load initial data
   useEffect(() => {
     setLoading(true);
     try {
@@ -281,11 +279,9 @@ const ScreenerPage = () => {
     };
   }, []);
 
-  // Apply filters
   useEffect(() => {
     let result = stocks;
 
-    // Search filter
     if (filters.search) {
       result = result.filter(
         (stock) =>
@@ -294,17 +290,14 @@ const ScreenerPage = () => {
       );
     }
 
-    // Sector filter
     if (filters.sector !== 'All') {
       result = result.filter((stock) => stock.sector === filters.sector);
     }
 
-    // Signal filter
     if (filters.signals.length > 0) {
       result = result.filter((stock) => filters.signals.includes(stock.signal));
     }
 
-    // Price change filter
     if (filters.minPriceChange !== null) {
       result = result.filter((stock) => stock.change >= filters.minPriceChange);
     }
@@ -312,10 +305,8 @@ const ScreenerPage = () => {
       result = result.filter((stock) => stock.change <= filters.maxPriceChange);
     }
 
-    // RSI filter
     result = result.filter((stock) => stock.rsi >= filters.minRsi && stock.rsi <= filters.maxRsi);
 
-    // Price filters
     if (filters.minPrice) {
       result = result.filter((stock) => stock.price >= parseFloat(filters.minPrice));
     }
@@ -323,17 +314,14 @@ const ScreenerPage = () => {
       result = result.filter((stock) => stock.price <= parseFloat(filters.maxPrice));
     }
 
-    // Volume filter
     if (filters.minVolume) {
       result = result.filter((stock) => stock.volume >= parseFloat(filters.minVolume));
     }
 
-    // Trend filter
     if (filters.trendType !== 'all') {
       result = result.filter((stock) => stock.trend === filters.trendType);
     }
 
-    // Signal filter
     if (filters.showOnlySignals && activeSignalTab !== 'all') {
       result = result.filter((stock) => stock.signal.toLowerCase() === activeSignalTab.toLowerCase());
     }
@@ -433,8 +421,8 @@ const ScreenerPage = () => {
   const SECTOR_OPTIONS = ['All', ...new Set(stocks.map((s) => s.sector))];
 
   return (
-    <div className="screener-page h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex overflow-hidden">
-      {/* Filter Sidebar */}
+    <div className="screener-page h-screen flex overflow-hidden">
+      {}
       <AnimatePresence>
         {filterOpen && (
           <motion.div
@@ -455,10 +443,10 @@ const ScreenerPage = () => {
         )}
       </AnimatePresence>
 
-      {/* Main Content */}
+      {}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="h-20 bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border-b border-slate-700/50 px-6 flex items-center justify-between">
+        {}
+        <div className="h-20 border-b border-slate-700/50 px-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             {!filterOpen && (
               <button
@@ -529,8 +517,8 @@ const ScreenerPage = () => {
           </div>
         </div>
 
-        {/* Signal Tabs */}
-        <div className="h-16 bg-slate-900/50 border-b border-slate-700/50 px-6 flex items-center justify-between gap-4 overflow-x-auto">
+        {}
+        <div className="h-16 border-b border-slate-700/50 px-6 flex items-center justify-between gap-4 overflow-x-auto">
           <div className="flex items-center gap-2 overflow-x-auto">
           {SIGNAL_TABS.map((tab) => (
             <button
@@ -559,14 +547,8 @@ const ScreenerPage = () => {
           </div>
         </div>
 
-        {/* Results Area */}
-        <div
-          ref={contentRef}
-          className="flex-1 overflow-y-auto p-6"
-          style={{
-            backgroundImage: 'radial-gradient(circle at 20% 50%, rgba(34, 197, 94, 0.05) 0%, transparent 50%)',
-          }}
-        >
+        {}
+        <div ref={contentRef} className="flex-1 overflow-y-auto p-6">
           <AnimatePresence mode="wait">
             {loading ? (
               <motion.div
@@ -628,7 +610,7 @@ const ScreenerPage = () => {
             )}
           </AnimatePresence>
 
-          {/* Results Summary */}
+          {}
           {!loading && filteredStocks.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -654,7 +636,7 @@ const ScreenerPage = () => {
 
           <div className="mt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
             <span>Last Updated: {lastUpdated.toLocaleDateString()} {lastUpdated.toLocaleTimeString()}</span>
-            <span>Data provided by Market Terminal 2.0.4 • prices delayed by 16 seconds</span>
+            <span>Data provided by Market Terminal 2.0.4 â€¢ prices delayed by 16 seconds</span>
           </div>
         </div>
       </div>

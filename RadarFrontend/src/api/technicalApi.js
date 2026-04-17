@@ -12,7 +12,6 @@ export const fetchTechnicalSummary = async (assetType, symbol, options = {}) => 
     } catch (error) {
         const status = error?.response?.status;
         if (isUnauthorizedError(error) || (status && Number(status) >= 500)) {
-            // Return null silently for server errors or unauthorized to prevent UI noise
             return null;
         }
 

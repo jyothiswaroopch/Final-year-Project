@@ -28,13 +28,10 @@ const TraderStockPage = lazy(() => import('./pages/TraderStockPage'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const RealtimeDemoPage = lazy(() => import('./pages/RealtimeDemoPage'));
 const SpecShowcasePage = lazy(() => import('./pages/SpecShowcase'));
-<<<<<<< Updated upstream
 const Onboarding = lazy(() => import('./pages/Onboarding'));
 const InvestorStockPage = lazy(() => import('./pages/InvestorStockPage'));
-=======
 const MarketResearchDashboard = lazy(() => import('./pages/MarketResearchDashboard'));
 const ScreenerPage = lazy(() => import('./pages/ScreenerPage'));
->>>>>>> Stashed changes
 
 const AppLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-[#020617] text-[#E2E8F0]">
@@ -113,18 +110,15 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/trader" element={<DashboardAliasRoute mode="TRADER" />} />
             <Route path="/dashboard/investor" element={<DashboardAliasRoute mode="INVESTOR" />} />
+            <Route path="/investor-dashboard" element={<DashboardAliasRoute mode="INVESTOR" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/auth/oauth/callback" element={<OAuthCallbackRoute />} />
-<<<<<<< Updated upstream
-            <Route path="/stocks/:symbol" element={<StockPage />} />
-            <Route path="/investor-stock/:symbol" element={<InvestorStockPage />} />
-=======
             <Route path="/stocks/:symbol" element={<TraderStockPage />} />
->>>>>>> Stashed changes
+            <Route path="/investor-stock/:symbol" element={<InvestorStockPage />} />
             <Route path="/asset/:symbol" element={<AssetAliasRoute />} />
             <Route path="/trader/momentum" element={<DashboardAliasRoute mode="TRADER" module="DASHBOARD" />} />
             <Route path="/investor/valuation" element={<DashboardAliasRoute mode="INVESTOR" module="DASHBOARD" />} />
@@ -140,6 +134,7 @@ function App() {
             <Route path="/reports/export" element={<ReportsExportPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/support" element={<Navigate to="/settings" replace />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/health" element={<Navigate to="/admin" replace />} />
             <Route path="/demo" element={<RealtimeDemoPage />} />

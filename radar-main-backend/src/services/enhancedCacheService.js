@@ -1,38 +1,29 @@
-/**
- * Enhanced Cache Service
- * Tiered caching with different TTLs based on data volatility
- * Cache warming and hit rate tracking
- */
+
 
 const NodeCache = require('node-cache');
 const logger = require('../utils/logger');
 
 class EnhancedCacheService {
   constructor() {
-    // Create separate caches for different data types
     this.caches = {
-      // Volatile data (short TTL)
       quotes: new NodeCache({ 
         stdTTL: 60,           // 1 minute
         checkperiod: 10,
         useClones: false,
       }),
       
-      // Semi-volatile data (medium TTL)
       ohlc: new NodeCache({
         stdTTL: 300,          // 5 minutes
         checkperiod: 30,
         useClones: false,
       }),
       
-      // Stable data (long TTL)
       company: new NodeCache({
         stdTTL: 86400,        // 24 hours
         checkperiod: 3600,
         useClones: false,
       }),
       
-      // Static data (very long TTL)
       symbols: new NodeCache({
         stdTTL: 604800,       // 7 days
         checkperiod: 86400,
@@ -40,7 +31,6 @@ class EnhancedCacheService {
       }),
     };
 
-    // Statistics tracking
     this.stats = {
       hits: { quotes: 0, ohlc: 0, company: 0, symbols: 0 },
       misses: { quotes: 0, ohlc: 0, company: 0, symbols: 0 },
@@ -48,16 +38,10 @@ class EnhancedCacheService {
       deletes: { quotes: 0, ohlc: 0, company: 0, symbols: 0 },
     };
 
-    // Warm-up symbols (Nifty 50)
     this.warmupSymbols = this.getNifty50Symbols();
   }
 
-  /**
-   * Get data from cache
-   * @param {string} cacheType - Cache type (quotes, ohlc, company, symbols)
-   * @param {string} key - Cache key
-   * @returns {*} Cached value or undefined
-   */
+  
   get(cacheType, key) {
     if (!this.caches[cacheType]) {
       logger.error(`Invalid cache type: ${cacheType}`);
@@ -77,14 +61,7 @@ class EnhancedCacheService {
     }
   }
 
-  /**
-   * Set data in cache
-   * @param {string} cacheType - Cache type
-   * @param {string} key - Cache key
-   * @param {*} value - Value to cache
-   * @param {number} ttl - Optional TTL override (seconds)
-   * @returns {boolean} Success
-   */
+  
   set(cacheType, key, value, ttl = null) {
     if (!this.caches[cacheType]) {
       logger.error(`Invalid cache type: ${cacheType}`);
@@ -108,12 +85,7 @@ class EnhancedCacheService {
     }
   }
 
-  /**
-   * Delete data from cache
-   * @param {string} cacheType - Cache type
-   * @param {string} key - Cache key
-   * @returns {number} Number of deleted entries
-   */
+  
   delete(cacheType, key) {
     if (!this.caches[cacheType]) {
       logger.error(`Invalid cache type: ${cacheType}`);
@@ -129,10 +101,7 @@ class EnhancedCacheService {
     return deleted;
   }
 
-  /**
-   * Clear all caches
-   * @param {string} cacheType - Optional cache type to clear (clears all if not specified)
-   */
+  
   clear(cacheType = null) {
     if (cacheType) {
       if (this.caches[cacheType]) {
@@ -147,11 +116,7 @@ class EnhancedCacheService {
     }
   }
 
-  /**
-   * Warm up cache with popular symbols
-   * @param {Function} dataFetcher - Function to fetch data for warming
-   * @returns {Promise<Object>}
-   */
+  
   async warmCache(dataFetcher) {
     if (!dataFetcher) {
       logger.warn('No data fetcher provided for cache warming');
@@ -167,14 +132,12 @@ class EnhancedCacheService {
       try {
         const data = await dataFetcher(symbol);
         if (data) {
-          // Cache the data (typically quotes or OHLC)
           this.set('quotes', symbol, data, 300); // 5 min for warm-up data
           successCount++;
         } else {
           failCount++;
         }
         
-        // Small delay between requests
         await this.sleep(100);
       } catch (error) {
         logger.error(`Error warming cache for ${symbol}:`, error.message);
@@ -193,10 +156,7 @@ class EnhancedCacheService {
     };
   }
 
-  /**
-   * Get cache statistics
-   * @returns {Object}
-   */
+  
   getStats() {
     const stats = {
       caches: {},
@@ -209,7 +169,6 @@ class EnhancedCacheService {
       },
     };
 
-    // Per-cache statistics
     Object.keys(this.caches).forEach(cacheType => {
       const cache = this.caches[cacheType];
       const hits = this.stats.hits[cacheType];
@@ -227,14 +186,12 @@ class EnhancedCacheService {
         ttl: cache.options.stdTTL,
       };
 
-      // Add to overall totals
       stats.overall.totalHits += hits;
       stats.overall.totalMisses += misses;
       stats.overall.totalSets += this.stats.sets[cacheType];
       stats.overall.totalDeletes += this.stats.deletes[cacheType];
     });
 
-    // Calculate overall hit rate
     const totalRequests = stats.overall.totalHits + stats.overall.totalMisses;
     stats.overall.hitRate = totalRequests > 0 
       ? `${((stats.overall.totalHits / totalRequests) * 100).toFixed(1)}%`
@@ -243,11 +200,7 @@ class EnhancedCacheService {
     return stats;
   }
 
-  /**
-   * Get cache keys for a specific cache type
-   * @param {string} cacheType - Cache type
-   * @returns {Array<string>}
-   */
+  
   getKeys(cacheType) {
     if (!this.caches[cacheType]) {
       return [];
@@ -255,11 +208,7 @@ class EnhancedCacheService {
     return this.caches[cacheType].keys();
   }
 
-  /**
-   * Get cache size (number of keys)
-   * @param {string} cacheType - Cache type
-   * @returns {number}
-   */
+  
   getSize(cacheType) {
     if (!this.caches[cacheType]) {
       return 0;
@@ -267,9 +216,7 @@ class EnhancedCacheService {
     return this.caches[cacheType].keys().length;
   }
 
-  /**
-   * Reset statistics
-   */
+  
   resetStats() {
     Object.keys(this.stats.hits).forEach(key => {
       this.stats.hits[key] = 0;
@@ -280,10 +227,7 @@ class EnhancedCacheService {
     logger.info('Cache statistics reset');
   }
 
-  /**
-   * Get Nifty 50 symbols for warming
-   * @returns {Array<string>}
-   */
+  
   getNifty50Symbols() {
     return [
       'RELIANCE', 'TCS', 'HDFCBANK', 'INFY', 'ICICIBANK',
@@ -293,10 +237,7 @@ class EnhancedCacheService {
     ];
   }
 
-  /**
-   * Sleep utility
-   * @param {number} ms - Milliseconds
-   */
+  
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

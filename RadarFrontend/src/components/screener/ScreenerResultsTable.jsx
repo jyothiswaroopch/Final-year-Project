@@ -75,7 +75,7 @@ const ScreenerResultsTable = ({ stocks, onOpenResearch }) => {
               transition={{ delay: index * 0.02 }}
               className="border-b border-slate-700/30 hover:bg-slate-800/30 transition-colors"
             >
-              {/* Symbol */}
+              {}
               <td className="px-6 py-4">
                 <div className="flex items-center gap-3">
                   <div className="flex-1">
@@ -85,12 +85,12 @@ const ScreenerResultsTable = ({ stocks, onOpenResearch }) => {
                 </div>
               </td>
 
-              {/* Price */}
+              {}
               <td className="px-6 py-4">
-                <p className="text-sm font-bold text-white">₹{stock.price.toFixed(2)}</p>
+                <p className="text-sm font-bold text-white">â‚¹{stock.price.toFixed(2)}</p>
               </td>
 
-              {/* Change % */}
+              {}
               <td className="px-6 py-4">
                 <div
                   className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-bold ${
@@ -108,7 +108,7 @@ const ScreenerResultsTable = ({ stocks, onOpenResearch }) => {
                 </div>
               </td>
 
-              {/* Signal */}
+              {}
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                   {getSignalIcon(stock.signal)}
@@ -116,7 +116,7 @@ const ScreenerResultsTable = ({ stocks, onOpenResearch }) => {
                 </div>
               </td>
 
-              {/* RSI */}
+              {}
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                   <div className="w-12 h-1.5 bg-slate-700 rounded-full overflow-hidden">
@@ -145,12 +145,12 @@ const ScreenerResultsTable = ({ stocks, onOpenResearch }) => {
                 </div>
               </td>
 
-              {/* P/E */}
+              {}
               <td className="px-6 py-4">
                 <p className="text-sm text-slate-300">{stock.pe.toFixed(1)}</p>
               </td>
 
-              {/* Trend */}
+              {}
               <td className="px-6 py-4">
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${getTrendBadgeColor(
@@ -166,7 +166,7 @@ const ScreenerResultsTable = ({ stocks, onOpenResearch }) => {
                 </span>
               </td>
 
-              {/* Sentiment */}
+              {}
               <td className="px-6 py-4">
                 <span
                   className={`inline-block px-3 py-1 rounded-full text-xs font-bold ${getSentimentColor(
@@ -177,14 +177,14 @@ const ScreenerResultsTable = ({ stocks, onOpenResearch }) => {
                 </span>
               </td>
 
-              {/* Sector */}
+              {}
               <td className="px-6 py-4">
                 <span className="inline-block px-2 py-1 bg-slate-800 text-slate-300 rounded text-xs font-medium">
                   {stock.sector}
                 </span>
               </td>
 
-              {/* Action */}
+              {}
               <td className="px-6 py-4">
                 <button
                   onClick={() => onOpenResearch?.(stock.symbol)}

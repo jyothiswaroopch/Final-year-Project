@@ -1,8 +1,4 @@
-/**
- * Free API Aggregator
- * Intelligently routes requests to free API sources
- * Priority: Twelve Data (Indian stocks) → Yahoo Finance (fallback) → Finnhub (US stocks)
- */
+
 
 const finnhubService = require('./finnhubService');
 const twelveDataService = require('./twelveDataService');
@@ -22,12 +18,7 @@ class FreeApiAggregator {
     };
   }
 
-  /**
-   * Get real-time quote with intelligent source selection
-   * @param {string} symbol - Stock symbol (e.g., 'RELIANCE.NS')
-   * @param {Object} options - Options
-   * @returns {Promise<Object>}
-   */
+  
   async getQuote(symbol, options = {}) {
     const {
       preferredSource = 'auto',
@@ -38,7 +29,6 @@ class FreeApiAggregator {
     this.stats.totalRequests++;
 
     try {
-      // 1. Try cache first (if not skipped)
       if (!skipCache) {
         const cached = await this.getCachedQuote(symbol, maxAge);
         if (cached) {
@@ -47,20 +37,16 @@ class FreeApiAggregator {
         }
       }
 
-      // 2. Determine best source
       const source = preferredSource === 'auto' 
         ? this.selectBestSource(symbol)
         : preferredSource;
 
-      // 3. Try selected source
       let result = await this.trySource(symbol, source);
 
-      // 4. Fallback chain if primary fails
       if (!result.success) {
         result = await this.tryFallbackChain(symbol, source);
       }
 
-      // 5. Cache successful result
       if (result.success) {
         await this.cacheQuote(symbol, result.data);
       } else {
@@ -80,13 +66,8 @@ class FreeApiAggregator {
     }
   }
 
-  /**
-   * Select best API source based on symbol
-   * @param {string} symbol - Stock symbol
-   * @returns {string}
-   */
+  
   selectBestSource(symbol) {
-    // Indian stocks (.NS, .BO) - use Twelve Data (best support)
     if (symbol.includes('.NS') || symbol.includes('.BO')) {
       if (twelveDataService.canMakeRequest()) {
         return 'twelvedata';
@@ -94,21 +75,14 @@ class FreeApiAggregator {
       return 'yahoo'; // Fallback to Yahoo
     }
 
-    // US stocks - use Finnhub
     if (finnhubService.canMakeRequest()) {
       return 'finnhub';
     }
 
-    // Default to Yahoo (unlimited)
     return 'yahoo';
   }
 
-  /**
-   * Try a specific source
-   * @param {string} symbol - Stock symbol
-   * @param {string} source - Source name
-   * @returns {Promise<Object>}
-   */
+  
   async trySource(symbol, source) {
     try {
       switch (source) {
@@ -123,8 +97,6 @@ class FreeApiAggregator {
         case 'yahoo':
         default:
           this.stats.yahooHits++;
-          // Yahoo doesn't have a quote endpoint in our service yet
-          // Use latest OHLC or fetch latest candle
           const latest = await ohlcService.getLatest(symbol.replace('.NS', '').replace('.BO', ''), '1d');
           if (latest.success && latest.data) {
             return {
@@ -161,12 +133,7 @@ class FreeApiAggregator {
     }
   }
 
-  /**
-   * Try fallback chain
-   * @param {string} symbol - Stock symbol
-   * @param {string} excludeSource - Source to exclude
-   * @returns {Promise<Object>}
-   */
+  
   async tryFallbackChain(symbol, excludeSource) {
     const sources = ['twelvedata', 'finnhub', 'yahoo'];
     const remainingSources = sources.filter(s => s !== excludeSource);
@@ -186,12 +153,7 @@ class FreeApiAggregator {
     };
   }
 
-  /**
-   * Get cached quote from OHLC database
-   * @param {string} symbol - Stock symbol
-   * @param {number} maxAge - Max age in milliseconds
-   * @returns {Promise<Object|null>}
-   */
+  
   async getCachedQuote(symbol, maxAge) {
     try {
       const cleanSymbol = symbol.replace('.NS', '').replace('.BO', '');
@@ -226,23 +188,12 @@ class FreeApiAggregator {
     }
   }
 
-  /**
-   * Cache quote data
-   * @param {string} symbol - Stock symbol
-   * @param {Object} data - Quote data
-   */
+  
   async cacheQuote(symbol, data) {
-    // Cache is handled by OHLC service updates
-    // This is a placeholder for future cache implementation
     logger.debug(`Quote cached for ${symbol}`);
   }
 
-  /**
-   * Get batch quotes
-   * @param {Array<string>} symbols - Array of symbols
-   * @param {Object} options - Options
-   * @returns {Promise<Array>}
-   */
+  
   async getBatchQuotes(symbols, options = {}) {
     const results = [];
     
@@ -253,17 +204,13 @@ class FreeApiAggregator {
         ...quote,
       });
       
-      // Small delay to avoid rate limits
       await this.sleep(100);
     }
     
     return results;
   }
 
-  /**
-   * Get aggregator statistics
-   * @returns {Object}
-   */
+  
   getStats() {
     const total = this.stats.totalRequests || 1;
     
@@ -284,9 +231,7 @@ class FreeApiAggregator {
     };
   }
 
-  /**
-   * Reset statistics
-   */
+  
   resetStats() {
     this.stats = {
       totalRequests: 0,
@@ -298,10 +243,7 @@ class FreeApiAggregator {
     };
   }
 
-  /**
-   * Test all API connections
-   * @returns {Promise<Object>}
-   */
+  
   async testAllConnections() {
     const results = {
       finnhub: await finnhubService.testConnection(),
@@ -315,10 +257,7 @@ class FreeApiAggregator {
     };
   }
 
-  /**
-   * Sleep utility
-   * @param {number} ms - Milliseconds
-   */
+  
   sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
   }

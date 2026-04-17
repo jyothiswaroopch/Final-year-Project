@@ -24,8 +24,12 @@ export const fetchSectorPerformance = async (period = '1y') => {
         const response = await api.get(`/sectors/performance?period=${period}`);
         return response.data;
     } catch (error) {
-        console.error("Error fetching sector performance:", error);
-        throw error;
+        console.warn('Sector performance unavailable, using UI fallback themes:', error?.message || error);
+        return {
+            success: false,
+            period,
+            data: [],
+        };
     }
 };
 
@@ -95,7 +99,6 @@ export const fetchMarketHistory = async (symbol, type = 'STOCK', interval = '1D'
 
 export const fetchMarketNews = async (params = {}) => {
     try {
-        // Try the new intelligent news endpoint first
         const response = await api.get('/news', { params });
         return response.data?.data ?? response.data;
     } catch (error) {

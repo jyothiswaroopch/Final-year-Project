@@ -2,10 +2,7 @@ import React from 'react';
 import { Newspaper, TrendingUp, TrendingDown, Minus, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-/**
- * News Badge Component
- * Shows news count with color coding and unread indicator
- */
+
 export const NewsBadge = ({ count, hasToday, unread, onClick }) => {
   if (count === 0) {
     return (
@@ -41,10 +38,7 @@ export const NewsBadge = ({ count, hasToday, unread, onClick }) => {
   );
 };
 
-/**
- * Sentiment Score Display
- * Shows sentiment with color gradient and icon
- */
+
 export const SentimentDisplay = ({ sentiment, compact = false }) => {
   const getSentimentIcon = (score) => {
     if (score > 20) return TrendingUp;
@@ -90,10 +84,7 @@ export const SentimentDisplay = ({ sentiment, compact = false }) => {
   );
 };
 
-/**
- * Toolbar Button Component
- * Reusable button for toolbar actions
- */
+
 export const ToolbarButton = ({ icon: Icon, label, onClick, active = false, badge = null, variant = 'default' }) => {
   const variants = {
     default: active 
@@ -122,10 +113,7 @@ export const ToolbarButton = ({ icon: Icon, label, onClick, active = false, badg
   );
 };
 
-/**
- * Keyboard Shortcut Hint
- * Small badge showing keyboard shortcut
- */
+
 export const KeyboardHint = ({ keys }) => {
   return (
     <div className="inline-flex items-center gap-0.5">
@@ -141,10 +129,7 @@ export const KeyboardHint = ({ keys }) => {
   );
 };
 
-/**
- * Export Menu Component
- * Dropdown menu for export options
- */
+
 export const ExportMenu = ({ onExportCSV, onExportJSON, onClose }) => {
   return (
     <motion.div
@@ -158,7 +143,7 @@ export const ExportMenu = ({ onExportCSV, onExportJSON, onClose }) => {
           onClick={onExportCSV}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left text-sm text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-300 transition-colors"
         >
-          <span className="text-xs">📄</span>
+          <span className="text-xs">ðŸ“„</span>
           <div className="flex-1">
             <div className="font-medium">Export as CSV</div>
             <div className="text-[10px] text-slate-500">Excel-compatible format</div>
@@ -168,7 +153,7 @@ export const ExportMenu = ({ onExportCSV, onExportJSON, onClose }) => {
           onClick={onExportJSON}
           className="w-full flex items-center gap-3 px-3 py-2 rounded-md text-left text-sm text-slate-300 hover:bg-cyan-500/10 hover:text-cyan-300 transition-colors"
         >
-          <span className="text-xs">📋</span>
+          <span className="text-xs">ðŸ“‹</span>
           <div className="flex-1">
             <div className="font-medium">Export as JSON</div>
             <div className="text-[10px] text-slate-500">Developer format</div>
@@ -179,10 +164,7 @@ export const ExportMenu = ({ onExportCSV, onExportJSON, onClose }) => {
   );
 };
 
-/**
- * Notification Permission Banner
- * Prompts user to enable notifications
- */
+
 export const NotificationBanner = ({ onEnable, onDismiss }) => {
   return (
     <motion.div

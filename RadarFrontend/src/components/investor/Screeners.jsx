@@ -33,10 +33,10 @@ const mockReadyMade = [
 ];
 
 const mockResults = [
-    { id: 'TCS', name: 'Tata Consultancy Services', price: '₹3,542.10', change: '+1.2%', isPositive: true, mcap: '12.4T', sector: 'IT Services', why: 'Strong 200-DMA support with 15% ROE.', tags: ['Value', 'Low Risk'], confidence: 92, yield: '1.2%', beta: 0.85, volume: '2.4M', pe: 28.5, roe: '24.1%', trend: [3500, 3520, 3510, 3530, 3542] },
-    { id: 'HINDUNILVR', name: 'Hindustan Unilever', price: '₹2,410.50', change: '-0.4%', isPositive: false, mcap: '5.6T', sector: 'FMCG', why: 'Overbought on daily RSI, holding support.', tags: ['Defensive'], confidence: 85, yield: '1.5%', beta: 0.62, volume: '1.8M', pe: 54.2, roe: '18.5%', trend: [2450, 2440, 2430, 2420, 2410] },
-    { id: 'ITC', name: 'ITC Limited', price: '₹415.80', change: '+2.1%', isPositive: true, mcap: '5.1T', sector: 'FMCG', why: 'Breakout above monthly consolidation.', tags: ['Momentum', 'Yield'], confidence: 88, yield: '3.4%', beta: 0.74, volume: '8.2M', pe: 24.8, roe: '29.2%', trend: [400, 405, 408, 412, 415] },
-    { id: 'INFY', name: 'Infosys Ltd', price: '₹1,440.00', change: '+0.8%', isPositive: true, mcap: '5.9T', sector: 'IT Services', why: 'Institutional accumulation detected.', tags: ['Momentum'], confidence: 90, yield: '1.0%', beta: 1.12, volume: '3.6M', pe: 22.1, roe: '26.4%', trend: [1420, 1425, 1435, 1430, 1440] },
+    { id: 'TCS', name: 'Tata Consultancy Services', price: 'â‚¹3,542.10', change: '+1.2%', isPositive: true, mcap: '12.4T', sector: 'IT Services', why: 'Strong 200-DMA support with 15% ROE.', tags: ['Value', 'Low Risk'], confidence: 92, yield: '1.2%', beta: 0.85, volume: '2.4M', pe: 28.5, roe: '24.1%', trend: [3500, 3520, 3510, 3530, 3542] },
+    { id: 'HINDUNILVR', name: 'Hindustan Unilever', price: 'â‚¹2,410.50', change: '-0.4%', isPositive: false, mcap: '5.6T', sector: 'FMCG', why: 'Overbought on daily RSI, holding support.', tags: ['Defensive'], confidence: 85, yield: '1.5%', beta: 0.62, volume: '1.8M', pe: 54.2, roe: '18.5%', trend: [2450, 2440, 2430, 2420, 2410] },
+    { id: 'ITC', name: 'ITC Limited', price: 'â‚¹415.80', change: '+2.1%', isPositive: true, mcap: '5.1T', sector: 'FMCG', why: 'Breakout above monthly consolidation.', tags: ['Momentum', 'Yield'], confidence: 88, yield: '3.4%', beta: 0.74, volume: '8.2M', pe: 24.8, roe: '29.2%', trend: [400, 405, 408, 412, 415] },
+    { id: 'INFY', name: 'Infosys Ltd', price: 'â‚¹1,440.00', change: '+0.8%', isPositive: true, mcap: '5.9T', sector: 'IT Services', why: 'Institutional accumulation detected.', tags: ['Momentum'], confidence: 90, yield: '1.0%', beta: 1.12, volume: '3.6M', pe: 22.1, roe: '26.4%', trend: [1420, 1425, 1435, 1430, 1440] },
 ];
 
 const strategies = [
@@ -51,7 +51,7 @@ const strategies = [
 
 const allFilters = [
     { id: 'mcap', label: 'Market Cap', icon: BarChart3, options: ['Large', 'Mid', 'Small', 'Micro'] },
-    { id: 'price', label: 'Price', icon: Banknote, options: ['Any', '< ₹500', '₹500 - ₹2k', '> ₹2k'] },
+    { id: 'price', label: 'Price', icon: Banknote, options: ['Any', '< â‚¹500', 'â‚¹500 - â‚¹2k', '> â‚¹2k'] },
     { id: 'change', label: 'Change %', icon: TrendingUp, options: ['Any', '> 0%', '> 2%', '> 5%', '< 0%'] },
     { id: 'sector', label: 'Sector', icon: Search, options: ['All', 'IT', 'Finance', 'FMCG', 'Auto', 'Energy', 'Healthcare'] },
     { id: 'roe', label: 'ROE', icon: Activity, options: ['Any', '> 10%', '> 15%', '> 20%'] },
@@ -183,7 +183,7 @@ const Screeners = ({ isHero = false }) => {
         <div className={`w-full ${isHero ? '' : 'min-h-screen py-8 px-4 md:px-10 bg-[#f8fafc]/50'}`}>
             <div className={`mx-auto fade-in ${isHero ? '' : 'max-w-[1600px]'}`}>
                 
-                {/* Personalization Banner */}
+                {}
                 <div className="mb-6 flex items-center justify-between px-2">
                     <div className="flex items-center gap-3">
                         <div className="bg-blue-600 p-2 rounded-lg text-white shadow-lg">
@@ -193,7 +193,7 @@ const Screeners = ({ isHero = false }) => {
                             <h1 className="text-2xl font-black text-slate-800">Smart Market Screener</h1>
                             <p className="text-[12px] font-bold text-slate-500 flex items-center gap-1.5 uppercase tracking-wider">
                                 <ShieldCheck size={14} className="text-blue-500" />
-                                ⚡ Tailored for you: {userMode === 'TRADER' ? 'Active Trader' : 'Long-term Investor'}
+                                âš¡ Tailored for you: {userMode === 'TRADER' ? 'Active Trader' : 'Long-term Investor'}
                             </p>
                         </div>
                     </div>
@@ -212,7 +212,7 @@ const Screeners = ({ isHero = false }) => {
                     </div>
                 </div>
 
-                {/* HORIZONTAL SMART SCREENER HERO */}
+                {}
                 <div className={`${baseCardClass} !p-4 !mb-6 bg-white overflow-visible relative z-30`}>
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="flex items-center gap-2 px-3 border-r border-slate-200">
@@ -519,7 +519,7 @@ const Screeners = ({ isHero = false }) => {
                     </div>
                 </div>
 
-                {/* MODALS */}
+                {}
                 {showCreateModal && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                         <div className="absolute inset-0 modal-overlay" onClick={() => setShowCreateModal(false)} />

@@ -31,7 +31,7 @@ const FilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -40,7 +40,7 @@ const FilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
             className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
           />
 
-          {/* Modal */}
+          {}
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -48,7 +48,7 @@ const FilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
             className="fixed inset-0 flex items-center justify-center z-50 p-4"
           >
             <div className="w-full max-w-md rounded-2xl border border-slate-700/50 bg-slate-800/50 backdrop-blur-xl shadow-2xl overflow-hidden">
-              {/* Header */}
+              {}
               <div className="flex items-center justify-between p-6 border-b border-slate-700/30 bg-slate-900/50">
                 <h2 className="text-xl font-bold text-slate-100">Advanced Filters</h2>
                 <button
@@ -59,9 +59,9 @@ const FilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
                 </button>
               </div>
 
-              {/* Scrollable Content */}
+              {}
               <div className="overflow-y-auto max-h-[calc(100vh-250px)] p-4 space-y-3">
-                {/* Price Range Section */}
+                {}
                 <div className="rounded-lg border border-slate-700/30 bg-slate-900/30 overflow-hidden">
                   <button
                     onClick={() => setExpandedSection(expandedSection === 'price' ? null : 'price')}
@@ -86,7 +86,7 @@ const FilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
                       >
                         <div>
                           <label className="text-xs font-semibold text-slate-400 block mb-2">
-                            Min Price: ₹{localFilters.priceRange[0]}
+                            Min Price: â‚¹{localFilters.priceRange[0]}
                           </label>
                           <input
                             type="range"
@@ -100,7 +100,7 @@ const FilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
 
                         <div>
                           <label className="text-xs font-semibold text-slate-400 block mb-2">
-                            Max Price: ₹{localFilters.priceRange[1]}
+                            Max Price: â‚¹{localFilters.priceRange[1]}
                           </label>
                           <input
                             type="range"
@@ -113,16 +113,16 @@ const FilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
                         </div>
 
                         <div className="flex gap-2 text-xs text-slate-400">
-                          <span>₹{localFilters.priceRange[0]}</span>
+                          <span>â‚¹{localFilters.priceRange[0]}</span>
                           <span>-</span>
-                          <span>₹{localFilters.priceRange[1]}</span>
+                          <span>â‚¹{localFilters.priceRange[1]}</span>
                         </div>
                       </motion.div>
                     )}
                   </AnimatePresence>
                 </div>
 
-                {/* Volume Section */}
+                {}
                 <div className="rounded-lg border border-slate-700/30 bg-slate-900/30 overflow-hidden">
                   <button
                     onClick={() => setExpandedSection(expandedSection === 'volume' ? null : 'volume')}
@@ -187,7 +187,7 @@ const FilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
                   </AnimatePresence>
                 </div>
 
-                {/* RSI Section */}
+                {}
                 <div className="rounded-lg border border-slate-700/30 bg-slate-900/30 overflow-hidden">
                   <button
                     onClick={() => setExpandedSection(expandedSection === 'rsi' ? null : 'rsi')}
@@ -272,7 +272,7 @@ const FilterModal = ({ isOpen, onClose, filters, onApplyFilters }) => {
                 </div>
               </div>
 
-              {/* Footer */}
+              {}
               <div className="flex gap-2 p-4 border-t border-slate-700/30 bg-slate-900/50">
                 <button
                   onClick={handleReset}

@@ -1,20 +1,9 @@
 import React from 'react';
 import { useOHLCData, useLatestOHLC, useChartData } from '../hooks/useOHLCData';
 
-/**
- * Example: Stock Chart Component using OHLC data
- * This shows how to integrate the new OHLC API into your existing components
- * 
- * Features:
- * - Automatic data source selection (OHLC storage → External API)
- * - Loading states
- * - Error handling
- * - Multiple chart types
- * - Cached data indicator
- */
+
 
 const StockChartWithOHLC = ({ symbol, chartType = 'line' }) => {
-    // Use the enhanced hook that automatically tries OHLC first
     const { data, loading, error, isCached, refetch } = useChartData(symbol, {
         type: 'STOCK',
         interval: '1D',
@@ -53,13 +42,13 @@ const StockChartWithOHLC = ({ symbol, chartType = 'line' }) => {
 
     return (
         <div className="w-full">
-            {/* Data Source Indicator */}
+            {}
             <div className="mb-2 flex items-center justify-between">
                 <h3 className="text-lg font-semibold">{symbol} - Last 90 Days</h3>
                 <div className="flex items-center gap-2">
                     {isCached && (
                         <span className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded">
-                            ⚡ Fast (Cached)
+                            âš¡ Fast (Cached)
                         </span>
                     )}
                     <span className="text-sm text-gray-500">
@@ -68,7 +57,7 @@ const StockChartWithOHLC = ({ symbol, chartType = 'line' }) => {
                 </div>
             </div>
 
-            {/* Chart */}
+            {}
             <ResponsiveContainer width="100%" height={400}>
                 {chartType === 'line' && (
                     <LineChart data={data}>
@@ -121,9 +110,7 @@ const StockChartWithOHLC = ({ symbol, chartType = 'line' }) => {
     );
 };
 
-/**
- * Example: Latest Price Display using OHLC
- */
+
 const LatestPriceCard = ({ symbol }) => {
     const { data, loading, error } = useLatestOHLC(symbol, {
         exchange: 'NSE',
@@ -150,22 +137,20 @@ const LatestPriceCard = ({ symbol }) => {
     return (
         <div className="p-4 bg-white rounded-lg shadow">
             <div className="text-sm text-gray-500 mb-1">{symbol}</div>
-            <div className="text-2xl font-bold mb-2">₹{data.close.toFixed(2)}</div>
+            <div className="text-2xl font-bold mb-2">â‚¹{data.close.toFixed(2)}</div>
             <div className={`flex items-center gap-2 text-sm ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-                <span>{isPositive ? '▲' : '▼'}</span>
+                <span>{isPositive ? 'â–²' : 'â–¼'}</span>
                 <span>{Math.abs(priceChange).toFixed(2)}</span>
                 <span>({priceChangePercent}%)</span>
             </div>
             <div className="mt-2 text-xs text-gray-400">
-                H: ₹{data.high.toFixed(2)} | L: ₹{data.low.toFixed(2)}
+                H: â‚¹{data.high.toFixed(2)} | L: â‚¹{data.low.toFixed(2)}
             </div>
         </div>
     );
 };
 
-/**
- * Example: Historical Data Table
- */
+
 const PriceHistoryTable = ({ symbol, days = 10 }) => {
     const { data, loading, error } = useOHLCData(symbol, {
         exchange: 'NSE',
@@ -204,10 +189,10 @@ const PriceHistoryTable = ({ symbol, days = 10 }) => {
                             <td className="px-4 py-2 border">
                                 {new Date(candle.timestamp).toLocaleDateString()}
                             </td>
-                            <td className="px-4 py-2 border">₹{candle.open.toFixed(2)}</td>
-                            <td className="px-4 py-2 border text-green-600">₹{candle.high.toFixed(2)}</td>
-                            <td className="px-4 py-2 border text-red-600">₹{candle.low.toFixed(2)}</td>
-                            <td className="px-4 py-2 border font-semibold">₹{candle.close.toFixed(2)}</td>
+                            <td className="px-4 py-2 border">â‚¹{candle.open.toFixed(2)}</td>
+                            <td className="px-4 py-2 border text-green-600">â‚¹{candle.high.toFixed(2)}</td>
+                            <td className="px-4 py-2 border text-red-600">â‚¹{candle.low.toFixed(2)}</td>
+                            <td className="px-4 py-2 border font-semibold">â‚¹{candle.close.toFixed(2)}</td>
                             <td className="px-4 py-2 border text-gray-600">
                                 {candle.volume ? candle.volume.toLocaleString() : 'N/A'}
                             </td>
@@ -219,9 +204,7 @@ const PriceHistoryTable = ({ symbol, days = 10 }) => {
     );
 };
 
-/**
- * Example: Complete Stock Detail Page
- */
+
 const StockDetailPage = ({ symbol = 'RELIANCE' }) => {
     const [chartType, setChartType] = React.useState('line');
 
@@ -229,10 +212,10 @@ const StockDetailPage = ({ symbol = 'RELIANCE' }) => {
         <div className="container mx-auto p-4 space-y-6">
             <h1 className="text-3xl font-bold mb-6">Stock Details - {symbol}</h1>
 
-            {/* Latest Price Card */}
+            {}
             <LatestPriceCard symbol={symbol} />
 
-            {/* Chart Section */}
+            {}
             <div className="bg-white rounded-lg shadow p-6">
                 <div className="mb-4 flex gap-2">
                     <button
@@ -264,7 +247,7 @@ const StockDetailPage = ({ symbol = 'RELIANCE' }) => {
                 <StockChartWithOHLC symbol={symbol} chartType={chartType} />
             </div>
 
-            {/* Price History Table */}
+            {}
             <div className="bg-white rounded-lg shadow p-6">
                 <h2 className="text-xl font-semibold mb-4">Recent Price History</h2>
                 <PriceHistoryTable symbol={symbol} days={10} />

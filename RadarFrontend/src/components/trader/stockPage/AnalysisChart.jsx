@@ -41,7 +41,7 @@ export default function AnalysisChart({ symbol = 'RELIANCE' }) {
 
     return (
         <div className="terminal-card flex flex-col h-[520px]">
-            {/* Chart Toolbar */}
+            {}
             <div className="p-2 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
                 <div className="flex items-center gap-4">
                     <div className="flex bg-black/40 p-0.5 rounded border border-white/5">
@@ -68,7 +68,7 @@ export default function AnalysisChart({ symbol = 'RELIANCE' }) {
                 </div>
             </div>
 
-            {/* Chart Area */}
+            {}
             <div className="flex-1 relative pt-2">
                  <div className="absolute top-4 left-6 z-10 flex gap-4 pointer-events-none">
                     <div className="flex flex-col">

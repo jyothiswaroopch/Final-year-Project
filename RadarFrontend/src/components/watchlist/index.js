@@ -1,4 +1,3 @@
-// Export all watchlist components
 export { default as AdvancedWatchlistDashboard } from './AdvancedWatchlistDashboard';
 export { default as WatchlistTable } from './WatchlistTable';
 export { default as StockDetailsPanel } from './StockDetailsPanel';

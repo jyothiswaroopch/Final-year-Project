@@ -1,14 +1,10 @@
-/**
- * Advanced Screener Presets
- * 15+ Professional Screening Strategies
- */
+
 
 export const SCREENER_PRESETS = {
-  // Original Presets (Enhanced)
   momentum: {
     name: 'Momentum Movers',
     description: 'Stocks with strong upward price momentum and high RSI',
-    icon: '🚀',
+    icon: 'ðŸš€',
     category: 'Technical',
     filters: { minChange: 0.8, minRsi: 55, minScore: 55, volumeStatus: 'high_volume' },
     sortBy: 'change',
@@ -17,7 +13,7 @@ export const SCREENER_PRESETS = {
   value: {
     name: 'Value Picks',
     description: 'Undervalued stocks with low P/E ratios',
-    icon: '💎',
+    icon: 'ðŸ’Ž',
     category: 'Fundamental',
     filters: { maxPe: 22, minPrice: 50, minMarketCap: '1000Cr' },
     sortBy: 'pe',
@@ -26,18 +22,17 @@ export const SCREENER_PRESETS = {
   breakout: {
     name: 'High RSI Breakouts',
     description: 'Stocks breaking out with strong technical indicators',
-    icon: '📈',
+    icon: 'ðŸ“ˆ',
     category: 'Technical',
     filters: { minRsi: 60, minScore: 65, minChange: 0.5 },
     sortBy: 'score',
     sortOrder: 'desc',
   },
 
-  // NEW: Dividend & Income Strategies
   dividendKings: {
     name: 'Dividend Kings',
     description: 'High dividend yield stocks with consistent payouts',
-    icon: '👑',
+    icon: 'ðŸ‘‘',
     category: 'Income',
     filters: { minDividendYield: 3.5, minMarketCap: '5000Cr', maxPe: 30 },
     sortBy: 'dividendYield',
@@ -46,18 +41,17 @@ export const SCREENER_PRESETS = {
   dividendGrowth: {
     name: 'Dividend Growth',
     description: 'Companies growing dividends year-over-year',
-    icon: '📊',
+    icon: 'ðŸ“Š',
     category: 'Income',
     filters: { minDividendYield: 2, minChange: 0, minScore: 50 },
     sortBy: 'dividendYield',
     sortOrder: 'desc',
   },
 
-  // NEW: Growth Strategies
   growthLeaders: {
     name: 'Growth Leaders',
     description: 'High-growth stocks with strong earnings potential',
-    icon: '🌟',
+    icon: 'ðŸŒŸ',
     category: 'Growth',
     filters: { minChange: 1.5, minScore: 70, sectors: ['Technology', 'Healthcare'] },
     sortBy: 'change',
@@ -66,18 +60,17 @@ export const SCREENER_PRESETS = {
   smallCapGems: {
     name: 'Small Cap Gems',
     description: 'Small-cap stocks with big potential',
-    icon: '💠',
+    icon: 'ðŸ’ ',
     category: 'Growth',
     filters: { minMarketCap: '100Cr', maxMarketCap: '5000Cr', minScore: 60 },
     sortBy: 'score',
     sortOrder: 'desc',
   },
 
-  // NEW: Contrarian Strategies
   oversold: {
     name: 'Oversold Bounce',
     description: 'Oversold stocks ready for reversal',
-    icon: '🔄',
+    icon: 'ðŸ”„',
     category: 'Contrarian',
     filters: { maxRsi: 35, minScore: 40, volumeStatus: 'high_volume' },
     sortBy: 'rsi',
@@ -86,18 +79,17 @@ export const SCREENER_PRESETS = {
   fallenAngels: {
     name: 'Fallen Angels',
     description: 'Quality stocks temporarily beaten down',
-    icon: '😇',
+    icon: 'ðŸ˜‡',
     category: 'Contrarian',
     filters: { minChange: -5, maxChange: -1, maxPe: 25, minMarketCap: '10000Cr' },
     sortBy: 'change',
     sortOrder: 'asc',
   },
 
-  // NEW: Quality Strategies
   blueChips: {
     name: 'Blue Chip Quality',
     description: 'Large-cap stable companies',
-    icon: '🏆',
+    icon: 'ðŸ†',
     category: 'Quality',
     filters: { minMarketCap: '50000Cr', maxPe: 35, minScore: 55 },
     sortBy: 'marketcap',
@@ -106,18 +98,17 @@ export const SCREENER_PRESETS = {
   defensiveStocks: {
     name: 'Defensive Stocks',
     description: 'Low-volatility defensive sectors',
-    icon: '🛡️',
+    icon: 'ðŸ›¡ï¸',
     category: 'Quality',
     filters: { sectors: ['FMCG', 'Pharma', 'Utilities'], minMarketCap: '5000Cr' },
     sortBy: 'marketcap',
     sortOrder: 'desc',
   },
 
-  // NEW: Volatility & Trading
   highVolatility: {
     name: 'High Volatility Traders',
     description: 'Volatile stocks for day trading',
-    icon: '⚡',
+    icon: 'âš¡',
     category: 'Trading',
     filters: { volumeStatus: 'high_volume', minScore: 50 },
     sortBy: 'change',
@@ -126,18 +117,17 @@ export const SCREENER_PRESETS = {
   gappers: {
     name: 'Gap Up/Down Stocks',
     description: 'Stocks with significant price gaps',
-    icon: '📉',
+    icon: 'ðŸ“‰',
     category: 'Trading',
     filters: { minChange: 2 },
     sortBy: 'change',
     sortOrder: 'desc',
   },
 
-  // NEW: Sector Rotation
   sectorLeaders: {
     name: 'Sector Leaders',
     description: 'Top performers in each sector',
-    icon: '🎯',
+    icon: 'ðŸŽ¯',
     category: 'Sector',
     filters: { minScore: 65, minMarketCap: '1000Cr' },
     sortBy: 'score',
@@ -146,18 +136,17 @@ export const SCREENER_PRESETS = {
   itExporters: {
     name: 'IT Export Leaders',
     description: 'Technology and IT services exporters',
-    icon: '💻',
+    icon: 'ðŸ’»',
     category: 'Sector',
     filters: { sectors: ['Technology'], minMarketCap: '10000Cr', minChange: 0 },
     sortBy: 'marketcap',
     sortOrder: 'desc',
   },
 
-  // NEW: News-Based Screening
   newsMovers: {
     name: 'News Movers',
     description: 'Stocks moving on breaking news',
-    icon: '📰',
+    icon: 'ðŸ“°',
     category: 'News',
     filters: { minNewsCount: 3, minChange: 1 },
     sortBy: 'newsCount',
@@ -166,18 +155,17 @@ export const SCREENER_PRESETS = {
   positiveSentiment: {
     name: 'Positive News Sentiment',
     description: 'Stocks with positive news sentiment',
-    icon: '😊',
+    icon: 'ðŸ˜Š',
     category: 'News',
     filters: { minSentiment: 50, minNewsCount: 2 },
     sortBy: 'sentiment',
     sortOrder: 'desc',
   },
 
-  // Custom preset
   custom: {
     name: 'Custom Scan',
     description: 'Create your own screening criteria',
-    icon: '⚙️',
+    icon: 'âš™ï¸',
     category: 'Custom',
     filters: {},
     sortBy: 'symbol',
@@ -186,17 +174,17 @@ export const SCREENER_PRESETS = {
 };
 
 export const PRESET_CATEGORIES = [
-  { id: 'all', label: 'All Presets', icon: '📋' },
-  { id: 'Technical', label: 'Technical', icon: '📊' },
-  { id: 'Fundamental', label: 'Fundamental', icon: '📈' },
-  { id: 'Income', label: 'Income', icon: '💰' },
-  { id: 'Growth', label: 'Growth', icon: '🚀' },
-  { id: 'Contrarian', label: 'Contrarian', icon: '🔄' },
-  { id: 'Quality', label: 'Quality', icon: '⭐' },
-  { id: 'Trading', label: 'Trading', icon: '⚡' },
-  { id: 'Sector', label: 'Sector', icon: '🎯' },
-  { id: 'News', label: 'News', icon: '📰' },
-  { id: 'Custom', label: 'Custom', icon: '⚙️' },
+  { id: 'all', label: 'All Presets', icon: 'ðŸ“‹' },
+  { id: 'Technical', label: 'Technical', icon: 'ðŸ“Š' },
+  { id: 'Fundamental', label: 'Fundamental', icon: 'ðŸ“ˆ' },
+  { id: 'Income', label: 'Income', icon: 'ðŸ’°' },
+  { id: 'Growth', label: 'Growth', icon: 'ðŸš€' },
+  { id: 'Contrarian', label: 'Contrarian', icon: 'ðŸ”„' },
+  { id: 'Quality', label: 'Quality', icon: 'â­' },
+  { id: 'Trading', label: 'Trading', icon: 'âš¡' },
+  { id: 'Sector', label: 'Sector', icon: 'ðŸŽ¯' },
+  { id: 'News', label: 'News', icon: 'ðŸ“°' },
+  { id: 'Custom', label: 'Custom', icon: 'âš™ï¸' },
 ];
 
 export const getPresetsByCategory = (category) => {

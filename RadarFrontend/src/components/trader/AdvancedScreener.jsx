@@ -29,14 +29,14 @@ const mockReadyMade = [
     { id: 4, title: 'High Yielders', desc: 'Top 5% dividend yield stocks.', icon: Star, color: 'text-amber-400', bg: 'bg-amber-400/10' },
     { id: 5, title: 'Institutional Favorites', desc: 'Highest FII/DII accumulation.', icon: Users, color: 'text-indigo-400', bg: 'bg-indigo-400/10' },
     { id: 6, title: 'Debt-Free Leaders', desc: 'Zero debt balance sheet giants.', icon: Zap, color: 'text-red-400', bg: 'bg-red-400/10' },
-    { id: 7, title: 'ESG Alpha', desc: 'Leading sustainability scores.', icon: ShieldCheck, color: 'text-teal-400', bg: 'bg-teal-400/10' },
+    { id: 7, title: 'ESG Score', desc: 'Leading sustainability scores.', icon: ShieldCheck, color: 'text-teal-400', bg: 'bg-teal-400/10' },
 ];
 
 const mockResults = [
-    { id: 'RELIANCE', name: 'Reliance Industries', price: '₹2,942.10', change: '+1.2%', isPositive: true, mcap: '19.4T', sector: 'Energy', why: 'Strong 200-DMA support with institutional accumulation.', tags: ['Value', 'Growth'], confidence: 92, yield: '0.8%', beta: 0.95, volume: '4.4M', pe: 26.4, roe: '14.2%', trend: [2850, 2870, 2890, 2920, 2942] },
-    { id: 'TCS', name: 'Tata Consultancy Services', price: '₹3,810.50', change: '-0.4%', isPositive: false, mcap: '13.6T', sector: 'IT Services', why: 'Consolidating near major Fibonacci support level.', tags: ['Blue Chip'], confidence: 85, yield: '1.2%', beta: 0.72, volume: '1.2M', pe: 29.1, roe: '28.5%', trend: [3850, 3840, 3820, 3815, 3810] },
-    { id: 'HDFCBANK', name: 'HDFC Bank', price: '₹1,615.80', change: '+2.1%', isPositive: true, mcap: '12.1T', sector: 'Banking', why: 'Breakout above horizontal resistance with volume spike.', tags: ['Momentum', 'Finance'], confidence: 88, yield: '1.1%', beta: 1.04, volume: '12.2M', pe: 18.2, roe: '17.1%', trend: [1550, 1570, 1585, 1600, 1615] },
-    { id: 'INFY', name: 'Infosys Ltd', price: '₹1,540.00', change: '+0.8%', isPositive: true, mcap: '6.4T', sector: 'IT Services', why: 'Price above all major EMAs, bullish bias.', tags: ['Momentum'], confidence: 90, yield: '1.5%', beta: 1.15, volume: '2.6M', pe: 24.5, roe: '26.8%', trend: [1510, 1520, 1535, 1530, 1540] },
+    { id: 'RELIANCE', name: 'Reliance Industries', price: 'â‚¹2,942.10', change: '+1.2%', isPositive: true, mcap: '19.4T', sector: 'Energy', why: 'Strong 200-DMA support with institutional accumulation.', tags: ['Value', 'Growth'], confidence: 92, yield: '0.8%', beta: 0.95, volume: '4.4M', pe: 26.4, roe: '14.2%', trend: [2850, 2870, 2890, 2920, 2942] },
+    { id: 'TCS', name: 'Tata Consultancy Services', price: 'â‚¹3,810.50', change: '-0.4%', isPositive: false, mcap: '13.6T', sector: 'IT Services', why: 'Consolidating near major Fibonacci support level.', tags: ['Blue Chip'], confidence: 85, yield: '1.2%', beta: 0.72, volume: '1.2M', pe: 29.1, roe: '28.5%', trend: [3850, 3840, 3820, 3815, 3810] },
+    { id: 'HDFCBANK', name: 'HDFC Bank', price: 'â‚¹1,615.80', change: '+2.1%', isPositive: true, mcap: '12.1T', sector: 'Banking', why: 'Breakout above horizontal resistance with volume spike.', tags: ['Momentum', 'Finance'], confidence: 88, yield: '1.1%', beta: 1.04, volume: '12.2M', pe: 18.2, roe: '17.1%', trend: [1550, 1570, 1585, 1600, 1615] },
+    { id: 'INFY', name: 'Infosys Ltd', price: 'â‚¹1,540.00', change: '+0.8%', isPositive: true, mcap: '6.4T', sector: 'IT Services', why: 'Price above all major EMAs, bullish bias.', tags: ['Momentum'], confidence: 90, yield: '1.5%', beta: 1.15, volume: '2.6M', pe: 24.5, roe: '26.8%', trend: [1510, 1520, 1535, 1530, 1540] },
 ];
 
 const strategies = [
@@ -51,7 +51,7 @@ const strategies = [
 
 const allFilters = [
     { id: 'mcap', label: 'Market Cap', icon: BarChart3, options: ['Large', 'Mid', 'Small', 'Micro'] },
-    { id: 'price', label: 'Price', icon: Banknote, options: ['Any', '< ₹500', '₹500 - ₹2k', '> ₹2k'] },
+    { id: 'price', label: 'Price', icon: Banknote, options: ['Any', '< â‚¹500', 'â‚¹500 - â‚¹2k', '> â‚¹2k'] },
     { id: 'change', label: 'Change %', icon: TrendingUp, options: ['Any', '> 0%', '> 2%', '> 5%', '< 0%'] },
     { id: 'sector', label: 'Sector', icon: Search, options: ['All', 'IT', 'Finance', 'FMCG', 'Auto', 'Energy', 'Healthcare'] },
     { id: 'roe', label: 'ROE', icon: Activity, options: ['Any', '> 10%', '> 15%', '> 20%'] },
@@ -173,7 +173,7 @@ const AdvancedScreener = () => {
         <div className="trader-theme flex flex-col w-full min-h-screen bg-[#0b0f17] text-[#8b949e] p-4 md:p-8">
             <div className="max-w-[1700px] mx-auto w-full">
                 
-                {/* Header Section */}
+                {}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 px-2">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-2xl bg-[#42C0A5]/10 flex items-center justify-center text-[#42C0A5] border border-[#42C0A5]/20 shadow-[0_0_20px_rgba(66,192,165,0.1)]">
@@ -203,7 +203,7 @@ const AdvancedScreener = () => {
                     </div>
                 </div>
 
-                {/* Horizontal Smart Filter Hero */}
+                {}
                 <div className="bg-[#161b22] border border-[#30363d] rounded-2xl p-4 mb-8 shadow-2xl relative z-40 overflow-visible">
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="flex items-center gap-2 pr-4 border-r border-[#30363d] text-[#c9d1d9] font-bold text-sm">
@@ -282,7 +282,7 @@ const AdvancedScreener = () => {
                         </div>
                     </div>
 
-                    {/* Quick Strategies */}
+                    {}
                     <div className="mt-4 pt-4 border-t border-[#30363d] flex items-center gap-4">
                         <span className="text-[10px] font-black text-[#8b949e] uppercase tracking-[0.2em] px-2">Market Signals</span>
                         <div className="flex gap-2.5">
@@ -303,7 +303,7 @@ const AdvancedScreener = () => {
                     </div>
                 </div>
 
-                {/* Trending and Expert Sections */}
+                {}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
                     <div className="space-y-4">
                         <div className="flex items-center justify-between px-2">
@@ -363,7 +363,7 @@ const AdvancedScreener = () => {
                     </div>
                 </div>
 
-                {/* Results Table */}
+                {}
                 <div className="bg-[#161b22] border border-[#30363d] rounded-2xl overflow-hidden shadow-2xl">
                     <div className="p-5 border-b border-[#30363d] flex items-center justify-between bg-[#1c2128]">
                         <div className="flex items-center gap-4">
@@ -485,7 +485,7 @@ const AdvancedScreener = () => {
                 </div>
             </div>
 
-            {/* Modals */}
+            {}
             {showCreateModal && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCreateModal(false)} />

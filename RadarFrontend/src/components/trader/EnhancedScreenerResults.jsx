@@ -18,10 +18,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 
-/**
- * Enhanced Screener Results Table
- * Includes news, sentiment, comparison, and visualization features
- */
+
 export const EnhancedScreenerResults = ({
   results,
   loading,
@@ -135,7 +132,7 @@ export const EnhancedScreenerResults = ({
                 <div className="text-sm text-slate-300 max-w-[200px] truncate">{stock.name}</div>
               </td>
               <td className="px-4 py-3">
-                <div className="font-semibold text-white">₹{stock.price?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
+                <div className="font-semibold text-white">â‚¹{stock.price?.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>
               </td>
               <td className="px-4 py-3">
                 <div className={`flex items-center gap-1 ${stock.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>

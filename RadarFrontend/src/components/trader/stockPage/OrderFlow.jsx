@@ -50,7 +50,7 @@ export default function OrderFlow() {
             </div>
 
             <div className="flex-1 overflow-hidden flex flex-col">
-                {/* ASKS SECTION */}
+                {}
                 <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col-reverse">
                     {asks.map((item, i) => (
                         <motion.div 
@@ -64,13 +64,13 @@ export default function OrderFlow() {
                     ))}
                 </div>
 
-                {/* SPREAD INDICATOR */}
+                {}
                 <div className="py-2.5 bg-white/[0.05] border-y border-white/10 flex flex-col items-center">
                     <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Spread: 0.05 (0.002%)</span>
                     <span className="text-sm font-black text-white">2,870.15</span>
                 </div>
 
-                {/* BIDS SECTION */}
+                {}
                 <div className="flex-1 overflow-y-auto custom-scrollbar">
                     {bids.map((item, i) => (
                         <motion.div 
@@ -85,7 +85,7 @@ export default function OrderFlow() {
                 </div>
             </div>
 
-            {/* VOLUMETRIC FOOTER */}
+            {}
             <div className="p-3 bg-[#0f172a]/40 border-t border-white/10 flex justify-between">
                 <div className="flex flex-col">
                     <span className="text-[9px] text-slate-500 font-bold uppercase">Buy Vol</span>

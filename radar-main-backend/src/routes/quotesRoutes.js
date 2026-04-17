@@ -1,8 +1,4 @@
-/**
- * Real-Time Quotes Routes
- * Endpoints for getting live market data
- * Now with offline mode support
- */
+
 
 const express = require('express');
 const router = express.Router();
@@ -12,11 +8,7 @@ const finnhubService = require('../services/finnhubService');
 const twelveDataService = require('../services/twelveDataService');
 const logger = require('../utils/logger');
 
-/**
- * GET /api/quotes/:symbol
- * Get real-time quote for a symbol
- * Supports offline fallback
- */
+
 router.get('/:symbol', async (req, res) => {
   try {
     const { symbol } = req.params;
@@ -28,7 +20,6 @@ router.get('/:symbol', async (req, res) => {
       maxAge: maxAge ? parseInt(maxAge) : 60000,
     };
 
-    // Use offline fallback if enabled
     if (useOfflineFallback === 'true') {
       const result = await offlineModeService.getQuoteWithFallback(
         symbol,
@@ -46,7 +37,6 @@ router.get('/:symbol', async (req, res) => {
         timestamp: new Date(),
       });
     } else {
-      // Original behavior (no fallback)
       const result = await freeApiAggregator.getQuote(symbol, options);
 
       if (result.success) {
@@ -75,10 +65,7 @@ router.get('/:symbol', async (req, res) => {
   }
 });
 
-/**
- * POST /api/quotes/batch
- * Get quotes for multiple symbols
- */
+
 router.post('/batch', async (req, res) => {
   try {
     const { symbols, source, skipCache } = req.body;
@@ -124,10 +111,7 @@ router.post('/batch', async (req, res) => {
   }
 });
 
-/**
- * GET /api/quotes/stats
- * Get aggregator statistics
- */
+
 router.get('/stats/all', async (req, res) => {
   try {
     const stats = freeApiAggregator.getStats();
@@ -146,10 +130,7 @@ router.get('/stats/all', async (req, res) => {
   }
 });
 
-/**
- * POST /api/quotes/stats/reset
- * Reset statistics
- */
+
 router.post('/stats/reset', (req, res) => {
   try {
     freeApiAggregator.resetStats();
@@ -168,10 +149,7 @@ router.post('/stats/reset', (req, res) => {
   }
 });
 
-/**
- * GET /api/quotes/test/connections
- * Test all API connections
- */
+
 router.get('/test/connections', async (req, res) => {
   try {
     const results = await freeApiAggregator.testAllConnections();
@@ -193,10 +171,7 @@ router.get('/test/connections', async (req, res) => {
   }
 });
 
-/**
- * GET /api/quotes/ratelimits
- * Get rate limit status for all APIs
- */
+
 router.get('/ratelimits', (req, res) => {
   try {
     const limits = {

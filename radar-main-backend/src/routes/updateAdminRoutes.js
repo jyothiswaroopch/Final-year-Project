@@ -1,7 +1,4 @@
-/**
- * Admin Routes for Incremental Updates
- * Endpoints to manage auto-updates and cron jobs
- */
+
 
 const express = require('express');
 const router = express.Router();
@@ -10,10 +7,7 @@ const incrementalUpdateService = require('../services/incrementalUpdateService')
 const marketHoursService = require('../services/marketHoursService');
 const logger = require('../utils/logger');
 
-/**
- * GET /api/admin/update-status
- * Get current update status and statistics
- */
+
 router.get('/update-status', (req, res) => {
   try {
     const status = dataUpdateCron.getStatus();
@@ -31,10 +25,7 @@ router.get('/update-status', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/trigger-update
- * Manually trigger an incremental update
- */
+
 router.post('/trigger-update', async (req, res) => {
   try {
     const { symbols, timeframe, force } = req.body;
@@ -62,10 +53,7 @@ router.post('/trigger-update', async (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/update-symbol
- * Update a specific symbol
- */
+
 router.post('/update-symbol', async (req, res) => {
   try {
     const { symbol, timeframe = '1d' } = req.body;
@@ -96,10 +84,7 @@ router.post('/update-symbol', async (req, res) => {
   }
 });
 
-/**
- * GET /api/admin/market-status
- * Get current market status (NSE/BSE)
- */
+
 router.get('/market-status', (req, res) => {
   try {
     const status = marketHoursService.getMarketStatus();
@@ -122,10 +107,7 @@ router.get('/market-status', (req, res) => {
   }
 });
 
-/**
- * GET /api/admin/update-stats
- * Get update statistics
- */
+
 router.get('/update-stats', (req, res) => {
   try {
     const stats = incrementalUpdateService.getStats();
@@ -143,10 +125,7 @@ router.get('/update-stats', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/reset-stats
- * Reset update statistics
- */
+
 router.post('/reset-stats', (req, res) => {
   try {
     incrementalUpdateService.resetStats();
@@ -164,10 +143,7 @@ router.post('/reset-stats', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/start-cron
- * Start the cron job
- */
+
 router.post('/start-cron', (req, res) => {
   try {
     dataUpdateCron.start();
@@ -185,10 +161,7 @@ router.post('/start-cron', (req, res) => {
   }
 });
 
-/**
- * POST /api/admin/stop-cron
- * Stop the cron job
- */
+
 router.post('/stop-cron', (req, res) => {
   try {
     dataUpdateCron.stop();

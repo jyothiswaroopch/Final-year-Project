@@ -1,7 +1,4 @@
-/**
- * Data Update Cron Job
- * Runs incremental updates every 5 minutes during market hours
- */
+
 
 const cron = require('node-cron');
 const incrementalUpdateService = require('./incrementalUpdateService');
@@ -15,9 +12,7 @@ class DataUpdateCron {
     this.cronExpression = '*/5 * * * *'; // Every 5 minutes
   }
 
-  /**
-   * Initialize and start the cron job
-   */
+  
   start() {
     if (this.isInitialized) {
       logger.warn('Data update cron already initialized');
@@ -26,7 +21,6 @@ class DataUpdateCron {
 
     logger.info('Initializing data update cron job...');
 
-    // Schedule: Every 5 minutes
     this.cronJob = cron.schedule(this.cronExpression, async () => {
       await this.runUpdate();
     }, {
@@ -40,15 +34,12 @@ class DataUpdateCron {
       timezone: 'Asia/Kolkata',
     });
 
-    // Run initial update on startup if market is open
     setTimeout(() => {
       this.runInitialUpdate();
     }, 5000); // Wait 5 seconds after server start
   }
 
-  /**
-   * Stop the cron job
-   */
+  
   stop() {
     if (this.cronJob) {
       this.cronJob.stop();
@@ -57,9 +48,7 @@ class DataUpdateCron {
     }
   }
 
-  /**
-   * Run the update process
-   */
+  
   async runUpdate() {
     try {
       const marketStatus = marketHoursService.getMarketStatus();
@@ -70,13 +59,11 @@ class DataUpdateCron {
         currentTime: marketStatus.currentTime,
       });
 
-      // Only run if market should be fetching data
       if (!marketStatus.shouldFetchUpdates) {
         logger.info('Cron: Market closed - skipping update');
         return;
       }
 
-      // Check if enough time has passed since last update
       if (!incrementalUpdateService.isUpdateNeeded(5)) {
         logger.info('Cron: Recent update exists - skipping');
         return;
@@ -101,9 +88,7 @@ class DataUpdateCron {
     }
   }
 
-  /**
-   * Run initial update on server startup
-   */
+  
   async runInitialUpdate() {
     try {
       const marketStatus = marketHoursService.getMarketStatus();
@@ -133,10 +118,7 @@ class DataUpdateCron {
     }
   }
 
-  /**
-   * Get cron status
-   * @returns {Object}
-   */
+  
   getStatus() {
     return {
       isRunning: this.isInitialized && this.cronJob !== null,
@@ -147,11 +129,7 @@ class DataUpdateCron {
     };
   }
 
-  /**
-   * Manually trigger an update
-   * @param {Object} options 
-   * @returns {Promise<Object>}
-   */
+  
   async triggerManualUpdate(options = {}) {
     logger.info('Manual update triggered');
     return await incrementalUpdateService.forceUpdate(options);

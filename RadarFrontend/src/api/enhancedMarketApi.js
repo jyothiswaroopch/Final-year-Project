@@ -1,26 +1,9 @@
 import { fetchOHLCData, fetchOHLCForChart, fetchPriceHistory, hasOHLCData } from './ohlcApi';
 import { fetchMarketHistory } from './marketApi';
 
-/**
- * Enhanced Market History API
- * This provides a unified interface that:
- * 1. First tries to fetch from local OHLC storage (fast, no API limits)
- * 2. Falls back to external APIs if data not available
- * 
- * Benefits:
- * - 10x faster for stored symbols
- * - No external API rate limits for cached data
- * - Automatic fallback ensures data availability
- */
 
-/**
- * Fetch market history with intelligent data source selection
- * @param {string} symbol - Stock symbol
- * @param {string} type - Asset type ('STOCK', 'CRYPTO', 'FOREX')
- * @param {string} interval - Time interval ('1D', '1H', '15M', '5M')
- * @param {object} options - Additional options
- * @returns {Promise} Historical data with indicators
- */
+
+
 export const fetchEnhancedMarketHistory = async (
     symbol,
     type = 'STOCK',
@@ -28,9 +11,7 @@ export const fetchEnhancedMarketHistory = async (
     options = {}
 ) => {
     try {
-        // Only use OHLC storage for stocks
         if (type === 'STOCK') {
-            // Map interval to timeframe
             const timeframeMap = {
                 '1D': '1d',
                 '1H': '1h',
@@ -41,7 +22,6 @@ export const fetchEnhancedMarketHistory = async (
 
             const timeframe = timeframeMap[interval] || '1d';
 
-            // Try to fetch from OHLC storage first
             console.log(`[Enhanced] Attempting OHLC fetch for ${symbol} (${timeframe})`);
             
             const ohlcResult = await fetchOHLCData(symbol, {
@@ -51,11 +31,9 @@ export const fetchEnhancedMarketHistory = async (
                 ...options,
             });
 
-            // If we got data from OHLC storage, use it
             if (ohlcResult.data && ohlcResult.data.length > 0) {
-                console.log(`[Enhanced] ✅ Using OHLC data (${ohlcResult.count} records)`);
+                console.log(`[Enhanced] âœ… Using OHLC data (${ohlcResult.count} records)`);
 
-                // Format to match existing API structure
                 const formattedData = ohlcResult.data.map(candle => ({
                     timestamp: candle.timestamp,
                     open: candle.open,
@@ -73,10 +51,9 @@ export const fetchEnhancedMarketHistory = async (
                 };
             }
 
-            console.log(`[Enhanced] ⚠️ No OHLC data found, falling back to external API`);
+            console.log(`[Enhanced] âš ï¸ No OHLC data found, falling back to external API`);
         }
 
-        // Fallback to existing market API (external sources)
         console.log(`[Enhanced] Using external API for ${symbol}`);
         const result = await fetchMarketHistory(symbol, type, interval);
 
@@ -88,7 +65,6 @@ export const fetchEnhancedMarketHistory = async (
     } catch (error) {
         console.error('[Enhanced] Error fetching market history:', error);
         
-        // Final fallback: try external API
         try {
             console.log(`[Enhanced] Attempting fallback to external API`);
             const fallbackResult = await fetchMarketHistory(symbol, type, interval);
@@ -104,12 +80,7 @@ export const fetchEnhancedMarketHistory = async (
     }
 };
 
-/**
- * Fetch chart data with automatic source selection
- * @param {string} symbol - Stock symbol
- * @param {object} options - Chart options
- * @returns {Promise} Chart-ready data
- */
+
 export const fetchEnhancedChartData = async (symbol, options = {}) => {
     const {
         type = 'STOCK',
@@ -118,7 +89,6 @@ export const fetchEnhancedChartData = async (symbol, options = {}) => {
     } = options;
 
     try {
-        // For stocks, try OHLC first
         if (type === 'STOCK') {
             const timeframeMap = {
                 '1D': '1d',
@@ -136,12 +106,11 @@ export const fetchEnhancedChartData = async (symbol, options = {}) => {
             });
 
             if (chartData && chartData.length > 0) {
-                console.log(`[Chart] ✅ Using OHLC storage (${chartData.length} points)`);
+                console.log(`[Chart] âœ… Using OHLC storage (${chartData.length} points)`);
                 return chartData;
             }
         }
 
-        // Fallback to external API
         console.log(`[Chart] Using external API for ${symbol}`);
         const result = await fetchMarketHistory(symbol, type, interval);
         
@@ -152,15 +121,9 @@ export const fetchEnhancedChartData = async (symbol, options = {}) => {
     }
 };
 
-/**
- * Get simple price history for line charts
- * @param {string} symbol - Stock symbol
- * @param {number} days - Number of days (default: 30)
- * @returns {Promise} Price history array
- */
+
 export const fetchSimplePriceHistory = async (symbol, days = 30) => {
     try {
-        // Try OHLC first
         const priceHistory = await fetchPriceHistory(symbol, {
             exchange: 'NSE',
             timeframe: '1d',
@@ -168,11 +131,10 @@ export const fetchSimplePriceHistory = async (symbol, days = 30) => {
         });
 
         if (priceHistory && priceHistory.length > 0) {
-            console.log(`[Price] ✅ Using OHLC storage (${priceHistory.length} days)`);
+            console.log(`[Price] âœ… Using OHLC storage (${priceHistory.length} days)`);
             return priceHistory;
         }
 
-        // Fallback to external API
         console.log(`[Price] Using external API`);
         const result = await fetchMarketHistory(symbol, 'STOCK', '1D');
         
@@ -189,11 +151,7 @@ export const fetchSimplePriceHistory = async (symbol, days = 30) => {
     }
 };
 
-/**
- * Check if we have cached data for a symbol
- * @param {string} symbol - Stock symbol
- * @returns {Promise<boolean>} True if cached data exists
- */
+
 export const hasCachedData = async (symbol) => {
     try {
         return await hasOHLCData(symbol, 'NSE');
@@ -202,11 +160,7 @@ export const hasCachedData = async (symbol) => {
     }
 };
 
-/**
- * Get data freshness info
- * @param {string} symbol - Stock symbol
- * @returns {Promise} Freshness info
- */
+
 export const getDataFreshness = async (symbol) => {
     try {
         const hasCached = await hasCachedData(symbol);
@@ -218,7 +172,6 @@ export const getDataFreshness = async (symbol) => {
             };
         }
 
-        // Get latest data timestamp
         const latestResult = await fetchOHLCData(symbol, {
             exchange: 'NSE',
             timeframe: '1d',

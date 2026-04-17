@@ -9,11 +9,7 @@ import {
     fetchOfflineStatus,
 } from '../api/adminApi';
 
-/**
- * Custom hook for monitoring auto-update system (Sprint 1)
- * @param {number} refreshInterval - Auto-refresh interval (default: 10s)
- * @returns {object} { status, stats, marketStatus, loading, error, refetch }
- */
+
 export const useAutoUpdateStatus = (refreshInterval = 10000) => {
     const [status, setStatus] = useState(null);
     const [stats, setStats] = useState(null);
@@ -58,18 +54,13 @@ export const useAutoUpdateStatus = (refreshInterval = 10000) => {
         loading,
         error,
         refetch: fetchData,
-        // Convenience accessors
         isRunning: status?.cronRunning || false,
         isMarketOpen: marketStatus?.isOpen || false,
         lastUpdate: status?.lastUpdate || null,
     };
 };
 
-/**
- * Custom hook for monitoring smart refresh system (Sprint 3)
- * @param {number} refreshInterval - Auto-refresh interval (default: 15s)
- * @returns {object} { status, stats, loading, error, refetch }
- */
+
 export const useSmartRefreshStatus = (refreshInterval = 15000) => {
     const [status, setStatus] = useState(null);
     const [stats, setStats] = useState(null);
@@ -110,17 +101,12 @@ export const useSmartRefreshStatus = (refreshInterval = 15000) => {
         loading,
         error,
         refetch: fetchData,
-        // Convenience accessors
         isRunning: status?.running || false,
         tiers: status?.tiers || {},
     };
 };
 
-/**
- * Custom hook for monitoring cache performance (Sprint 4)
- * @param {number} refreshInterval - Auto-refresh interval (default: 10s)
- * @returns {object} { stats, loading, error, refetch }
- */
+
 export const useCacheStatus = (refreshInterval = 10000) => {
     const [stats, setStats] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -154,17 +140,12 @@ export const useCacheStatus = (refreshInterval = 10000) => {
         loading,
         error,
         refetch: fetchData,
-        // Convenience accessors
         hitRate: stats?.overall?.hitRate || 0,
         totalKeys: stats?.overall?.totalKeys || 0,
     };
 };
 
-/**
- * Custom hook for monitoring offline mode status (Sprint 4)
- * @param {number} refreshInterval - Auto-refresh interval (default: 5s)
- * @returns {object} { status, loading, error, refetch }
- */
+
 export const useOfflineStatus = (refreshInterval = 5000) => {
     const [status, setStatus] = useState(null);
     const [loading, setLoading] = useState(false);
@@ -198,19 +179,13 @@ export const useOfflineStatus = (refreshInterval = 5000) => {
         loading,
         error,
         refetch: fetchData,
-        // Convenience accessors
         isOnline: status?.isOnline || false,
         failureCount: status?.consecutiveFailures || 0,
         lastFailure: status?.lastFailure || null,
     };
 };
 
-/**
- * Combined hook for complete system status
- * Monitors all Phase 2 systems in one hook
- * @param {number} refreshInterval - Auto-refresh interval (default: 15s)
- * @returns {object} Complete system status
- */
+
 export const useSystemStatus = (refreshInterval = 15000) => {
     const autoUpdate = useAutoUpdateStatus(refreshInterval);
     const smartRefresh = useSmartRefreshStatus(refreshInterval);
@@ -226,14 +201,12 @@ export const useSystemStatus = (refreshInterval = 15000) => {
             return 'error';
         }
 
-        // Check if critical systems are running
         const criticalSystemsUp = 
             offline.isOnline &&
             autoUpdate.isRunning &&
             smartRefresh.isRunning;
 
         if (criticalSystemsUp) {
-            // Check cache performance
             const cacheHealthy = cache.hitRate >= 0.7; // 70% threshold
             return cacheHealthy ? 'healthy' : 'degraded';
         }
@@ -252,7 +225,6 @@ export const useSystemStatus = (refreshInterval = 15000) => {
         cache,
         offline,
         overallHealth,
-        // Convenience accessors
         allSystemsOperational: overallHealth === 'healthy',
         hasErrors: autoUpdate.error || smartRefresh.error || cache.error || offline.error,
     };

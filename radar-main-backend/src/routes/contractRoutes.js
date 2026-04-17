@@ -110,7 +110,6 @@ const summarizePortfolio = async (portfolio) => {
     };
 };
 
-// Auth & User
 router.post('/auth/register', registerUser);
 router.post('/auth/login', loginUser);
 router.post('/auth/logout', ...ensureAuth(async (_req, res) => {
@@ -414,7 +413,6 @@ router.delete('/user/watchlists/:id/symbols/:symbol', ...ensureAuth(async (req, 
     return res.json({ success: true, data: req.user.watchlist });
 }));
 
-// Notifications & Alerts
 router.get('/user/notifications', ...ensureAuth(async (req, res) => {
     const rows = await Notification.find({ user: req.user._id }).sort({ createdAt: -1 }).limit(100);
     return res.json({ success: true, data: rows });
@@ -529,7 +527,6 @@ router.get('/alerts/history', ...ensureAuth(async (req, res) => {
     return res.json({ success: true, data: rows });
 }));
 
-// Market Data & Search
 router.get('/market/summary', async (_req, res) => {
     const [stocks, crypto, forex] = await Promise.all([
         fetchStockData().catch(() => []),
@@ -717,7 +714,6 @@ router.get('/market/momentum', async (_req, res) => {
     });
 });
 
-// Technical Analytics Engine
 router.get('/technical/:symbol/indicators', async (req, res) => {
     try {
         const data = await getTechnicalIndicators('stock', normalizeSymbol(req.params.symbol), '1D', {});
@@ -830,7 +826,6 @@ router.get('/discovery/patterns/double-bottom', async (_req, res) => {
     return res.json({ success: true, data: detected });
 });
 
-// Fundamental & Macro
 router.get('/fundamental/:symbol/valuation', async (req, res) => {
     const symbol = normalizeSymbol(req.params.symbol);
     const rows = await fetchStockData().catch(() => []);
@@ -944,7 +939,6 @@ router.get('/macro/worldbank/:indicator', async (req, res) => {
     });
 });
 
-// News
 router.get('/news/general', async (_req, res) => {
     const rows = await fetchMarketNews('general');
     return res.json({ success: true, data: rows });
@@ -965,7 +959,6 @@ router.get('/news/asset/:symbol', async (req, res) => {
     }
 });
 
-// System, Exports & WebSocket
 router.get('/health', async (_req, res) => {
     return res.json({
         success: true,

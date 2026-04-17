@@ -35,7 +35,6 @@ const ProfileDropdown = ({
     localStorage.setItem("mode", mode);
   }, [mode]);
 
-  // Calculate position based on avatar element
   useEffect(() => {
     if (!isOpen || !avatarRef?.current) return;
 
@@ -47,12 +46,10 @@ const ProfileDropdown = ({
 
       let left = rect.right - dropdownWidth;
       
-      // Ensure dropdown doesn't go off-screen on left side
       if (left < padding) {
         left = padding;
       }
       
-      // Ensure dropdown doesn't go off-screen on right side
       if (left + dropdownWidth + padding > viewportWidth) {
         left = viewportWidth - dropdownWidth - padding;
       }
@@ -73,7 +70,6 @@ const ProfileDropdown = ({
     };
   }, [isOpen, avatarRef]);
 
-  // Close on outside click
   useEffect(() => {
     if (!isOpen) return;
 
@@ -128,7 +124,7 @@ const ProfileDropdown = ({
         pointerEvents: "auto"
       }}
     >
-      {/* Profile Header */}
+      {}
       <div className="dropdown-profile-header">
         <div className="dropdown-profile-avatar">
           {userInitial}
@@ -141,7 +137,7 @@ const ProfileDropdown = ({
 
       <div className="profile-divider" />
 
-      {/* Menu Items */}
+      {}
       <div className="dropdown-menu-list">
         <button
           type="button"
@@ -186,7 +182,7 @@ const ProfileDropdown = ({
 
       <div className="profile-divider" />
 
-      {/* Mode Toggle */}
+      {}
       <div className="dropdown-interface-section">
         <p className="dropdown-interface-title">CHOOSE YOUR INTERFACE</p>
         <div className="dropdown-toggle-group" role="tablist" aria-label="Choose your interface">
@@ -209,7 +205,7 @@ const ProfileDropdown = ({
 
       <div className="profile-divider" />
 
-      {/* Sign Out */}
+      {}
       <button 
         type="button" 
         onClick={() => {

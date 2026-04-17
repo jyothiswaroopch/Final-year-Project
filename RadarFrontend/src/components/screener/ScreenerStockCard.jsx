@@ -115,12 +115,12 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
       }`}
       onClick={onSelect}
     >
-      {/* Background Gradient */}
+      {}
       <div
         className={`absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity bg-gradient-to-br ${signalClasses.hoverGlow} to-transparent pointer-events-none`}
       />
 
-      {/* Selection Checkbox */}
+      {}
       <div className="absolute top-3 right-3 z-10">
         <div
           className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${
@@ -134,7 +134,7 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
       </div>
 
       <div className="p-4 relative z-1">
-        {/* Header */}
+        {}
         <div className="flex items-start justify-between mb-3">
           <div>
             <div className="flex items-center gap-2">
@@ -150,10 +150,10 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
           </div>
         </div>
 
-        {/* Price Section */}
+        {}
         <div className="mb-4 pb-4 border-b border-slate-700/50">
           <div className="flex items-baseline justify-between mb-2">
-            <div className="text-3xl font-bold text-white">₹{stock.price.toFixed(2)}</div>
+            <div className="text-3xl font-bold text-white">â‚¹{stock.price.toFixed(2)}</div>
             <div
               className={`flex items-center gap-1 text-lg font-bold ${
                 isPositive ? 'text-emerald-400' : 'text-rose-400'
@@ -170,7 +170,7 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
           </p>
         </div>
 
-        {/* Chart */}
+        {}
         <div className="mb-4 h-12 -mx-4 px-0">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
@@ -186,25 +186,25 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
           </ResponsiveContainer>
         </div>
 
-        {/* Entry Target Stop */}
+        {}
         <div className="mb-4 pb-4 border-b border-slate-700/50">
           <div className="grid grid-cols-3 gap-2 text-xs">
             <div>
               <p className="text-slate-500 uppercase tracking-wide">Entry</p>
-              <p className="text-slate-100 font-semibold">₹{Number(stock.entry || stock.price).toFixed(2)}</p>
+              <p className="text-slate-100 font-semibold">â‚¹{Number(stock.entry || stock.price).toFixed(2)}</p>
             </div>
             <div>
               <p className="text-slate-500 uppercase tracking-wide">Target</p>
-              <p className="text-slate-100 font-semibold">₹{Number(stock.target || stock.price).toFixed(2)}</p>
+              <p className="text-slate-100 font-semibold">â‚¹{Number(stock.target || stock.price).toFixed(2)}</p>
             </div>
             <div>
               <p className="text-slate-500 uppercase tracking-wide">Stop Loss</p>
-              <p className="text-slate-100 font-semibold">₹{Number(stock.stopLoss || stock.price).toFixed(2)}</p>
+              <p className="text-slate-100 font-semibold">â‚¹{Number(stock.stopLoss || stock.price).toFixed(2)}</p>
             </div>
           </div>
         </div>
 
-        {/* Signal Info */}
+        {}
         <div className="mb-4 pb-4 border-b border-slate-700/50">
           <p className="text-xs text-slate-400 mb-1">Research Signal</p>
           <p className="text-xs text-slate-200">{stock.signalType}</p>
@@ -230,9 +230,9 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
           </div>
         </div>
 
-        {/* Metrics Grid */}
+        {}
         <div className="grid grid-cols-2 gap-2 mb-4">
-          {/* RSI */}
+          {}
           <div className="bg-slate-900/50 rounded p-2 border border-slate-700/30">
             <p className="text-xs text-slate-400 mb-1">RSI</p>
             <p className={`text-sm font-bold ${
@@ -246,13 +246,13 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
             </p>
           </div>
 
-          {/* P/E */}
+          {}
           <div className="bg-slate-900/50 rounded p-2 border border-slate-700/30">
             <p className="text-xs text-slate-400 mb-1">P/E Ratio</p>
             <p className="text-sm font-bold text-slate-300">{stock.pe.toFixed(1)}</p>
           </div>
 
-          {/* Sentiment */}
+          {}
           <div className="bg-slate-900/50 rounded p-2 border border-slate-700/30">
             <p className="text-xs text-slate-400 mb-1">Sentiment</p>
             <p className={`text-sm font-bold ${
@@ -266,14 +266,14 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
             </p>
           </div>
 
-          {/* Strength */}
+          {}
           <div className="bg-slate-900/50 rounded p-2 border border-slate-700/30">
             <p className="text-xs text-slate-400 mb-1">Research Score</p>
             <p className="text-sm font-bold text-cyan-300">{stock.strength}</p>
           </div>
         </div>
 
-        {/* Volume & Sector */}
+        {}
         <div className="flex items-center justify-between text-xs text-slate-400 mb-3">
           <span>Volume: {(stock.volume / 1000000).toFixed(1)}M</span>
           <span className="px-2 py-1 bg-slate-700/50 rounded">{stock.sector}</span>
@@ -284,7 +284,7 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
           <span className="text-cyan-300 font-semibold">{stock.strength}</span>
         </div>
 
-        {/* Action Button */}
+        {}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -297,7 +297,7 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
         </button>
       </div>
 
-      {/* Hover Effect Border */}
+      {}
       <div
         className={`absolute inset-0 rounded-xl border border-transparent ${signalClasses.hoverBorder} transition-colors pointer-events-none`}
       />

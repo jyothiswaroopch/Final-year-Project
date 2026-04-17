@@ -19,17 +19,7 @@ import {
   Clock,
 } from 'lucide-react';
 
-/**
- * REAL-TIME MARKET SCANNER
- * 
- * TradingView-style real-time scanner with:
- * - Live price/volume breakout detection
- * - Technical pattern recognition (Head & Shoulders, Triangles, etc.)
- * - Custom alert conditions
- * - Real-time WebSocket updates
- * - Sound/desktop notifications
- * - Auto-refresh scanning
- */
+
 
 const SCAN_TYPES = [
   { 
@@ -116,12 +106,10 @@ const RealTimeScanner = () => {
   const scanTimerRef = useRef(null);
   const audioRef = useRef(null);
 
-  // Initialize audio
   useEffect(() => {
     audioRef.current = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhGh+u4P6jYB8IQZzW6bRJIA==');
   }, []);
 
-  // Toggle scan type
   const toggleScanType = useCallback((scanTypeId) => {
     setActiveScanTypes(prev => 
       prev.includes(scanTypeId)
@@ -130,15 +118,12 @@ const RealTimeScanner = () => {
     );
   }, []);
 
-  // Perform scan
   const performScan = useCallback(async () => {
     try {
       setLastScanTime(new Date());
       
-      // Mock scanning logic (replace with actual API call)
       const newAlerts = [];
       
-      // Simulate alerts based on active scan types
       activeScanTypes.forEach(scanType => {
         if (Math.random() > 0.7) { // 30% chance of alert
           const mockStocks = ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK', 'SBIN'];
@@ -164,12 +149,10 @@ const RealTimeScanner = () => {
       if (newAlerts.length > 0) {
         setAlerts(prev => [...newAlerts, ...prev].slice(0, 100)); // Keep last 100 alerts
         
-        // Play sound
         if (soundEnabled && audioRef.current) {
           audioRef.current.play().catch(() => {});
         }
         
-        // Show desktop notification
         if (desktopNotifications && 'Notification' in window && Notification.permission === 'granted') {
           new Notification('RADAR Scanner Alert', {
             body: `${newAlerts.length} new alert${newAlerts.length > 1 ? 's' : ''} detected!`,
@@ -182,11 +165,10 @@ const RealTimeScanner = () => {
     }
   }, [activeScanTypes, soundEnabled, desktopNotifications]);
 
-  // Generate alert message
   const generateAlertMessage = (scanType, symbol) => {
     const messages = {
-      'price-breakout': `${symbol} breaking above resistance at ₹{price}`,
-      'price-breakdown': `${symbol} breaking below support at ₹{price}`,
+      'price-breakout': `${symbol} breaking above resistance at â‚¹{price}`,
+      'price-breakdown': `${symbol} breaking below support at â‚¹{price}`,
       'volume-spike': `${symbol} volume spike: 2.5x average`,
       'rsi-extreme': `${symbol} RSI at 75 (overbought)`,
       'gap-up': `${symbol} gapped up 3.2% at open`,
@@ -199,7 +181,6 @@ const RealTimeScanner = () => {
     return messages[scanType] || `Alert for ${symbol}`;
   };
 
-  // Start scanning
   const startScanning = useCallback(() => {
     setIsScanning(true);
     performScan(); // Initial scan
@@ -209,7 +190,6 @@ const RealTimeScanner = () => {
     }, scanInterval * 1000);
   }, [performScan, scanInterval]);
 
-  // Stop scanning
   const stopScanning = useCallback(() => {
     setIsScanning(false);
     if (scanTimerRef.current) {
@@ -218,14 +198,12 @@ const RealTimeScanner = () => {
     }
   }, []);
 
-  // Request notification permission
   const requestNotificationPermission = useCallback(async () => {
     if ('Notification' in window && Notification.permission === 'default') {
       await Notification.requestPermission();
     }
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       if (scanTimerRef.current) {
@@ -234,7 +212,6 @@ const RealTimeScanner = () => {
     };
   }, []);
 
-  // Request notification permission on mount
   useEffect(() => {
     requestNotificationPermission();
   }, [requestNotificationPermission]);
@@ -250,7 +227,7 @@ const RealTimeScanner = () => {
 
   return (
     <div className="h-full bg-slate-950 flex flex-col">
-      {/* Header */}
+      {}
       <div className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-slate-800">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600">
@@ -277,7 +254,7 @@ const RealTimeScanner = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Scan Control */}
+          {}
           <button
             onClick={isScanning ? stopScanning : startScanning}
             disabled={activeScanTypes.length === 0}
@@ -300,7 +277,7 @@ const RealTimeScanner = () => {
             )}
           </button>
 
-          {/* Settings */}
+          {}
           <button
             onClick={() => setShowSettings(!showSettings)}
             className="p-3 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all"
@@ -308,7 +285,7 @@ const RealTimeScanner = () => {
             <Settings className="w-5 h-5" />
           </button>
 
-          {/* Alerts Count */}
+          {}
           <div className="px-4 py-3 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 flex items-center gap-2">
             <Bell className="w-5 h-5" />
             <span className="font-semibold">{alerts.length}</span>
@@ -317,7 +294,7 @@ const RealTimeScanner = () => {
       </div>
 
       <div className="flex-1 flex overflow-hidden">
-        {/* Scan Types Sidebar */}
+        {}
         <div className="w-80 bg-slate-900 border-r border-slate-800 p-4 overflow-y-auto">
           <div className="mb-4">
             <h3 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">
@@ -359,7 +336,7 @@ const RealTimeScanner = () => {
           </div>
         </div>
 
-        {/* Alerts List */}
+        {}
         <div className="flex-1 overflow-y-auto p-6">
           {alerts.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
@@ -417,7 +394,7 @@ const RealTimeScanner = () => {
                           <div className="text-sm opacity-80">{alert.message}</div>
                           
                           <div className="flex items-center gap-4 mt-2 text-xs opacity-70">
-                            <span>₹{alert.price.toFixed(2)}</span>
+                            <span>â‚¹{alert.price.toFixed(2)}</span>
                             <span>Vol: {(alert.volume / 1000000).toFixed(2)}M</span>
                             <span>{alert.timestamp.toLocaleTimeString()}</span>
                           </div>
@@ -436,7 +413,7 @@ const RealTimeScanner = () => {
         </div>
       </div>
 
-      {/* Settings Modal */}
+      {}
       <AnimatePresence>
         {showSettings && (
           <motion.div
@@ -456,7 +433,7 @@ const RealTimeScanner = () => {
               <h3 className="text-xl font-bold text-white mb-4">Scanner Settings</h3>
               
               <div className="space-y-4">
-                {/* Scan Interval */}
+                {}
                 <div>
                   <label className="text-sm font-semibold text-slate-300 mb-2 block">
                     Scan Interval
@@ -473,7 +450,7 @@ const RealTimeScanner = () => {
                   </select>
                 </div>
 
-                {/* Sound Notifications */}
+                {}
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-slate-300">Sound Alerts</span>
                   <button
@@ -490,7 +467,7 @@ const RealTimeScanner = () => {
                   </button>
                 </div>
 
-                {/* Desktop Notifications */}
+                {}
                 <div className="flex items-center justify-between">
                   <span className="text-sm font-semibold text-slate-300">Desktop Notifications</span>
                   <button

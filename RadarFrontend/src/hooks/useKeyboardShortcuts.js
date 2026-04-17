@@ -1,23 +1,10 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-/**
- * Keyboard shortcuts for watchlist navigation
- * 
- * Shortcuts:
- * - j/k: Navigate down/up in the stock list
- * - Enter: Open stock details
- * - /: Focus search
- * - Esc: Close panels/modals
- * - 1-5: Switch between filter tabs
- * - e: Export watchlist (Ctrl/Cmd+E)
- * - n: Toggle news filter
- * - c: Toggle compact view
- */
+
 
 export const useKeyboardShortcuts = (callbacks = {}) => {
   const callbacksRef = useRef(callbacks);
 
-  // Update callbacks ref when they change
   useEffect(() => {
     callbacksRef.current = callbacks;
   }, [callbacks]);
@@ -26,7 +13,6 @@ export const useKeyboardShortcuts = (callbacks = {}) => {
     const target = event.target;
     const callbacks = callbacksRef.current;
 
-    // Ignore if typing in input/textarea (except Esc)
     if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
       if (event.key === 'Escape') {
         if (target.type === 'search' || target.type === 'text') {
@@ -39,7 +25,6 @@ export const useKeyboardShortcuts = (callbacks = {}) => {
 
     const { key, ctrlKey, metaKey } = event;
 
-    // Navigation shortcuts
     switch (key.toLowerCase()) {
       case 'j':
         event.preventDefault();

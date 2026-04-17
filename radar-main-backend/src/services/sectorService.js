@@ -85,7 +85,12 @@ const computeReturnFromHistory = (history) => {
 };
 
 const getSectorPerformance = async (period = '1y') => {
-    const stocks = await fetchStockData();
+    let stocks = [];
+    try {
+        stocks = await fetchStockData();
+    } catch (_error) {
+        return buildFallbackPerformance(period).sort((a, b) => b.return - a.return);
+    }
 
     if (!Array.isArray(stocks) || stocks.length === 0) {
         return buildFallbackPerformance(period).sort((a, b) => b.return - a.return);

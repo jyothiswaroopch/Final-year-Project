@@ -8,9 +8,9 @@ const mockSparklineNegative = Array.from({ length: 15 }, () => ({ value: 100 - M
 const MOCK_WATCHLIST_EMPTY = false; // Set to true to view empty state
 
 const mockAttentionStocks = [
-    { id: 'att-1', name: 'HDFC Bank', price: '₹1,620', change: '+3.2%', isPositive: true, sparkline: mockSparklinePositive, tagTop: 'User Alert Reached', tagTopColor: 'amber', insight: 'Price just dropped below your manual alert target of ₹1,650.' },
-    { id: 'att-2', name: 'TCS', price: '₹3,548', change: '-2.1%', isPositive: false, sparkline: mockSparklineNegative, tagTop: 'Support Broken', tagTopColor: 'rose', insight: 'Price crossed below the ₹3,600 technical 200-day moving average.' },
-    { id: 'att-3', name: 'Reliance', price: '₹2,672', change: '+1.8%', isPositive: true, sparkline: mockSparklinePositive, tagTop: 'Earnings Today', tagTopColor: 'blue', insight: 'Q4 Financial Results scheduled to be released after market close.' },
+    { id: 'att-1', name: 'HDFC Bank', price: 'â‚¹1,620', change: '+3.2%', isPositive: true, sparkline: mockSparklinePositive, tagTop: 'User Alert Reached', tagTopColor: 'amber', insight: 'Price just dropped below your manual alert target of â‚¹1,650.' },
+    { id: 'att-2', name: 'TCS', price: 'â‚¹3,548', change: '-2.1%', isPositive: false, sparkline: mockSparklineNegative, tagTop: 'Support Broken', tagTopColor: 'rose', insight: 'Price crossed below the â‚¹3,600 technical 200-day moving average.' },
+    { id: 'att-3', name: 'Reliance', price: 'â‚¹2,672', change: '+1.8%', isPositive: true, sparkline: mockSparklinePositive, tagTop: 'Earnings Today', tagTopColor: 'blue', insight: 'Q4 Financial Results scheduled to be released after market close.' },
 ];
 
 const mockRecentChanges = [
@@ -21,7 +21,7 @@ const mockRecentChanges = [
 
 const mockWatchlistGrid = [
     {
-        id: 'wl-1', name: 'INFY', price: '₹1,520', changeToday: '+1.2%', changeTotal: '+1.12%', isPositive: true, sparkline: mockSparklinePositive,
+        id: 'wl-1', name: 'INFY', price: 'â‚¹1,520', changeToday: '+1.2%', changeTotal: '+1.12%', isPositive: true, sparkline: mockSparklinePositive,
         sector: 'IT Services',
         pe: { label: 'PE Ratio', value: '25.4', color: 'blue' },
         valStatus: 'fair',
@@ -37,10 +37,10 @@ const mockWatchlistGrid = [
         verdict: 'Fairly valued, comfortable hold.',
         lastChecked: '+2.6% since last visit',
         hasNote: true,
-        note: '"Accumulate on dips below ₹1,500" - Long-term IT bet.'
+        note: '"Accumulate on dips below â‚¹1,500" - Long-term IT bet.'
     },
     {
-        id: 'wl-2', name: 'HUL', price: '₹2,540', changeToday: '-0.1%', changeTotal: '+4.6%', isPositive: false, sparkline: mockSparklineNegative,
+        id: 'wl-2', name: 'HUL', price: 'â‚¹2,540', changeToday: '-0.1%', changeTotal: '+4.6%', isPositive: false, sparkline: mockSparklineNegative,
         sector: 'FMCG',
         pe: { label: 'ROE', value: '18%', color: 'amber' },
         valStatus: 'overvalued',
@@ -58,7 +58,7 @@ const mockWatchlistGrid = [
         hasNote: false
     },
     {
-        id: 'wl-3', name: 'TCS', price: '₹3,548', changeToday: '-2.1%', changeTotal: '-2.1%', isPositive: false, sparkline: mockSparklineNegative, tagTopRight: 'Trimming Alert', tagTopRightColor: 'rose',
+        id: 'wl-3', name: 'TCS', price: 'â‚¹3,548', changeToday: '-2.1%', changeTotal: '-2.1%', isPositive: false, sparkline: mockSparklineNegative, tagTopRight: 'Trimming Alert', tagTopRightColor: 'rose',
         sector: 'IT Services',
         pe: { label: 'PE Ratio', value: '32.1', color: 'rose' },
         valStatus: 'overvalued',
@@ -76,7 +76,7 @@ const mockWatchlistGrid = [
         lastChecked: '-2.2% since yest visit'
     },
     {
-        id: 'wl-4', name: 'Reliance', price: '₹2,672', changeToday: '+1.8%', changeTotal: '+5.2%', isPositive: true, sparkline: mockSparklinePositive,
+        id: 'wl-4', name: 'Reliance', price: 'â‚¹2,672', changeToday: '+1.8%', changeTotal: '+5.2%', isPositive: true, sparkline: mockSparklinePositive,
         sector: 'Energy',
         pe: { label: 'PE Ratio', value: '18.5', color: 'blue' },
         valStatus: 'undervalued',
@@ -93,7 +93,7 @@ const mockWatchlistGrid = [
         hasNote: false
     },
     {
-        id: 'wl-5', name: 'HDFC Bank', price: '₹1,620', changeToday: '+3.2%', changeTotal: '+1.5%', isPositive: true, sparkline: mockSparklinePositive,
+        id: 'wl-5', name: 'HDFC Bank', price: 'â‚¹1,620', changeToday: '+3.2%', changeTotal: '+1.5%', isPositive: true, sparkline: mockSparklinePositive,
         sector: 'Banking',
         pe: { label: 'P/B Ratio', value: '2.8x', color: 'blue' },
         valStatus: 'undervalued',
@@ -109,7 +109,7 @@ const mockWatchlistGrid = [
         hasNote: false
     },
     {
-        id: 'wl-6', name: 'ITC', price: '₹440', changeToday: '+0.5%', changeTotal: '+12.4%', isPositive: true, sparkline: mockSparklinePositive,
+        id: 'wl-6', name: 'ITC', price: 'â‚¹440', changeToday: '+0.5%', changeTotal: '+12.4%', isPositive: true, sparkline: mockSparklinePositive,
         sector: 'FMCG',
         pe: { label: 'Div Yield', value: '4.2%', color: 'blue' },
         valStatus: 'undervalued',
@@ -125,7 +125,7 @@ const mockWatchlistGrid = [
         hasNote: false
     },
     {
-        id: 'wl-7', name: 'Asian Paints', price: '₹3,120', changeToday: '-1.4%', changeTotal: '-3.2%', isPositive: false, sparkline: mockSparklineNegative,
+        id: 'wl-7', name: 'Asian Paints', price: 'â‚¹3,120', changeToday: '-1.4%', changeTotal: '-3.2%', isPositive: false, sparkline: mockSparklineNegative,
         sector: 'Paints',
         pe: { label: 'PE Ratio', value: '72x', color: 'rose' },
         valStatus: 'overvalued',
@@ -141,7 +141,7 @@ const mockWatchlistGrid = [
         hasNote: false
     },
     {
-        id: 'wl-8', name: 'L&T', price: '₹3,450', changeToday: '+2.1%', changeTotal: '+8.7%', isPositive: true, sparkline: mockSparklinePositive,
+        id: 'wl-8', name: 'L&T', price: 'â‚¹3,450', changeToday: '+2.1%', changeTotal: '+8.7%', isPositive: true, sparkline: mockSparklinePositive,
         sector: 'Engineering',
         pe: { label: 'Order Book', value: 'Strong', color: 'blue' },
         valStatus: 'fair',
@@ -314,11 +314,11 @@ const GridCard = ({ stock, onRemove }) => {
                  </div>
             </div>
 
-            {/* Target Price Proximity */}
+            {}
             <div className="bg-slate-50/50 border border-slate-100/60 rounded-xl p-3 mb-5">
                  <div className="flex justify-between items-center mb-1.5">
                      <div className="text-[10px] font-black uppercase text-slate-400 tracking-wider">Buy Target</div>
-                     <div className="text-[11px] font-bold text-slate-600">{stock.targetPrice || '₹' + Math.floor(parseInt(stock.price.replace(/[^0-9]/g, '')) * 0.93).toLocaleString('en-IN')}</div>
+                     <div className="text-[11px] font-bold text-slate-600">{stock.targetPrice || 'â‚¹' + Math.floor(parseInt(stock.price.replace(/[^0-9]/g, '')) * 0.93).toLocaleString('en-IN')}</div>
                  </div>
                  
                  <div className="w-full bg-slate-200 rounded-full h-1.5 mb-1.5 overflow-hidden">
@@ -645,7 +645,7 @@ const MarketBehaviorMirror = ({ stats }) => {
             <div className="text-[11px] font-medium text-slate-500 mb-5">How your tracking list mirrors the broader index</div>
             
             <div className="grid grid-cols-1 gap-4">
-                {/* Volatility Card */}
+                {}
                 <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4 hover:border-blue-200 transition-all">
                     <div className="flex justify-between items-start mb-3">
                         <div>
@@ -667,7 +667,7 @@ const MarketBehaviorMirror = ({ stats }) => {
                     </div>
                 </div>
 
-                {/* Sector Mix Card */}
+                {}
                 <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4 hover:border-blue-200 transition-all">
                     <div className="flex justify-between items-start mb-3">
                         <div>
@@ -684,7 +684,7 @@ const MarketBehaviorMirror = ({ stats }) => {
                     </div>
                 </div>
 
-                {/* Valuation vs Benchmark Card */}
+                {}
                 <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4 hover:border-blue-200 transition-all">
                     <div className="flex justify-between items-start mb-3">
                         <div>
@@ -714,13 +714,11 @@ const Watchlist = () => {
     const [activeTab, setActiveTab] = useState('all');
     const [watchlist, setWatchlist] = useState(mockWatchlistGrid);
     
-    // Calculate aggregate metrics (Logic for Overview and Behavior Mirror)
     const stats = React.useMemo(() => {
         if (!watchlist || watchlist.length === 0) return null;
 
         const total = watchlist.length;
         
-        // Valuation logic
         const counts = { undervalued: 0, fair: 0, overvalued: 0 };
         let totalPE = 0;
         let validPECount = 0;
@@ -750,14 +748,12 @@ const Watchlist = () => {
         else if (counts.fair > total / 2) { valStatusLabel = "Fairly Valued"; valColor = "text-amber-600"; }
         else if (percs.overvalued > 50) { valStatusLabel = "Overvalued Zone"; valColor = "text-rose-600"; }
 
-        // Risk level logic (Beta)
         const avgBeta = watchlist.reduce((acc, s) => acc + (s.beta || 1), 0) / total;
         let riskLabel = "Moderate Risk";
         let riskColor = "text-amber-500";
         if (avgBeta < 0.8) { riskLabel = "Low Risk"; riskColor = "text-blue-600"; }
         else if (avgBeta > 1.2) { riskLabel = "High Risk"; riskColor = "text-rose-600"; }
 
-        // Sector Distribution
         const sectorCounts = {};
         watchlist.forEach(s => {
             const sec = s.sector || 'Others';
@@ -766,7 +762,6 @@ const Watchlist = () => {
         const topSector = Object.keys(sectorCounts).reduce((a, b) => sectorCounts[a] > sectorCounts[b] ? a : b);
         const topSectorPerc = Math.round((sectorCounts[topSector] / total) * 100);
 
-        // Market Comparison (Mirror Logic)
         const benchmarkPE = 22.5;
         const benchmarkTopSector = "Banking";
         
@@ -778,7 +773,7 @@ const Watchlist = () => {
             valuation: {
                 label: valStatusLabel,
                 color: valColor,
-                breakdown: `${percs.fair}% Fair • ${percs.overvalued}% Over • ${percs.undervalued}% Under`
+                breakdown: `${percs.fair}% Fair â€¢ ${percs.overvalued}% Over â€¢ ${percs.undervalued}% Under`
             },
             risk: {
                 label: riskLabel,
@@ -818,7 +813,7 @@ const Watchlist = () => {
             <div className="fade-in w-full min-h-screen relative px-4 md:px-10">
             
                 <div className="mb-16">
-                {/* Header Area */}
+                {}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4 px-2">
                     <div>
                         <h2 className="text-[26px] font-black text-slate-800 tracking-tight flex items-center gap-2">
@@ -844,7 +839,7 @@ const Watchlist = () => {
                 <EmptyState />
             ) : (
                 <div className="space-y-6">
-                    {/* SECTION 1: Watchlist Overview Stats */}
+                    {}
                     <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6">
                         <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest mb-4 flex items-center">
                             Watchlist Overview
@@ -912,9 +907,9 @@ const Watchlist = () => {
                         </div>
                     </div>
 
-                    {/* SECTION 2: What Needs Attention & Recent Changes */}
+                    {}
                     <div className="flex flex-col lg:flex-row gap-6">
-                        {/* What Needs Attention Box */}
+                        {}
                         <div className="lg:w-[65%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 transition-all">
                             <div className="flex items-center justify-between mb-5">
                                 <h3 className="text-[15px] font-black text-slate-800 flex items-center gap-2">
@@ -931,7 +926,7 @@ const Watchlist = () => {
                             </div>
                         </div>
 
-                        {/* Recent Changes Feed */}
+                        {}
                         <div className="lg:w-[35%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col h-full min-h-[380px]">
                             <h3 className="text-[16px] font-black text-slate-800 mb-6 flex items-center gap-2">
                                 <Activity size={18} className="text-blue-500" />
@@ -967,9 +962,9 @@ const Watchlist = () => {
                         </div>
                     </div>
 
-                    {/* SECTION 3: Main Watchlist Grid Container */}
+                    {}
                     <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6">
-                        {/* Filters & Sorting */}
+                        {}
                         <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                             <h3 className="text-[15px] font-black text-slate-800 flex items-center">
                                 Watchlist Holdings
@@ -977,7 +972,7 @@ const Watchlist = () => {
                             </h3>
                             
                             <div className="flex items-center gap-3">
-                                {/* Filters Dropdown Button */}
+                                {}
                                 <div className="relative group">
                                     <button className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-slate-600 text-[11px] font-bold hover:bg-slate-50 hover:text-blue-700 hover:border-blue-200 transition-all shadow-sm">
                                         <Filter size={13} className="text-slate-400 group-hover:text-blue-500" />
@@ -986,7 +981,7 @@ const Watchlist = () => {
                                         <ChevronDown size={14} className="ml-1 opacity-60" />
                                     </button>
                                     
-                                    {/* Hover Menu Panel (Mock) */}
+                                    {}
                                     <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 overflow-hidden transform origin-top-right scale-95 group-hover:scale-100">
                                         <div className="px-3 py-2 border-b border-slate-100 text-[10px] uppercase font-bold text-slate-400">Filter By Tag</div>
                                         <div className="p-1">
@@ -1007,14 +1002,14 @@ const Watchlist = () => {
                                     </div>
                                 </div>
 
-                                {/* Sort Dropdown Button */}
+                                {}
                                 <div className="relative group">
                                     <button className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-slate-600 text-[11px] font-bold hover:bg-slate-100 transition-colors shadow-sm">
                                         Sort: <span className="text-blue-700">Valuation Gap</span>
                                         <ChevronDown size={14} />
                                     </button>
                                     
-                                    {/* Hover Menu Panel (Mock) */}
+                                    {}
                                     <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-xl shadow-lg border border-slate-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-20 overflow-hidden transform origin-top-right scale-95 group-hover:scale-100">
                                         <div className="px-3 py-2 border-b border-slate-100 text-[10px] uppercase font-bold text-slate-400">Sort By</div>
                                         <div className="p-1">
@@ -1040,7 +1035,7 @@ const Watchlist = () => {
                             </div>
                         </div>
 
-                        {/* Main Grid */}
+                        {}
                         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                             {watchlist.map(stock => (
                                 <GridCard 
@@ -1052,12 +1047,12 @@ const Watchlist = () => {
                         </div>
                     </div>
 
-                    {/* SECTION 4: Bottom Area - Why This Matters & Compare & Reflect */}
+                    {}
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        {/* Market Behavior Mirror */}
+                        {}
                         <MarketBehaviorMirror stats={stats} />
 
-                        {/* Watchlist Heatmap Insights */}
+                        {}
                         <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 opacity-95">
                             <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2 text-slate-800 font-black text-[15px]">

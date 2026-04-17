@@ -27,6 +27,7 @@ import SharedAdvancedWatchlist from "../components/trader/AdvancedWatchlist";
 import EnhancedStockScreener from "../components/trader/EnhancedStockScreener"; // ENHANCED VERSION
 import MultiChartWorkspace from "../components/trader/MultiChartWorkspace"; // TRADINGVIEW MULTI-CHART
 import RealTimeScanner from "../components/trader/RealTimeScanner"; // TRADINGVIEW SCANNER
+import MainLayout from "../components/layout/MainLayout";
 import MarketTicker from "../components/dashboard/MarketTicker";
 import TraderStockPage from "./TraderStockPage"; 
 import "./TraderDashboard.css";
@@ -115,7 +116,7 @@ const FALLBACK_RESEARCH_INSIGHTS = [
     details: [
       { name: "Bias", value: "Bullish", note: "Score 71", color: "#42C0A5" },
       { name: "RSI", value: "61.2", note: "Momentum", color: "#42C0A5" },
-      { name: "MACD Δ", value: "0.82", note: "Signal spread", color: "#42C0A5" },
+      { name: "MACD Î”", value: "0.82", note: "Signal spread", color: "#42C0A5" },
       { name: "Volume", value: "Above Average", note: "Participation", color: "#42C0A5" },
     ],
     note: "Fallback research view while backend insight scan is unavailable.",
@@ -131,7 +132,7 @@ const FALLBACK_RESEARCH_INSIGHTS = [
     details: [
       { name: "Bias", value: "Neutral", note: "Score 63", color: "#f0b429" },
       { name: "RSI", value: "53.8", note: "Momentum", color: "#f0b429" },
-      { name: "MACD Δ", value: "0.18", note: "Signal spread", color: "#42C0A5" },
+      { name: "MACD Î”", value: "0.18", note: "Signal spread", color: "#42C0A5" },
       { name: "Volume", value: "Average", note: "Participation", color: "#8b909a" },
     ],
     note: "Fallback insight card. Confirm with live backend feed before execution.",
@@ -180,9 +181,9 @@ const FALLBACK_SUMMARY = {
 };
 
 const getBiasMeta = (bias) => {
-  if (bias === "bullish") return { label: "Bullish", color: "#42C0A5", symbol: "↑" };
-  if (bias === "bearish") return { label: "Bearish", color: "#ed5750", symbol: "↓" };
-  return { label: "Neutral", color: "#8b909a", symbol: "→" };
+  if (bias === "bullish") return { label: "Bullish", color: "#42C0A5", symbol: "â†‘" };
+  if (bias === "bearish") return { label: "Bearish", color: "#ed5750", symbol: "â†“" };
+  return { label: "Neutral", color: "#8b909a", symbol: "â†’" };
 };
 
 const getImpactColor = (impact) => {
@@ -479,7 +480,7 @@ const SectorHeatmap = () => {
           <h3 className="tr-card-title">Sector Heatmap</h3>
         </div>
         <span className={`tr-pill ${isLoading ? "text-amber-400 bg-amber-400/10" : "text-[#42C0A5] bg-[#42C0A5]/10"}`}>
-          {isLoading ? "● SYNCING" : "● LIVE"}
+          {isLoading ? "â— SYNCING" : "â— LIVE"}
         </span>
       </div>
       <div className="flex-1 p-3 grid grid-cols-3 gap-2">
@@ -648,9 +649,9 @@ const TrendStrengthPanel = () => {
   const marketBiasColor = marketBias === "Bullish" ? "#42C0A5" : marketBias === "Bearish" ? "#ed5750" : "#8b909a";
 
   const stateToGlyph = {
-    bullish: "↑",
-    bearish: "↓",
-    neutral: "→",
+    bullish: "â†‘",
+    bearish: "â†“",
+    neutral: "â†’",
     unknown: "-",
   };
 
@@ -669,7 +670,7 @@ const TrendStrengthPanel = () => {
         {hasError ? (
           <span className="tr-pill text-[#f0b429] bg-[#f0b429]/10">OFFLINE</span>
         ) : matrixRows.length > 0 ? (
-          <span className="tr-pill text-[#42C0A5] bg-[#42C0A5]/10">● LIVE</span>
+          <span className="tr-pill text-[#42C0A5] bg-[#42C0A5]/10">â— LIVE</span>
         ) : (
           <span className="tr-pill text-[#8b909a] bg-white/5">NO DATA</span>
         )}
@@ -751,15 +752,15 @@ const TrendStrengthPanel = () => {
       <div className="px-2.5 py-1.5 border-t border-white/10 flex items-center justify-between" style={{ background: "rgba(255,255,255,0.03)" }}>
         <div className="flex items-center gap-2 text-[9px]">
           <div className="flex items-center gap-1">
-            <span className="w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] font-bold" style={{ background: "rgba(61,178,107,0.2)", color: "#42C0A5" }}>↑</span>
+            <span className="w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] font-bold" style={{ background: "rgba(61,178,107,0.2)", color: "#42C0A5" }}>â†‘</span>
             <span className="text-[#5d606b]">Bullish</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] font-bold" style={{ background: "rgba(237,87,80,0.2)", color: "#ed5750" }}>↓</span>
+            <span className="w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] font-bold" style={{ background: "rgba(237,87,80,0.2)", color: "#ed5750" }}>â†“</span>
             <span className="text-[#5d606b]">Bearish</span>
           </div>
           <div className="flex items-center gap-1">
-            <span className="w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: "#8b909a" }}>→</span>
+            <span className="w-4 h-4 rounded-full inline-flex items-center justify-center text-[9px] font-bold" style={{ background: "rgba(255,255,255,0.08)", color: "#8b909a" }}>â†’</span>
             <span className="text-[#5d606b]">Neutral</span>
           </div>
         </div>
@@ -827,7 +828,7 @@ const GapLists = () => {
               <div className="w-1.5 h-6 rounded-full" style={{ background: accentColor, boxShadow: `0 0 6px ${accentColor}` }} />
               <div>
                 <div className="font-bold text-white text-xs tracking-wide">{normalizeDisplaySymbol(item.symbol)}</div>
-                <div className="text-[10px] font-mono" style={{ color: "#5d6b7a" }}>₹{Number(item.price || 0).toLocaleString()}</div>
+                <div className="text-[10px] font-mono" style={{ color: "#5d6b7a" }}>â‚¹{Number(item.price || 0).toLocaleString()}</div>
               </div>
             </div>
             <span className="font-mono text-sm font-black px-2 py-0.5 rounded-md" style={{ color: accentColor, background: `${accentColor}15` }}>
@@ -1456,7 +1457,7 @@ const SignalEnginePanel = () => {
               details: [
                 { name: "Bias", value: biasMeta.label, note: `Score ${summary?.score?.score ?? "--"}`, color: biasMeta.color },
                 { name: "RSI", value: Number(leadIndicators.rsi || 0).toFixed(1), note: "Momentum", color: leadIndicators.rsi >= 60 ? "#42C0A5" : leadIndicators.rsi <= 40 ? "#ed5750" : "#f0b429" },
-                { name: "MACD Δ", value: macdDelta.toFixed(2), note: "Signal spread", color: macdDelta >= 0 ? "#42C0A5" : "#ed5750" },
+                { name: "MACD Î”", value: macdDelta.toFixed(2), note: "Signal spread", color: macdDelta >= 0 ? "#42C0A5" : "#ed5750" },
                 { name: "Volume", value: formatVolumeStatus(leadIndicators.volumeStatus), note: "Participation", color: "#42C0A5" },
               ],
               note: leadPattern?.description || `${normalizeDisplaySymbol(symbol)} technical snapshot sourced from backend summary API.`,
@@ -1560,7 +1561,7 @@ const SignalEnginePanel = () => {
         {isFallback ? (
           <span className="tr-pill text-[#f0b429] bg-[#f0b429]/10">FALLBACK</span>
         ) : (
-          <span className="tr-pill text-[#42C0A5] bg-[#42C0A5]/10">● LIVE</span>
+          <span className="tr-pill text-[#42C0A5] bg-[#42C0A5]/10">â— LIVE</span>
         )}
       </div>
     </div>
@@ -1716,7 +1717,7 @@ const CatalystPanel = () => {
           item?.actual && item.actual !== "-" ? `Actual ${item.actual}` : null,
           item?.forecast && item.forecast !== "-" ? `Forecast ${item.forecast}` : null,
           item?.previous && item.previous !== "-" ? `Prev ${item.previous}` : null,
-        ].filter(Boolean).join(" · ");
+        ].filter(Boolean).join(" Â· ");
         return (
         <div
           key={idx}
@@ -1730,7 +1731,7 @@ const CatalystPanel = () => {
           }}
         >
           <div className="flex items-start gap-2">
-            <span className="text-base mt-0.5 flex-shrink-0">{String(item.impact).toLowerCase().includes("high") ? "⚠️" : String(item.impact).toLowerCase().includes("med") ? "🕒" : "📌"}</span>
+            <span className="text-base mt-0.5 flex-shrink-0">{String(item.impact).toLowerCase().includes("high") ? "âš ï¸" : String(item.impact).toLowerCase().includes("med") ? "ðŸ•’" : "ðŸ“Œ"}</span>
             <div className="flex-1 min-w-0">
               <div className="flex justify-between items-start gap-1">
                 <span className="text-[15px] text-white font-semibold leading-tight">{item.event}</span>
@@ -1748,12 +1749,12 @@ const CatalystPanel = () => {
                 <span className="text-[11px] font-mono text-[#7b8190]">{formatCalendarDate(item.date)}</span>
                 {metadata ? (
                   <>
-                    <span className="text-[#2a2e39]">·</span>
+                    <span className="text-[#2a2e39]">Â·</span>
                     <span className="text-[11px] text-[#7b8190]">{metadata}</span>
                   </>
                 ) : (
                   <>
-                    <span className="text-[#2a2e39]">·</span>
+                    <span className="text-[#2a2e39]">Â·</span>
                     <span className="text-[11px] text-[#7b8190]">Verified event schedule</span>
                   </>
                 )}
@@ -2062,11 +2063,11 @@ const FODashboard = () => {
   const callOi = contracts
     .filter((contract) => String(contract.type).toLowerCase().includes("call"))
     .map((contract) => contract.oi)
-    .join(" · ") || "--";
+    .join(" Â· ") || "--";
   const putOi = contracts
     .filter((contract) => String(contract.type).toLowerCase().includes("put"))
     .map((contract) => contract.oi)
-    .join(" · ") || "--";
+    .join(" Â· ") || "--";
   const longCount = dashboard?.buildup?.long?.length || 0;
   const shortCount = dashboard?.buildup?.short?.length || 0;
   const normalizedPcr = Number.isFinite(pcr) ? Math.max(0, Math.min(100, Math.round(pcr * 50))) : 0;
@@ -2079,7 +2080,7 @@ const FODashboard = () => {
     <div className="tr-card-header">
       <h3 className="tr-card-title">F&O INSIGHTS</h3>
       <div className="flex gap-2 items-center">
-        <span className="tr-pill text-[#42C0A5] bg-[#42C0A5]/10">● CHAIN</span>
+        <span className="tr-pill text-[#42C0A5] bg-[#42C0A5]/10">â— CHAIN</span>
       </div>
     </div>
     <div className="grid grid-cols-2 gap-2 h-full p-2">
@@ -2481,7 +2482,7 @@ const NewsFlash = ({ variant = "full" }) => {
                   <div className="flex items-center gap-2 flex-wrap">
                     {isBreaking && (
                       <span className="rounded-full border border-red-500/25 bg-red-500/20 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.14em] text-red-400">
-                        🔥 Breaking
+                        ðŸ”¥ Breaking
                       </span>
                     )}
                     {tag && (
@@ -2510,7 +2511,7 @@ const NewsFlash = ({ variant = "full" }) => {
   }
 
   return (
-    <div className="w-full min-h-screen px-6 py-6 bg-gradient-to-br from-[#020617] via-[#020617] to-[#0f172a] text-[#dce9ff]">
+    <div className="w-full min-h-screen px-6 py-6 text-[#dce9ff]">
       <div className="space-y-6">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
@@ -2778,11 +2779,13 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
 
   if (activeModule === "WATCHLIST") {
     return (
-      <div className="dashboard-layout flex flex-col w-full">
-        <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0 }}>
-          <SharedAdvancedWatchlist onSymbolSelect={(s) => navigate(`/stocks/${s}`)} />
+      <MainLayout>
+        <div className="dashboard-layout flex flex-col w-full">
+          <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0 }}>
+            <SharedAdvancedWatchlist onSymbolSelect={(s) => navigate(`/stocks/${s}`)} />
+          </div>
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
@@ -2790,7 +2793,7 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
     return (
         <div className="dashboard-layout flex flex-col w-full">
             <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0 }}>
-                {/* Note: In a real app, you might use a router here, but for this simulation we use state */}
+                {}
                 <TraderStockPage 
                     overrideSymbol={analysisSymbol} 
                     onBack={() => setAnalysisSymbol(null)} 
@@ -2802,16 +2805,22 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
   }
 
   if (activeModule === "SCREENERS") {
-    return <ScreenerPage />;
+    return (
+      <MainLayout>
+        <ScreenerPage />
+      </MainLayout>
+    );
   }
 
   if (activeModule === "NEWS") {
     return (
-      <div className="dashboard-layout flex flex-col w-full">
-        <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0 }}>
-          <NewsFlash variant="full" />
+      <MainLayout>
+        <div className="dashboard-layout flex flex-col w-full">
+          <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0 }}>
+            <NewsFlash variant="full" />
+          </div>
         </div>
-      </div>
+      </MainLayout>
     );
   }
 
@@ -2836,15 +2845,16 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
   }
 
   return (
-    <div className="dashboard-layout flex flex-col w-full">
-      <MarketTicker />
-      <div className="flex-1 overflow-y-auto main-content-area">
-        <div className="tr-dashboard-stage">
-          <div className="trader-dashboard-container">
+    <MainLayout>
+      <div className="dashboard-layout flex flex-col w-full">
+        <MarketTicker />
+        <div className="flex-1 overflow-y-auto main-content-area">
+          <div className="tr-dashboard-stage">
+            <div className="trader-dashboard-container">
             <section className="trader-dashboard-grid">
               <div className="trader-left-column">
                 <section className="tr-surface-card tr-panel-shell tr-panel-shell--hero">
-                  <div className="trader-dashboard-eyebrow">Alpha Terminal</div>
+                  <div className="trader-dashboard-eyebrow">Trader Dashboard</div>
                   <h1 className="trader-dashboard-title">Structured market research workspace</h1>
                   <p className="trader-dashboard-subtitle">
                     Advanced analysis panels and high-fidelity research data for data-driven decisions.
@@ -2908,7 +2918,7 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
                 <section className="tr-surface-card tr-panel-shell tr-panel-shell--grouped">
                   <div className="trader-section-header">
                     <div>
-                      <div className="trader-section-eyebrow">Alpha Insights</div>
+                      <div className="trader-section-eyebrow">Trader Insights</div>
                       <h2 className="trader-section-title">Research insights and catalysts</h2>
                     </div>
                   </div>
@@ -2994,24 +3004,30 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
           </div>
         </div>
       </div>
+      </div>
 
 
       {expandedChart && (
-        <div className="chart-modal" role="dialog" aria-modal="true">
+        <div
+          className="chart-modal-backdrop"
+          onClick={() => setExpandedChart(null)}
+        >
           <div
-            className="chart-modal-backdrop"
-            onClick={() => setExpandedChart(null)}
-          ></div>
-          <div className="chart-modal-panel">
+            className="chart-modal"
+            role="dialog"
+            aria-modal="true"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="chart-modal-panel">
             <div className="chart-modal-header">
               <div className="chart-modal-title">
-                {expandedChart} — Full Screen
+                {expandedChart} â€” Full Screen
               </div>
               <button
                 className="chart-modal-close"
                 onClick={() => setExpandedChart(null)}
               >
-                ✕ Close
+                âœ• Close
               </button>
             </div>
             <div className="chart-modal-body">
@@ -3055,8 +3071,9 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
             </div>
           </div>
         </div>
+        </div>
       )}
-    </div>
+    </MainLayout>
   );
 }
 

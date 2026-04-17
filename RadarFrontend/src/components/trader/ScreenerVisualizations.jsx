@@ -2,10 +2,7 @@ import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Newspaper } from 'lucide-react';
 
-/**
- * Screener Results Heatmap Visualization
- * Visual representation of screener results as color-coded blocks
- */
+
 export const ScreenerHeatmap = ({ results, metric = 'change', onStockClick }) => {
   const getColor = (value, metric) => {
     switch (metric) {
@@ -103,12 +100,12 @@ export const ScreenerHeatmap = ({ results, metric = 'change', onStockClick }) =>
                 )}
               </div>
 
-              {/* Hover Tooltip */}
+              {}
               <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20">
                 <div className="px-3 py-2 rounded-lg bg-slate-900/95 border border-slate-700 shadow-xl whitespace-nowrap">
                   <div className="text-xs font-bold text-white mb-1">{stock.name}</div>
                   <div className="space-y-0.5 text-[10px]">
-                    <div className="text-slate-300">Price: ₹{stock.price?.toFixed(2)}</div>
+                    <div className="text-slate-300">Price: â‚¹{stock.price?.toFixed(2)}</div>
                     <div className={stock.change >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
                       Change: {stock.change >= 0 ? '+' : ''}{stock.change?.toFixed(2)}%
                     </div>
@@ -125,10 +122,7 @@ export const ScreenerHeatmap = ({ results, metric = 'change', onStockClick }) =>
   );
 };
 
-/**
- * Stock Comparison View
- * Side-by-side comparison of selected stocks
- */
+
 export const StockComparison = ({ stocks, onRemove }) => {
   if (!stocks || stocks.length === 0) {
     return (
@@ -140,7 +134,7 @@ export const StockComparison = ({ stocks, onRemove }) => {
   }
 
   const metrics = [
-    { key: 'price', label: 'Price', format: (v) => `₹${v?.toFixed(2) || 'N/A'}` },
+    { key: 'price', label: 'Price', format: (v) => `â‚¹${v?.toFixed(2) || 'N/A'}` },
     { key: 'change', label: 'Change %', format: (v) => `${v >= 0 ? '+' : ''}${v?.toFixed(2)}%`, colored: true },
     { key: 'rsi', label: 'RSI', format: (v) => v?.toFixed(1) || 'N/A' },
     { key: 'score', label: 'Score', format: (v) => v || 'N/A' },
@@ -164,7 +158,7 @@ export const StockComparison = ({ stocks, onRemove }) => {
       
       <div className="min-w-[800px]">
         <div className="grid gap-4" style={{ gridTemplateColumns: `180px repeat(${stocks.length}, 1fr)` }}>
-          {/* Header Row */}
+          {}
           <div className="font-semibold text-slate-400 text-sm py-3">Metric</div>
           {stocks.map(stock => (
             <div key={stock.symbol} className="relative p-4 rounded-xl bg-slate-800/50 border border-slate-700">
@@ -172,14 +166,14 @@ export const StockComparison = ({ stocks, onRemove }) => {
                 onClick={() => onRemove(stock.symbol)}
                 className="absolute top-2 right-2 w-6 h-6 flex items-center justify-center rounded-full bg-rose-500/20 text-rose-400 hover:bg-rose-500/30 transition-colors"
               >
-                ×
+                Ã—
               </button>
               <div className="font-mono font-bold text-cyan-300 text-lg mb-1">{stock.symbol}</div>
               <div className="text-xs text-slate-400 truncate">{stock.name}</div>
             </div>
           ))}
 
-          {/* Metric Rows */}
+          {}
           {metrics.map(metric => (
             <React.Fragment key={metric.key}>
               <div className="flex items-center py-3 text-sm text-slate-300 font-medium border-t border-slate-800">
@@ -209,7 +203,7 @@ export const StockComparison = ({ stocks, onRemove }) => {
           ))}
         </div>
 
-        {/* Visual Comparison Charts */}
+        {}
         <div className="mt-8 space-y-6">
           <div>
             <h4 className="text-sm font-semibold text-slate-400 mb-3">Performance Comparison</h4>

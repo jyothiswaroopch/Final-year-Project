@@ -1,13 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-/**
- * Custom hook for watchlist enhancements including:
- * - News tracking
- * - Sentiment scores
- * - Read/unread state
- * - Desktop notifications
- * - Export functionality
- */
+
 
 const MOCK_NEWS_DATA = {
   RELIANCE: { count: 5, sentiment: 65, hasToday: true, unread: 3 },
@@ -25,7 +18,6 @@ export const useWatchlistEnhancements = (stocks = []) => {
   const [showOnlyWithNews, setShowOnlyWithNews] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
-  // Load read state from localStorage
   useEffect(() => {
     const savedReadArticles = localStorage.getItem('watchlist_read_articles');
     if (savedReadArticles) {
@@ -42,7 +34,6 @@ export const useWatchlistEnhancements = (stocks = []) => {
     }
   }, []);
 
-  // Save read state to localStorage
   const markArticleAsRead = useCallback((articleId) => {
     setReadArticles((prev) => {
       const next = new Set(prev);
@@ -52,7 +43,6 @@ export const useWatchlistEnhancements = (stocks = []) => {
     });
   }, []);
 
-  // Toggle view mode
   const toggleViewMode = useCallback(() => {
     setViewMode((prev) => {
       const next = prev === 'compact' ? 'expanded' : 'compact';
@@ -61,7 +51,6 @@ export const useWatchlistEnhancements = (stocks = []) => {
     });
   }, []);
 
-  // Request notification permission
   const requestNotificationPermission = useCallback(async () => {
     if (!('Notification' in window)) {
       console.warn('This browser does not support notifications');
@@ -83,7 +72,6 @@ export const useWatchlistEnhancements = (stocks = []) => {
     return false;
   }, []);
 
-  // Send desktop notification
   const sendNotification = useCallback((title, options = {}) => {
     if (!notificationsEnabled || Notification.permission !== 'granted') {
       return;
@@ -105,7 +93,6 @@ export const useWatchlistEnhancements = (stocks = []) => {
     }
   }, [notificationsEnabled]);
 
-  // Export watchlist to CSV
   const exportToCSV = useCallback((stocks, newsData) => {
     if (!stocks || stocks.length === 0) {
       alert('No stocks to export');
@@ -168,18 +155,15 @@ export const useWatchlistEnhancements = (stocks = []) => {
     document.body.removeChild(link);
   }, []);
 
-  // Get news info for a symbol
   const getNewsInfo = useCallback((symbol) => {
     return newsData[symbol] || { count: 0, sentiment: 0, hasToday: false, unread: 0 };
   }, [newsData]);
 
-  // Get unread count for a symbol
   const getUnreadCount = useCallback((symbol) => {
     const news = newsData[symbol];
     return news?.unread || 0;
   }, [newsData]);
 
-  // Simulate news updates (in real app, this would be from API)
   useEffect(() => {
     const interval = setInterval(() => {
       setNewsData((prev) => {
@@ -189,7 +173,6 @@ export const useWatchlistEnhancements = (stocks = []) => {
         const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
         const current = prev[randomSymbol];
         
-        // Randomly add news
         if (Math.random() > 0.9) {
           const newData = {
             ...prev,
@@ -201,7 +184,6 @@ export const useWatchlistEnhancements = (stocks = []) => {
             },
           };
 
-          // Send notification for breaking news
           if (notificationsEnabled) {
             sendNotification(`Breaking News: ${randomSymbol}`, {
               body: 'New market-moving news detected',
