@@ -9,12 +9,14 @@ const ProfileDropdown = ({
   onClose, 
   avatarRef, 
   profile, 
-  userInitial
+  userInitial,
+  onSignOut
 }) => {
   const navigate = useNavigate();
   const dropdownRef = useRef(null);
   const [position, setPosition] = useState({ top: 0, left: 0 });
   const [mode, setMode] = useState("trader");
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("mode");
@@ -34,6 +36,12 @@ const ProfileDropdown = ({
   useEffect(() => {
     localStorage.setItem("mode", mode);
   }, [mode]);
+
+  useEffect(() => {
+    if (!isOpen && showSignOutConfirm) {
+      setShowSignOutConfirm(false);
+    }
+  }, [isOpen, showSignOutConfirm]);
 
   // Calculate position based on avatar element
   useEffect(() => {
@@ -84,12 +92,14 @@ const ProfileDropdown = ({
         avatarRef?.current &&
         !avatarRef.current.contains(e.target)
       ) {
+        setShowSignOutConfirm(false);
         onClose();
       }
     };
 
     const handleEscape = (e) => {
       if (e.key === "Escape") {
+        setShowSignOutConfirm(false);
         onClose();
       }
     };
@@ -106,6 +116,7 @@ const ProfileDropdown = ({
   if (!isOpen) return null;
 
   const handleSelectMode = (nextMode) => {
+    setShowSignOutConfirm(false);
     setMode(nextMode);
     if (nextMode === "investor") {
       navigate("/investor-dashboard");
@@ -147,6 +158,7 @@ const ProfileDropdown = ({
           type="button"
           className="dropdown-menu-item"
           onClick={() => {
+            setShowSignOutConfirm(false);
             onClose();
             navigate("/profile");
           }}
@@ -160,6 +172,7 @@ const ProfileDropdown = ({
           type="button"
           className="dropdown-menu-item"
           onClick={() => {
+            setShowSignOutConfirm(false);
             onClose();
             navigate("/settings");
           }}
@@ -173,6 +186,7 @@ const ProfileDropdown = ({
           type="button"
           className="dropdown-menu-item"
           onClick={() => {
+            setShowSignOutConfirm(false);
             onClose();
             navigate("/support");
           }}
@@ -213,9 +227,11 @@ const ProfileDropdown = ({
       <button 
         type="button" 
         onClick={() => {
-          onClose();
-          localStorage.clear();
-          navigate("/login");
+          if (onSignOut) {
+            onSignOut();
+          } else {
+            setShowSignOutConfirm(true);
+          }
         }}
         className="dropdown-signout-btn"
       >
@@ -225,7 +241,54 @@ const ProfileDropdown = ({
     </div>
   );
 
-  return createPortal(content, document.body);
+  const confirmOverlay = (
+    <div className="fixed inset-0 z-[10000] flex items-center justify-center bg-[#0B0E14]/90 backdrop-blur-sm p-4">
+      <div
+        className="relative w-full max-w-[400px] rounded-[24px] bg-[#1A1D24] p-8 shadow-2xl border border-white/5"
+      >
+        <div className="flex flex-col items-center">
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-rose-500/10 border border-rose-500/20 text-rose-400">
+            <LogOut size={28} strokeWidth={2} />
+          </div>
+
+          <h3 className="text-2xl font-black text-white mb-2">
+            Sign out?
+          </h3>
+          
+          <p className="text-[15px] text-slate-400 mb-8 text-center">
+            Are you sure you want to sign out?
+          </p>
+
+          <div className="flex w-full gap-3">
+            <button
+              onClick={() => setShowSignOutConfirm(false)}
+              className="flex-1 rounded-[14px] bg-[#2A2E39] py-3.5 text-sm font-bold text-white transition-all hover:bg-[#323744] active:scale-[0.98]"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={() => {
+                setShowSignOutConfirm(false);
+                onClose();
+                localStorage.clear();
+                window.location.replace("/");
+              }}
+              className="flex-1 rounded-[14px] bg-gradient-to-r from-[#FF512F] to-[#F09819] py-3.5 text-sm font-bold text-white shadow-lg shadow-orange-500/20 transition-all hover:opacity-90 active:scale-[0.98]"
+            >
+              Yes, Sign Out
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <>
+      {createPortal(content, document.body)}
+      {showSignOutConfirm ? createPortal(confirmOverlay, document.body) : null}
+    </>
+  );
 };
 
 export default ProfileDropdown;

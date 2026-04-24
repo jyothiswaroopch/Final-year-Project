@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import api from '../api/api';
+import SupportHubPage from './support/SupportPage';
+import HelpSupportPage from './support/HelpSupportPage';
+import TradingSettingsPage from './settings/SettingsPage';
 import './Profile.css';
 import { 
     Bell, 
@@ -8,6 +12,11 @@ import {
     ChevronRight, 
     Zap, 
     Activity, 
+    ArrowLeft,
+    TrendingUp,
+    TrendingDown,
+    BarChart3,
+    Target,
     User as UserIcon, 
     Clock, 
     CheckCircle, 
@@ -22,6 +31,16 @@ import {
     Settings,
     LogOut
 } from 'lucide-react';
+import {
+    ResponsiveContainer,
+    AreaChart,
+    Area,
+    Line,
+    XAxis,
+    YAxis,
+    Tooltip,
+    CartesianGrid,
+} from 'recharts';
 
 const toPayload = (value, fallback = null) => {
     if (value && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, 'data')) {
@@ -47,6 +66,27 @@ const PageShell = ({ title, subtitle, children }) => (
 
 const scheduleAsync = (fn) => {
     Promise.resolve().then(fn);
+};
+
+const pageMotion = {
+    hidden: { opacity: 0, y: 12 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.35, ease: 'easeOut' } },
+};
+
+const staggerMotion = {
+    hidden: { opacity: 0 },
+    show: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.08,
+            delayChildren: 0.08,
+        },
+    },
+};
+
+const cardMotion = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.3, ease: 'easeOut' } },
 };
 
 export function VerifyEmailPage() {
@@ -785,7 +825,334 @@ export function ProfilePage() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
+    const activeMode = useMemo(() => {
+        if (typeof window === 'undefined') return 'INVESTOR';
+        const persisted = String(localStorage.getItem('mode') || 'INVESTOR').toUpperCase();
+        return persisted === 'TRADER' ? 'TRADER' : 'INVESTOR';
+    }, []);
+
     const initial = profile.username.charAt(0).toUpperCase();
+
+    if (activeMode === 'TRADER') {
+        const behavior = {
+            signalsGenerated: 148,
+            screensAnalyzed: 67,
+            patternAccuracy: 74,
+            researchConsistency: 81,
+            sessionInsight: 'High Volatility Active',
+            lastActive: '2 min ago',
+        };
+
+        const signalTrend = [42, 51, 49, 58, 63, 61, 69, 75, 72, 78];
+        const screenTrend = [20, 24, 22, 29, 31, 28, 35, 33, 38, 40];
+        const accuracyTrend = [61, 63, 66, 64, 68, 70, 72, 74, 73, 76];
+
+        const holdings = [
+            { symbol: 'RELIANCE', invested: 672000, current: 703200 },
+            { symbol: 'HDFCBANK', invested: 124800, current: 131440 },
+            { symbol: 'INFY', invested: 142500, current: 146965 },
+        ];
+
+        const watchlist = [
+            { symbol: 'NIFTY 50', price: 22541.3, change: 0.94, tag: 'High Momentum', signal: 'Breakout Bias' },
+            { symbol: 'BANKNIFTY', price: 48762.55, change: -0.62, tag: 'Weak Structure', signal: 'Distribution' },
+            { symbol: 'RELIANCE', price: 2930.0, change: 1.14, tag: 'High Momentum', signal: 'Volume Expansion' },
+            { symbol: 'HDFCBANK', price: 1643.6, change: 0.75, tag: 'Balanced', signal: 'Trend Hold' },
+            { symbol: 'TCS', price: 3826.35, change: -0.31, tag: 'Weak Structure', signal: 'Range Breakdown' },
+        ];
+
+        const activityLog = [
+            {
+                symbol: 'RELIANCE',
+                action: 'Research thesis updated',
+                reason: 'Opening range breakout sustained above VWAP with rising volume profile.',
+                signals: ['RSI 62', 'Volume Spike', 'VWAP Support'],
+                time: '10:42 AM',
+            },
+            {
+                symbol: 'BANKNIFTY',
+                action: 'Risk reduced',
+                reason: 'False breakout identified after weak breadth and declining OI support.',
+                signals: ['RSI Divergence', 'OI Drop', 'Breadth Weak'],
+                time: '11:16 AM',
+            },
+            {
+                symbol: 'HDFCBANK',
+                action: 'Watchlist priority raised',
+                reason: 'Trend continuation setup validated after retest of breakout zone.',
+                signals: ['Retest Confirmed', 'EMA Stack', 'Volume Follow-through'],
+                time: '12:03 PM',
+            },
+        ];
+
+        const invested = holdings.reduce((sum, row) => sum + row.invested, 0);
+        const current = holdings.reduce((sum, row) => sum + row.current, 0);
+        const netPnl = current - invested;
+        const pnlPct = invested > 0 ? (netPnl / invested) * 100 : 0;
+
+        const formatCurrency = (value) => new Intl.NumberFormat('en-IN', {
+            style: 'currency',
+            currency: 'INR',
+            maximumFractionDigits: 0,
+        }).format(value);
+
+        const mapTrendToSeries = (arr) => arr.map((value, idx) => ({ step: idx + 1, value }));
+
+        const signalSeries = mapTrendToSeries(signalTrend);
+        const screenSeries = mapTrendToSeries(screenTrend);
+        const accuracySeries = mapTrendToSeries(accuracyTrend);
+
+        const TrendMiniChart = ({ title, data, stroke, gradientId }) => (
+            <div className="rounded-xl border border-white/10 bg-[rgba(15,23,42,0.45)] p-3">
+                <div className="text-xs font-semibold text-slate-300">{title}</div>
+                <div className="mt-2 h-24">
+                    <ResponsiveContainer width="100%" height="100%">
+                        <AreaChart data={data} margin={{ top: 6, right: 4, left: -14, bottom: 0 }}>
+                            <defs>
+                                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor={stroke} stopOpacity={0.35} />
+                                    <stop offset="95%" stopColor={stroke} stopOpacity={0.02} />
+                                </linearGradient>
+                            </defs>
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(148, 163, 184, 0.08)" />
+                            <XAxis dataKey="step" hide />
+                            <YAxis hide domain={['dataMin - 5', 'dataMax + 5']} />
+                            <Tooltip
+                                cursor={{ stroke: 'rgba(148,163,184,0.2)' }}
+                                contentStyle={{
+                                    background: 'rgba(2, 6, 23, 0.96)',
+                                    border: '1px solid rgba(255,255,255,0.12)',
+                                    borderRadius: 10,
+                                    color: '#e2e8f0',
+                                }}
+                                labelStyle={{ color: '#94a3b8' }}
+                            />
+                            <Area type="monotone" dataKey="value" stroke="none" fill={`url(#${gradientId})`} />
+                            <Line type="monotone" dataKey="value" stroke={stroke} strokeWidth={2.2} dot={false} />
+                        </AreaChart>
+                    </ResponsiveContainer>
+                </div>
+            </div>
+        );
+
+        const BehaviorMetric = ({ label, value, accent = 'text-cyan-200' }) => (
+            <div className="rounded-xl border border-white/10 bg-white/[0.04] p-3">
+                <div className="text-[10px] uppercase tracking-[0.14em] text-slate-400">{label}</div>
+                <div className={`mt-1 text-xl font-black ${accent}`}>{value}</div>
+            </div>
+        );
+
+        return (
+            <div className="min-h-screen text-[#E5E7EB]" style={{ backgroundColor: '#06080c' }}>
+                <div
+                    className="pointer-events-none fixed inset-0"
+                    style={{
+                        background:
+                            'radial-gradient(circle at 10% 20%, rgba(66, 192, 165, 0.05), transparent 40%), radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.03), transparent 40%)',
+                    }}
+                />
+
+                <main className="relative mx-auto max-w-7xl px-4 py-8 md:px-8 md:py-10">
+                    <button
+                        type="button"
+                        onClick={() => navigate('/dashboard?module=DASHBOARD')}
+                        className="mb-6 inline-flex items-center gap-2 rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-2 text-sm font-bold text-cyan-200 transition-all duration-200 hover:-translate-y-0.5 hover:border-cyan-300/50 hover:bg-cyan-400/15"
+                    >
+                        <ArrowLeft size={16} />
+                        <span>Back to Dashboard</span>
+                    </button>
+
+                    <section className="rounded-2xl border border-white/10 bg-[rgba(10,15,25,0.62)] p-5 shadow-[0_12px_48px_rgba(4,14,34,0.45)] backdrop-blur-xl md:p-6">
+                        <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+                            <div className="flex items-start gap-4">
+                                <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-300/30 bg-cyan-400/15 text-xl font-black text-cyan-100 shadow-[0_0_28px_rgba(34,211,238,0.2)]">
+                                    {initial}
+                                </div>
+                                <div>
+                                    <div className="inline-flex items-center rounded-full border border-cyan-300/30 bg-cyan-400/15 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.15em] text-cyan-200">
+                                        Advanced Trader
+                                    </div>
+                                    <h1 className="mt-2 text-2xl font-black tracking-tight text-white md:text-3xl">{profile.username}</h1>
+                                    <p className="text-sm text-slate-300">{profile.email}</p>
+                                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-300">
+                                        <span className="inline-flex items-center gap-1 rounded-lg border border-white/10 bg-white/[0.03] px-2 py-1"><Clock size={12} /> Last active {behavior.lastActive}</span>
+                                        <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-400/30 bg-emerald-400/10 px-2 py-1 text-emerald-300"><Activity size={12} /> Session: {behavior.sessionInsight}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 lg:max-w-[340px]">
+                                <div className="text-[10px] uppercase tracking-[0.14em] text-slate-400">Trader Research Intelligence Panel</div>
+                                <p className="mt-1 text-sm text-slate-200">Behavior and signal quality profile calibrated for market research decisions.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-12">
+                        <article className="rounded-2xl border border-white/10 bg-[rgba(10,15,25,0.6)] p-5 backdrop-blur-xl xl:col-span-8">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-black tracking-tight text-white">Research Behavior</h2>
+                                <span className="rounded-full border border-cyan-300/30 bg-cyan-400/15 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] text-cyan-200">Behavioral Metrics</span>
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+                                <BehaviorMetric label="Signals Generated" value={behavior.signalsGenerated} accent="text-cyan-200" />
+                                <BehaviorMetric label="Screens Analyzed" value={behavior.screensAnalyzed} accent="text-blue-200" />
+                                <BehaviorMetric label="Pattern Accuracy" value={`${behavior.patternAccuracy}%`} accent="text-emerald-300" />
+                                <BehaviorMetric label="Research Consistency" value={`${behavior.researchConsistency}%`} accent="text-emerald-300" />
+                            </div>
+
+                            <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-3">
+                                <TrendMiniChart title="Signal Production Trend" data={signalSeries} stroke="#38bdf8" gradientId="signalTrendFill" />
+                                <TrendMiniChart title="Research Depth Trend" data={screenSeries} stroke="#3b82f6" gradientId="screenTrendFill" />
+                                <TrendMiniChart title="Pattern Accuracy Trend" data={accuracySeries} stroke="#34d399" gradientId="accuracyTrendFill" />
+                            </div>
+                        </article>
+
+                        <article className="rounded-2xl border border-white/10 bg-[rgba(10,15,25,0.6)] p-5 shadow-[0_0_35px_rgba(34,211,238,0.08)] backdrop-blur-xl xl:col-span-4">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-black text-white">Portfolio Snapshot</h2>
+                                <BarChart3 size={16} className="text-cyan-300" />
+                            </div>
+
+                            <div className="mt-3 space-y-2">
+                                {holdings.map((item) => {
+                                    const delta = item.current - item.invested;
+                                    return (
+                                        <div key={item.symbol} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2 text-sm">
+                                            <div className="font-semibold text-white">{item.symbol}</div>
+                                            <div className={`text-xs font-bold ${delta >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                                                {delta >= 0 ? '+' : '-'}{formatCurrency(Math.abs(delta))}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="mt-3 rounded-xl border border-cyan-300/20 bg-cyan-500/10 p-3 text-xs">
+                                <div className="flex items-center justify-between text-slate-300"><span>Invested</span><span className="font-bold text-white">{formatCurrency(invested)}</span></div>
+                                <div className="mt-1 flex items-center justify-between text-slate-300"><span>Current</span><span className="font-bold text-white">{formatCurrency(current)}</span></div>
+                                <div className="mt-1 flex items-center justify-between"><span className="text-slate-300">Net</span><span className={`font-bold ${netPnl >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>{pnlPct >= 0 ? '+' : ''}{pnlPct.toFixed(2)}%</span></div>
+                            </div>
+                        </article>
+                    </section>
+
+                    <section className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+                        <article className="rounded-2xl border border-white/10 bg-[rgba(10,15,25,0.6)] p-5 backdrop-blur-xl">
+                            <h2 className="text-lg font-black text-white">Trading Style & AI Insights</h2>
+                            <div className="mt-3 space-y-3 text-sm">
+                                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                                    <span className="text-slate-300">Style</span>
+                                    <span className="font-bold text-cyan-200">Intraday Breakout Research</span>
+                                </div>
+                                <div className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-3">
+                                    <div className="mb-1 flex items-center justify-between text-xs text-slate-300">
+                                        <span className="inline-flex items-center gap-1"><AlertCircle size={12} /> Risk Level</span>
+                                        <span className="font-semibold text-amber-300">Medium-High</span>
+                                    </div>
+                                    <div className="h-2 overflow-hidden rounded-full bg-slate-800">
+                                        <div className="h-full w-[78%] rounded-full bg-gradient-to-r from-amber-400 to-rose-500" />
+                                    </div>
+                                </div>
+                                <div className="flex items-center justify-between rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                                    <span className="text-slate-300">Preferred Sectors</span>
+                                    <span className="font-semibold text-white">Banking, IT, Energy</span>
+                                </div>
+                            </div>
+                            <div className="mt-4 space-y-2 rounded-xl border border-cyan-400/25 bg-cyan-400/10 px-4 py-3 text-sm text-cyan-100">
+                                <p>Prefers breakout setups during opening sessions.</p>
+                                <p>Higher risk appetite after consecutive losses; monitor cooldown discipline.</p>
+                                <p>Research quality improves when volume confirmation is part of the filter stack.</p>
+                            </div>
+                        </article>
+
+                        <article className="rounded-2xl border border-white/10 bg-[rgba(10,15,25,0.6)] p-5 backdrop-blur-xl">
+                            <div className="flex items-center justify-between">
+                                <h2 className="text-lg font-black text-white">Watchlist (Active Research)</h2>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/dashboard?module=WATCHLIST')}
+                                    className="rounded-lg border border-cyan-400/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-bold text-cyan-200 transition-all hover:border-cyan-300/60 hover:bg-cyan-400/15"
+                                >
+                                    Open Watchlist
+                                </button>
+                            </div>
+
+                            <div className="mt-3 space-y-2">
+                                {watchlist.map((row) => (
+                                    <div key={row.symbol} className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="text-sm font-semibold text-white">{row.symbol}</span>
+                                            <span className={`text-xs font-bold ${row.change >= 0 ? 'text-emerald-300' : 'text-rose-300'}`}>
+                                                {row.change >= 0 ? '+' : ''}{row.change.toFixed(2)}%
+                                            </span>
+                                        </div>
+                                        <div className="mt-1 flex items-center justify-between gap-2 text-[11px]">
+                                            <span className="rounded-full border border-white/10 bg-white/[0.04] px-2 py-0.5 text-slate-300">{row.signal}</span>
+                                            <span className={`rounded-full px-2 py-0.5 font-semibold ${row.tag === 'High Momentum' ? 'border border-emerald-400/30 bg-emerald-400/10 text-emerald-300' : row.tag === 'Weak Structure' ? 'border border-rose-400/30 bg-rose-400/10 text-rose-300' : 'border border-cyan-400/30 bg-cyan-400/10 text-cyan-200'}`}>
+                                                {row.tag}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </article>
+                    </section>
+
+                    <section className="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+                        <article className="rounded-2xl border border-white/10 bg-[rgba(10,15,25,0.6)] p-5 backdrop-blur-xl">
+                            <h2 className="text-lg font-black text-white">Activity Intelligence</h2>
+                            <div className="mt-3 space-y-3">
+                                {activityLog.map((item) => (
+                                    <div key={`${item.symbol}-${item.time}`} className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                                        <div className="flex items-center justify-between">
+                                            <div className="text-sm font-semibold text-white">{item.symbol} • {item.action}</div>
+                                            <div className="text-xs text-slate-400">{item.time}</div>
+                                        </div>
+                                        <p className="mt-1 text-xs text-slate-300">{item.reason}</p>
+                                        <div className="mt-2 flex flex-wrap gap-1.5">
+                                            {item.signals.map((signal) => (
+                                                <span key={signal} className="rounded-full border border-cyan-400/20 bg-cyan-500/10 px-2 py-0.5 text-[10px] font-semibold text-cyan-200">
+                                                    {signal}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </article>
+
+                        <article className="rounded-2xl border border-white/10 bg-[rgba(10,15,25,0.6)] p-5 backdrop-blur-xl">
+                            <h2 className="text-lg font-black text-white">Actions</h2>
+                            <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/settings?section=profile')}
+                                    className="rounded-xl border border-cyan-400/30 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-200 transition-all hover:-translate-y-0.5 hover:bg-cyan-400/15"
+                                >
+                                    Edit Profile
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/settings?section=mode')}
+                                    className="rounded-xl border border-white/15 bg-white/[0.05] px-4 py-3 text-sm font-bold text-white transition-all hover:-translate-y-0.5 hover:border-cyan-300/40"
+                                >
+                                    Change Mode
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate('/onboarding')}
+                                    className="rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-sm font-bold text-emerald-200 transition-all hover:-translate-y-0.5 hover:bg-emerald-400/15"
+                                >
+                                    Retake Assessment
+                                </button>
+                            </div>
+                        </article>
+                    </section>
+                </main>
+            </div>
+        );
+    }
 
     return (
         <div className="profile-page-root">
@@ -1020,55 +1387,359 @@ export function ProfilePage() {
 }
 
 export function SettingsPage() {
-    const [theme, setTheme] = useState('dark');
-    const [persona, setPersona] = useState('INVESTOR');
+    return <TradingSettingsPage />;
+
     const [status, setStatus] = useState('');
+    const [settings, setSettings] = useState({
+        persona: 'INVESTOR',
+        theme: 'dark',
+        researchSource: 'Market Feed',
+        coverage: 'NSE',
+        baseCurrency: 'INR',
+        chartTimeframe: '5m',
+        chartType: 'candlestick',
+        refreshInterval: '5',
+        priceAlerts: true,
+        volumeAlerts: true,
+        earningsAlerts: true,
+        newsAlerts: true,
+        calendarAlerts: true,
+        twoFA: true,
+        sessionTimeout: '30',
+        apiAccess: false,
+        webhookUrl: '',
+        indicators: {
+            rsi: true,
+            macd: true,
+            ema: true,
+            bb: true,
+            vwap: true,
+        },
+    });
 
     useEffect(() => {
         const load = async () => {
             const response = await api.get('/auth/me').catch(() => ({ data: {} }));
             const me = toPayload(response.data, {});
-            setPersona(me?.preferredMode || 'INVESTOR');
-            setTheme(me?.settings?.theme || 'dark');
+            const storedMode = String(localStorage.getItem('mode') || '').toUpperCase();
+
+            setSettings((current) => ({
+                ...current,
+                persona: storedMode === 'TRADER' ? 'INVESTOR' : (me?.preferredMode === 'TRADER' ? 'INVESTOR' : current.persona),
+                theme: me?.settings?.theme || current.theme,
+                researchSource: me?.settings?.researchSource || me?.settings?.broker || current.researchSource,
+                coverage: me?.settings?.coverage || me?.settings?.accountType || current.coverage,
+                baseCurrency: me?.settings?.baseCurrency || current.baseCurrency,
+                chartTimeframe: me?.settings?.chartTimeframe || current.chartTimeframe,
+                chartType: me?.settings?.chartType || current.chartType,
+                refreshInterval: me?.settings?.refreshInterval || current.refreshInterval,
+            }));
+
+            if (storedMode !== 'INVESTOR') {
+                localStorage.setItem('mode', 'INVESTOR');
+            }
         };
+
         load();
     }, []);
 
+    const updateField = (key, value) => {
+        setSettings((current) => ({ ...current, [key]: value }));
+    };
+
+    const toggleIndicator = (indicator) => {
+        setSettings((current) => ({
+            ...current,
+            indicators: {
+                ...current.indicators,
+                [indicator]: !current.indicators[indicator],
+            },
+        }));
+    };
+
     const save = async (event) => {
         event.preventDefault();
+        setStatus('');
+
         await Promise.all([
-            api.put('/user/persona', { persona }).catch(() => null),
-            api.put('/user/settings', { theme }).catch(() => null),
+            api.put('/user/persona', { persona: settings.persona }).catch(() => null),
+            api.put('/user/settings', {
+                theme: settings.theme,
+                research: {
+                    source: settings.researchSource,
+                    coverage: settings.coverage,
+                    baseCurrency: settings.baseCurrency,
+                    chartTimeframe: settings.chartTimeframe,
+                    chartType: settings.chartType,
+                    refreshInterval: settings.refreshInterval,
+                    indicators: settings.indicators,
+                    alerts: {
+                        priceAlerts: settings.priceAlerts,
+                        volumeAlerts: settings.volumeAlerts,
+                        earningsAlerts: settings.earningsAlerts,
+                        newsAlerts: settings.newsAlerts,
+                        calendarAlerts: settings.calendarAlerts,
+                    },
+                    security: {
+                        twoFA: settings.twoFA,
+                        sessionTimeout: settings.sessionTimeout,
+                        apiAccess: settings.apiAccess,
+                        webhookUrl: settings.webhookUrl,
+                    },
+                },
+            }).catch(() => null),
         ]);
-        localStorage.setItem('mode', persona === 'TRADER' ? 'TRADER' : 'INVESTOR');
-        setStatus('Settings updated.');
+
+        localStorage.setItem('mode', 'INVESTOR');
+        setStatus('Research settings updated successfully.');
     };
+
+    const sections = [
+        {
+            title: 'Research profile',
+            icon: UserIcon,
+            description: 'Persona, research source, coverage, and currency.',
+            fields: (
+                <>
+                    <label className="block text-sm">
+                        <span className="text-slate-300">Persona</span>
+                        <select value={settings.persona} onChange={(event) => updateField('persona', event.target.value)} className="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-sm">
+                            <option value="INVESTOR">INVESTOR</option>
+                            <option value="TRADER">TRADER</option>
+                        </select>
+                    </label>
+                    <label className="block text-sm">
+                        <span className="text-slate-300">Research source</span>
+                        <select value={settings.researchSource} onChange={(event) => updateField('researchSource', event.target.value)} className="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-sm">
+                            <option>Market Feed</option>
+                            <option>News & Filings</option>
+                            <option>Chart Analysis</option>
+                            <option>Macro Research</option>
+                        </select>
+                    </label>
+                    <label className="block text-sm">
+                        <span className="text-slate-300">Coverage</span>
+                        <select value={settings.coverage} onChange={(event) => updateField('coverage', event.target.value)} className="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-sm">
+                            <option value="NSE">NSE</option>
+                            <option value="BSE">BSE</option>
+                            <option value="Global">Global</option>
+                        </select>
+                    </label>
+                    <label className="block text-sm">
+                        <span className="text-slate-300">Base Currency</span>
+                        <select value={settings.baseCurrency} onChange={(event) => updateField('baseCurrency', event.target.value)} className="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-sm">
+                            <option value="INR">INR</option>
+                            <option value="USD">USD</option>
+                            <option value="EUR">EUR</option>
+                        </select>
+                    </label>
+                </>
+            ),
+        },
+        {
+            title: 'Charts',
+            icon: BarChart3,
+            description: 'Chart timeframe, type, and refresh rate.',
+            fields: (
+                <>
+                    <label className="block text-sm">
+                        <span className="text-slate-300">Chart Timeframe</span>
+                        <select value={settings.chartTimeframe} onChange={(event) => updateField('chartTimeframe', event.target.value)} className="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-sm">
+                            <option value="1m">1 Minute</option>
+                            <option value="5m">5 Minutes</option>
+                            <option value="15m">15 Minutes</option>
+                            <option value="1h">1 Hour</option>
+                            <option value="1d">1 Day</option>
+                        </select>
+                    </label>
+                    <label className="block text-sm">
+                        <span className="text-slate-300">Chart Type</span>
+                        <select value={settings.chartType} onChange={(event) => updateField('chartType', event.target.value)} className="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-sm">
+                            <option value="candlestick">Candlestick</option>
+                            <option value="line">Line</option>
+                            <option value="area">Area</option>
+                        </select>
+                    </label>
+                    <label className="block text-sm">
+                        <span className="text-slate-300">Refresh interval (sec)</span>
+                        <input value={settings.refreshInterval} onChange={(event) => updateField('refreshInterval', event.target.value)} type="number" min="1" className="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-sm" />
+                    </label>
+                </>
+            ),
+        },
+        {
+            title: 'Chart toolkit',
+            icon: Shield,
+            description: 'Indicators visible by default.',
+            fields: (
+                <>
+                    <label className="block text-sm">
+                        <span className="text-slate-300">Indicators</span>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm md:col-span-2 mt-2">
+                            {[
+                                ['rsi', 'RSI'],
+                                ['macd', 'MACD'],
+                                ['ema', 'EMA'],
+                                ['bb', 'Bollinger Bands'],
+                                ['vwap', 'VWAP'],
+                            ].map(([key, label]) => (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => toggleIndicator(key)}
+                                    className={`rounded-xl border px-3 py-3 text-left transition ${settings.indicators[key] ? 'border-emerald-400/60 bg-emerald-400/10 text-emerald-200' : 'border-white/10 bg-slate-900/70 text-slate-300 hover:border-emerald-400/30'}`}
+                                >
+                                    <span className="block font-semibold">{label}</span>
+                                    <span className="block text-xs text-slate-400 mt-1">{settings.indicators[key] ? 'Visible' : 'Hidden'}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </label>
+                </>
+            ),
+        },
+        {
+            title: 'Alerts',
+            icon: Bell,
+            description: 'Price, volume, news, and calendar alerts.',
+            fields: (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm md:col-span-2">
+                    {[
+                        ['priceAlerts', 'Price alerts'],
+                        ['volumeAlerts', 'Volume spikes'],
+                        ['earningsAlerts', 'Earnings'],
+                        ['newsAlerts', 'News feed'],
+                        ['calendarAlerts', 'Economic calendar'],
+                    ].map(([key, label]) => (
+                        <button
+                            key={key}
+                            type="button"
+                            onClick={() => updateField(key, !settings[key])}
+                            className={`rounded-xl border px-3 py-3 text-left transition ${settings[key] ? 'border-cyan-400/60 bg-cyan-400/10 text-cyan-200' : 'border-white/10 bg-slate-900/70 text-slate-300 hover:border-cyan-400/30'}`}
+                        >
+                            <span className="block font-semibold">{label}</span>
+                            <span className="block text-xs text-slate-400 mt-1">{settings[key] ? 'Enabled' : 'Disabled'}</span>
+                        </button>
+                    ))}
+                </div>
+            ),
+        },
+        {
+            title: 'Security',
+            icon: Settings,
+            description: 'Access control and session safety.',
+            fields: (
+                <>
+                    <label className="block text-sm">
+                        <span className="text-slate-300">Session Timeout (minutes)</span>
+                        <input value={settings.sessionTimeout} onChange={(event) => updateField('sessionTimeout', event.target.value)} type="number" min="5" step="5" className="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-sm" />
+                    </label>
+                    <div className="flex flex-col gap-3 text-sm md:col-span-2">
+                        <button
+                            type="button"
+                            onClick={() => updateField('twoFA', !settings.twoFA)}
+                            className={`rounded-xl border px-3 py-3 text-left transition ${settings.twoFA ? 'border-cyan-400/60 bg-cyan-400/10 text-cyan-200' : 'border-white/10 bg-slate-900/70 text-slate-300 hover:border-cyan-400/30'}`}
+                        >
+                            <span className="block font-semibold">Two-factor authentication</span>
+                            <span className="block text-xs text-slate-400 mt-1">{settings.twoFA ? 'Enabled' : 'Disabled'}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => updateField('apiAccess', !settings.apiAccess)}
+                            className={`rounded-xl border px-3 py-3 text-left transition ${settings.apiAccess ? 'border-cyan-400/60 bg-cyan-400/10 text-cyan-200' : 'border-white/10 bg-slate-900/70 text-slate-300 hover:border-cyan-400/30'}`}
+                        >
+                            <span className="block font-semibold">API access</span>
+                            <span className="block text-xs text-slate-400 mt-1">{settings.apiAccess ? 'Enabled' : 'Disabled'}</span>
+                        </button>
+                    </div>
+                    <label className="block text-sm md:col-span-2">
+                        <span className="text-slate-300">Webhook URL</span>
+                        <input value={settings.webhookUrl} onChange={(event) => updateField('webhookUrl', event.target.value)} type="url" placeholder="https://your-bot/webhook" className="mt-1 w-full rounded-xl bg-slate-900 border border-white/10 px-3 py-2 text-sm" />
+                    </label>
+                </>
+            ),
+        },
+    ];
 
     return (
         <PageShell
-            title="Settings"
-            subtitle="Persona and UI preference controls."
+            title="Research Settings"
+            subtitle="Configure the essential research controls for your dashboard."
         >
-            <form onSubmit={save} className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-3">
-                <label className="block text-sm">
-                    <span className="text-slate-300">Persona</span>
-                    <select value={persona} onChange={(event) => setPersona(event.target.value)} className="mt-1 w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm">
-                        <option value="TRADER">TRADER</option>
-                        <option value="INVESTOR">INVESTOR</option>
-                    </select>
-                </label>
-                <label className="block text-sm">
-                    <span className="text-slate-300">Theme</span>
-                    <select value={theme} onChange={(event) => setTheme(event.target.value)} className="mt-1 w-full rounded-lg bg-slate-900 border border-white/10 px-3 py-2 text-sm">
-                        <option value="dark">dark</option>
-                        <option value="light">light</option>
-                    </select>
-                </label>
-                <button type="submit" className="rounded-lg bg-cyan-400 text-slate-950 px-4 py-2 font-bold text-sm">Save Settings</button>
-                {status ? <div className="text-sm text-emerald-300">{status}</div> : null}
-            </form>
+            <motion.form
+                onSubmit={save}
+                className="space-y-5"
+                variants={pageMotion}
+                initial="hidden"
+                animate="show"
+            >
+                <motion.div className="rounded-2xl border border-cyan-400/10 bg-white/5 p-5 sm:p-6" variants={cardMotion}>
+                    <div className="grid gap-4 md:grid-cols-3">
+                        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
+                            <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Mode</div>
+                            <div className="mt-2 text-lg font-black text-cyan-300">{settings.persona === 'TRADER' ? 'RESEARCHER' : 'RESEARCH'}</div>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
+                            <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Source</div>
+                            <div className="mt-2 text-lg font-black text-slate-100">{settings.researchSource}</div>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-slate-900/70 p-4">
+                            <div className="text-xs uppercase tracking-[0.2em] text-slate-400">Coverage</div>
+                            <div className="mt-2 text-lg font-black text-emerald-300">{settings.coverage}</div>
+                        </div>
+                    </div>
+                </motion.div>
+
+                <motion.div className="grid gap-5 lg:grid-cols-2" variants={staggerMotion} initial="hidden" animate="show">
+                    {sections.map((section, index) => {
+                        const Icon = section.icon;
+                        return (
+                            <motion.section
+                                key={section.title}
+                                className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 shadow-[0_24px_80px_rgba(0,0,0,0.25)]"
+                                variants={cardMotion}
+                                whileHover={{ y: -2, transition: { duration: 0.2 } }}
+                                transition={{ delay: index * 0.02 }}
+                            >
+                                <div className="flex items-start gap-3 mb-5">
+                                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-400/10 text-cyan-300 border border-cyan-400/20">
+                                        <Icon size={18} />
+                                    </div>
+                                    <div>
+                                        <h2 className="text-lg font-black text-slate-50">{section.title}</h2>
+                                        <p className="text-sm text-slate-400 mt-1">{section.description}</p>
+                                    </div>
+                                </div>
+                                <div className="grid gap-4 md:grid-cols-2">
+                                    {section.fields}
+                                </div>
+                            </motion.section>
+                        );
+                    })}
+                </motion.div>
+
+                <motion.div className="rounded-2xl border border-white/10 bg-white/5 p-5 sm:p-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" variants={cardMotion}>
+                    <div>
+                        <div className="text-sm font-bold text-slate-100">Save research profile</div>
+                        <p className="text-sm text-slate-400">Persists persona, theme, chart, alerts, and security preferences.</p>
+                    </div>
+                    <button type="submit" className="inline-flex items-center justify-center rounded-xl bg-cyan-400 px-5 py-3 font-black text-slate-950 text-sm shadow-lg shadow-cyan-400/20 hover:bg-cyan-300 transition">
+                        Save Research Settings
+                    </button>
+                </motion.div>
+
+                {status ? (
+                    <motion.div className="text-sm text-emerald-300 font-semibold" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
+                        {status}
+                    </motion.div>
+                ) : null}
+            </motion.form>
         </PageShell>
     );
+}
+
+export function SupportPage() {
+    return <HelpSupportPage />;
 }
 
 export function InvestorFilingsPage() {

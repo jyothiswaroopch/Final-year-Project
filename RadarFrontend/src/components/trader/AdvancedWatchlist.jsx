@@ -208,7 +208,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
         const nextRows = prevRows.map((row, idx) => {
           if (!indices.has(idx)) return row;
 
-          const change = 1 + (Math.random() * 0.003 - 0.0015); // Â±0.15% fluctuation
+          const change = 1 + (Math.random() * 0.003 - 0.0015); // +/-0.15% fluctuation
           const nextPrice = row.price * change;
           const tickDir = nextPrice > row.price ? 'up' : 'down';
           nextTickState[row.symbol] = tickDir;
@@ -569,7 +569,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                              animate={{ color: "#fff" }}
                              className="text-lg font-black tracking-tighter"
                            >
-                             â‚¹{row.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                             ₹{row.price.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                            </motion.span>
                          </div>
 
@@ -595,7 +595,7 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                                   <Sparkline data={row.chart} color={isPositive ? "#10b981" : "#f43f5e"} />
                                </div>
                             ) : (
-                               <span className="text-[11px] font-bold text-slate-300">â‚¹{row.vwapVal || row.peRatio}</span>
+                               <span className="text-[11px] font-bold text-slate-300">₹{row.vwapVal || row.peRatio}</span>
                             )}
                          </div>
 
@@ -633,21 +633,21 @@ const AdvancedWatchlist = ({ onSymbolSelect }) => {
                                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-cyan-900/10 border border-cyan-400/10 text-cyan-300/60 hover:text-cyan-300 hover:bg-cyan-900/30"
                                  title="Set Alert"
                                >
-                                 <span className="text-xs">ðŸ””</span>
+                                 <span className="text-xs">🔔</span>
                                </button>
                                <button
                                  onClick={(e) => { e.stopPropagation(); openSymbol(row); }}
                                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-white/[0.03] border border-white/10 text-slate-400 hover:text-white hover:border-white/30"
                                  title="View"
                                >
-                                 <span className="text-sm">â€º</span>
+                                 <span className="text-sm">›</span>
                                </button>
                                <button
                                  onClick={(e) => handleDeleteSymbol(e, row.symbol)}
                                  className="h-8 w-8 inline-flex items-center justify-center rounded-lg bg-rose-900/20 border border-rose-400/30 text-rose-300 hover:text-rose-200 hover:bg-rose-900/35"
                                  title="Delete"
                                >
-                                 <span className="text-xs">âœ•</span>
+                                 <span className="text-xs">✕</span>
                                </button>
                             </div>
                          </div>

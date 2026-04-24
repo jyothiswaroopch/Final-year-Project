@@ -35,11 +35,11 @@ const TIMEFRAMES = [
 ];
 
 const CHART_TYPES = [
-  { id: 'candlestick', label: 'Candlestick', icon: 'ðŸ“Š' },
-  { id: 'line', label: 'Line', icon: 'ðŸ“ˆ' },
-  { id: 'area', label: 'Area', icon: 'ðŸ”ï¸' },
-  { id: 'bars', label: 'Bars', icon: 'ðŸ“‰' },
-  { id: 'heikinashi', label: 'Heikin Ashi', icon: 'ðŸŽ´' },
+  { id: 'candlestick', label: 'Candlestick', icon: '📊' },
+  { id: 'line', label: 'Line', icon: '📈' },
+  { id: 'area', label: 'Area', icon: '🏔️' },
+  { id: 'bars', label: 'Bars', icon: '📉' },
+  { id: 'heikinashi', label: 'Heikin Ashi', icon: '🎴' },
 ];
 
 const INDICATORS = [
@@ -296,7 +296,7 @@ const AdvancedTradingChart = ({
                 {currentPrice && (
                   <div className="flex items-center gap-2 mt-1">
                     <span className="text-2xl font-mono font-bold text-white">
-                      â‚¹{currentPrice.toFixed(2)}
+                      ₹{currentPrice.toFixed(2)}
                     </span>
                     <span className={`flex items-center gap-1 text-sm font-semibold ${
                       priceChange.value >= 0 ? 'text-emerald-400' : 'text-rose-400'

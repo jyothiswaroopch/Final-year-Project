@@ -3,9 +3,12 @@
 
 .profile-page-root {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: #f0f9ff;
+    background:
+        radial-gradient(circle at 10% 20%, rgba(66, 192, 165, 0.05), transparent 40%),
+        radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.03), transparent 40%),
+        linear-gradient(180deg, #06080c 0%, #06080c 100%);
     min-height: 100vh;
-    color: #0f172a;
+    color: #E5E7EB;
     padding-top: 3rem;
 }
 

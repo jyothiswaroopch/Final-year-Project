@@ -24,6 +24,34 @@ const buildFallbackProfile = () => {
     };
 };
 
+const buildFallbackNotifications = () => {
+    const now = Date.now();
+
+    return [
+        {
+            id: 'fallback-1',
+            title: 'Price Alert Triggered',
+            message: 'RELIANCE crossed your alert level at Rs 2,985.',
+            createdAt: new Date(now - 5 * 60 * 1000).toISOString(),
+            read: false
+        },
+        {
+            id: 'fallback-2',
+            title: 'Watchlist Update',
+            message: 'NIFTY 50 moved +0.52% in the last session.',
+            createdAt: new Date(now - 22 * 60 * 1000).toISOString(),
+            read: false
+        },
+        {
+            id: 'fallback-3',
+            title: 'Market Brief Ready',
+            message: 'Your morning market summary is available.',
+            createdAt: new Date(now - 65 * 60 * 1000).toISOString(),
+            read: true
+        }
+    ];
+};
+
 export const useHeaderData = () => {
     const [profile, setProfile] = useState(buildFallbackProfile);
     const [notifications, setNotifications] = useState([]);
@@ -58,21 +86,26 @@ export const useHeaderData = () => {
 
     const loadNotifications = useCallback(async () => {
         const token = localStorage.getItem('token');
+        const fallbackNotifications = buildFallbackNotifications();
 
         if (!token) {
-            setNotifications([]);
-            return [];
+            setNotifications(fallbackNotifications);
+            return fallbackNotifications;
         }
 
         try {
             setIsLoadingNotifications(true);
             const response = await fetchNotifications();
-            setNotifications(Array.isArray(response) ? response : []);
-            return response;
+            const resolvedNotifications = Array.isArray(response) && response.length > 0
+                ? response
+                : fallbackNotifications;
+
+            setNotifications(resolvedNotifications);
+            return resolvedNotifications;
         } catch (error) {
             console.error('Failed to load notifications:', error);
-            setNotifications([]);
-            return [];
+            setNotifications(fallbackNotifications);
+            return fallbackNotifications;
         } finally {
             setIsLoadingNotifications(false);
         }

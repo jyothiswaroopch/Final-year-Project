@@ -14,6 +14,7 @@ import {
   ReportsExportPage,
   ProfilePage,
   SettingsPage,
+  SupportPage,
   InvestorFilingsPage,
 } from './pages/ContractPages';
 
@@ -25,6 +26,7 @@ const Login = lazy(() => import('./pages/Login'));
 const Register = lazy(() => import('./pages/Register'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const TraderStockPage = lazy(() => import('./pages/TraderStockPage'));
+const TradeTerminalPage = lazy(() => import('./pages/TradeTerminalPage'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const RealtimeDemoPage = lazy(() => import('./pages/RealtimeDemoPage'));
 const SpecShowcasePage = lazy(() => import('./pages/SpecShowcase'));
@@ -32,6 +34,8 @@ const Onboarding = lazy(() => import('./pages/Onboarding'));
 const InvestorStockPage = lazy(() => import('./pages/InvestorStockPage'));
 const MarketResearchDashboard = lazy(() => import('./pages/MarketResearchDashboard'));
 const ScreenerPage = lazy(() => import('./pages/ScreenerPage'));
+const TraderProfilePage = lazy(() => import('./pages/traderProfile/TraderProfilePage'));
+const MinimalChartPage = lazy(() => import('./pages/MinimalChartPage'));
 
 const AppLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-[#020617] text-[#E2E8F0]">
@@ -117,6 +121,8 @@ function App() {
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/auth/oauth/callback" element={<OAuthCallbackRoute />} />
             <Route path="/stocks/:symbol" element={<TraderStockPage />} />
+            <Route path="/trade/:symbol" element={<TradeTerminalPage />} />
+            <Route path="/chart/:symbol" element={<MinimalChartPage />} />
             <Route path="/investor-stock/:symbol" element={<InvestorStockPage />} />
             <Route path="/asset/:symbol" element={<AssetAliasRoute />} />
             <Route path="/trader/momentum" element={<DashboardAliasRoute mode="TRADER" module="DASHBOARD" />} />
@@ -131,8 +137,10 @@ function App() {
             <Route path="/portfolio" element={<PortfolioPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
             <Route path="/reports/export" element={<ReportsExportPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/profile" element={<TraderProfilePage />} />
+            <Route path="/trader-profile" element={<TraderProfilePage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/support" element={<SupportPage />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/health" element={<Navigate to="/admin" replace />} />
             <Route path="/demo" element={<RealtimeDemoPage />} />
