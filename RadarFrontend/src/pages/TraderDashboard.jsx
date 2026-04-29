@@ -2850,7 +2850,7 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
   const { setAsset } = useAsset();
 
   if (activeModule === "WATCHLIST") {
-    return <Navigate to="/investor/watchlists" replace />;
+    return <Navigate to="/trader/watchlists" replace />;
   }
 
   if (analysisSymbol) {

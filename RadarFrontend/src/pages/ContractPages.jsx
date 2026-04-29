@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState, useRef } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import Header from '../components/common/Header';
+import AdvancedWatchlistDashboard from '../components/watchlist/AdvancedWatchlistDashboard';
+import MainLayout from '../components/layout/MainLayout';
 import './Profile.css';
 import './InvestorDashboard.css';
 import { 
@@ -571,7 +573,26 @@ export function NewsPage() {
 }
 
 export function WatchlistsPage() {
-    return <AdvancedWatchlistDashboard />;
+    const isTrader = typeof window !== 'undefined' && localStorage.getItem('mode') === 'TRADER';
+    
+    if (isTrader) {
+        return (
+            <MainLayout>
+                <div style={{ height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
+                    <AdvancedWatchlistDashboard />
+                </div>
+            </MainLayout>
+        );
+    }
+
+    return (
+        <div className="dashboard-container investor-theme">
+            <Header />
+            <main className="content fade-in transition-all duration-300">
+                <AdvancedWatchlistDashboard />
+            </main>
+        </div>
+    );
 }
 
 export function PortfolioPage() {

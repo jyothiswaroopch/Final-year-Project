@@ -4982,3 +4982,707 @@
 {"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 14:55:44"}
 {"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 14:55:45"}
 {"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 14:55:45"}
+{"level":"info","message":"Realtime Service Initialized","service":"radar-backend","timestamp":"2026-04-28 15:03:13"}
+{"level":"info","message":"Connected to Binance WebSocket","service":"radar-backend","timestamp":"2026-04-28 15:03:16"}
+{"level":"info","message":"Connected to Finnhub WebSocket","service":"radar-backend","timestamp":"2026-04-28 15:03:16"}
+{"level":"info","message":"Starting Advanced Alert Engine...","service":"radar-backend","timestamp":"2026-04-28 15:03:17"}
+{"level":"info","message":"Alert Engine started","service":"radar-backend","timestamp":"2026-04-28 15:03:17"}
+{"level":"info","message":"MongoDB Connected: ac-6hhl90p-shard-00-01.oxlqhqv.mongodb.net","service":"radar-backend","timestamp":"2026-04-28 15:03:17"}
+{"level":"info","message":"Time-series collection \"ohlcs\" already exists","service":"radar-backend","timestamp":"2026-04-28 15:03:18"}
+{"level":"info","message":"Initializing data update cron job...","service":"radar-backend","timestamp":"2026-04-28 15:03:18"}
+{"level":"info","message":"Data update cron job started","schedule":"*/5 * * * *","service":"radar-backend","timestamp":"2026-04-28 15:03:18","timezone":"Asia/Kolkata"}
+{"level":"info","message":"Data update cron job initialized","service":"radar-backend","timestamp":"2026-04-28 15:03:18"}
+{"level":"info","message":"Starting smart refresh service","service":"radar-backend","timestamp":"2026-04-28 15:03:18"}
+{"level":"info","message":"Smart refresh service initialized","service":"radar-backend","timestamp":"2026-04-28 15:03:18"}
+{"level":"info","message":"Server running on http://localhost:5000","service":"radar-backend","timestamp":"2026-04-28 15:03:18"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:03:18"}
+{"level":"info","message":"SmartRefresh tier1: loaded 208 symbols from DB","service":"radar-backend","timestamp":"2026-04-28 15:03:18"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:03:19"}
+{"isMarketOpen":true,"isPostMarket":false,"level":"info","message":"Running initial data check on startup","service":"radar-backend","timestamp":"2026-04-28 15:03:23"}
+{"level":"info","message":"Active market hours - skipping initial heavy backfill","nextClose":"2026-04-28T10:00:00.000Z","service":"radar-backend","timestamp":"2026-04-28 15:03:23"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 34s","service":"radar-backend","timestamp":"2026-04-28 15:03:53"}
+{"level":"info","message":"User connected: 9QuXMQmz3ySOYHC2AAAC","service":"radar-backend","timestamp":"2026-04-28 15:04:21"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:04:21"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:04:21"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:04:21"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:04:21"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:04:22"}
+{"error":"Request failed with status code 404","level":"warn","message":"Yahoo Finance history fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:04:28"}
+{"error":"Request failed with status code 429","level":"warn","message":"Tiingo history fetch failed, trying Finnhub...","service":"radar-backend","timestamp":"2026-04-28 15:04:30"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:04:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:04:32"}
+{"error":"Request failed with status code 403","level":"warn","message":"Finnhub history fetch failed, trying Polygon...","service":"radar-backend","timestamp":"2026-04-28 15:04:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:04:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:04:33"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:04:33"}
+{"error":"Request failed with status code 429","level":"warn","message":"Marketstack history fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:04:37"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:04:37"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:04:37"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:04:37"}
+{"level":"info","message":"User disconnected: 9QuXMQmz3ySOYHC2AAAC","service":"radar-backend","timestamp":"2026-04-28 15:04:38"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:04:38"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:04:39"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:04:53"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:04:54"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:04:54"}
+{"level":"info","message":"User connected: oq5IVTzn45qRcK6fAAAF","service":"radar-backend","timestamp":"2026-04-28 15:04:54"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:04:54"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:04:54"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:04:54"}
+{"level":"info","message":"User disconnected: oq5IVTzn45qRcK6fAAAF","service":"radar-backend","timestamp":"2026-04-28 15:04:57"}
+{"currentTime":"2026-04-28T09:35:00.042Z","isMarketOpen":true,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:05:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:05:00"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:05:00"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:05:00"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:05:00"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:05:00"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:05:02"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:05:03"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:05:03"}
+{"level":"info","message":"User connected: cqWjrkEm0P2Y8H85AAAI","service":"radar-backend","timestamp":"2026-04-28 15:05:03"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:05:04"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:05:04"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:05:05"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:05:07"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:05:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:05:07"}
+{"level":"info","message":"User disconnected: cqWjrkEm0P2Y8H85AAAI","service":"radar-backend","timestamp":"2026-04-28 15:05:12"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:05:12"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:05:13"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 22s","service":"radar-backend","timestamp":"2026-04-28 15:05:15"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:05:31"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:05:31"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:06:15"}
+{"level":"info","message":"User connected: kZLbn7AUhgDvqFmtAAAL","service":"radar-backend","timestamp":"2026-04-28 15:06:27"}
+{"level":"info","message":"User disconnected: kZLbn7AUhgDvqFmtAAAL","service":"radar-backend","timestamp":"2026-04-28 15:06:28"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:06:30"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:06:45"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:06:48"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 115s","service":"radar-backend","timestamp":"2026-04-28 15:08:10"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:09:10"}
+{"level":"info","message":"User connected: _H2Lr9Vw9iWETJTqAAAO","service":"radar-backend","timestamp":"2026-04-28 15:09:42"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:09:42"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:09:42"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:09:42"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:09:43"}
+{"level":"info","message":"User disconnected: _H2Lr9Vw9iWETJTqAAAO","service":"radar-backend","timestamp":"2026-04-28 15:09:43"}
+{"error":"Request failed with status code 401","level":"warn","message":"Yahoo Finance quote fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:09:50"}
+{"error":"timeout of 5000ms exceeded","level":"warn","message":"Yahoo Finance quote fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:09:55"}
+{"error":"socket hang up","level":"warn","message":"Frankfurter forex fetch failed, trying ExchangeRate API...","service":"radar-backend","timestamp":"2026-04-28 15:09:58"}
+{"currentTime":"2026-04-28T09:40:00.144Z","isMarketOpen":true,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:10:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:10:00"}
+{"error":"Client network socket disconnected before secure TLS connection was established","level":"warn","message":"Frankfurter forex fetch failed, trying ExchangeRate API...","service":"radar-backend","timestamp":"2026-04-28 15:10:01"}
+{"error":"timeout of 6000ms exceeded","level":"warn","message":"ExchangeRate API forex fetch failed, trying TwelveData...","service":"radar-backend","timestamp":"2026-04-28 15:10:04"}
+{"error":"timeout of 6000ms exceeded","level":"warn","message":"ExchangeRate API forex fetch failed, trying TwelveData...","service":"radar-backend","timestamp":"2026-04-28 15:10:07"}
+{"error":"timeout of 6000ms exceeded","level":"warn","message":"TwelveData forex fetch failed.","service":"radar-backend","timestamp":"2026-04-28 15:10:10"}
+{"error":"timeout of 7000ms exceeded","level":"warn","message":"Marketstack quote fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:10:11"}
+{"error":"timeout of 6000ms exceeded","level":"warn","message":"TwelveData forex fetch failed.","service":"radar-backend","timestamp":"2026-04-28 15:10:13"}
+{"level":"info","message":"Realtime Service Initialized","service":"radar-backend","timestamp":"2026-04-28 15:16:24"}
+{"level":"info","message":"Connected to Binance WebSocket","service":"radar-backend","timestamp":"2026-04-28 15:16:31"}
+{"level":"info","message":"Connected to Finnhub WebSocket","service":"radar-backend","timestamp":"2026-04-28 15:16:31"}
+{"level":"info","message":"Starting Advanced Alert Engine...","service":"radar-backend","timestamp":"2026-04-28 15:16:42"}
+{"level":"info","message":"Alert Engine started","service":"radar-backend","timestamp":"2026-04-28 15:16:42"}
+{"level":"info","message":"MongoDB Connected: ac-6hhl90p-shard-00-02.oxlqhqv.mongodb.net","service":"radar-backend","timestamp":"2026-04-28 15:16:42"}
+{"level":"info","message":"Time-series collection \"ohlcs\" already exists","service":"radar-backend","timestamp":"2026-04-28 15:16:44"}
+{"level":"info","message":"Initializing data update cron job...","service":"radar-backend","timestamp":"2026-04-28 15:16:44"}
+{"level":"info","message":"Data update cron job started","schedule":"*/5 * * * *","service":"radar-backend","timestamp":"2026-04-28 15:16:44","timezone":"Asia/Kolkata"}
+{"level":"info","message":"Data update cron job initialized","service":"radar-backend","timestamp":"2026-04-28 15:16:44"}
+{"level":"info","message":"Starting smart refresh service","service":"radar-backend","timestamp":"2026-04-28 15:16:44"}
+{"level":"info","message":"Smart refresh service initialized","service":"radar-backend","timestamp":"2026-04-28 15:16:44"}
+{"level":"info","message":"Server running on http://localhost:5000","service":"radar-backend","timestamp":"2026-04-28 15:16:44"}
+{"level":"info","message":"User connected: 6NtAl_wTXTYkJVBzAAAB","service":"radar-backend","timestamp":"2026-04-28 15:16:44"}
+{"level":"info","message":"tier1: Refreshing 80 symbols","service":"radar-backend","timestamp":"2026-04-28 15:16:45"}
+{"level":"info","message":"User disconnected: 6NtAl_wTXTYkJVBzAAAB","service":"radar-backend","timestamp":"2026-04-28 15:16:45"}
+{"level":"info","message":"User connected: B7rDBBTxbKPWLbWdAAAE","service":"radar-backend","timestamp":"2026-04-28 15:16:46"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:16:46"}
+{"level":"info","message":"SmartRefresh tier1: loaded 208 symbols from DB","service":"radar-backend","timestamp":"2026-04-28 15:16:46"}
+{"isMarketOpen":true,"isPostMarket":false,"level":"info","message":"Running initial data check on startup","service":"radar-backend","timestamp":"2026-04-28 15:16:49"}
+{"level":"info","message":"Active market hours - skipping initial heavy backfill","nextClose":"2026-04-28T10:00:00.000Z","service":"radar-backend","timestamp":"2026-04-28 15:16:49"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:16:50"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:16:52"}
+{"error":"timeout of 6000ms exceeded","level":"warn","message":"Yahoo Finance history fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:16:56"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:16:59"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:16:59"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:17:01"}
+{"error":"Request failed with status code 429","level":"warn","message":"Tiingo history fetch failed, trying Finnhub...","service":"radar-backend","timestamp":"2026-04-28 15:17:02"}
+{"error":"timeout of 7000ms exceeded","level":"warn","message":"Finnhub history fetch failed, trying Polygon...","service":"radar-backend","timestamp":"2026-04-28 15:17:09"}
+{"error":"Request failed with status code 401","level":"warn","message":"Yahoo Finance quote fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:17:10"}
+{"error":"timeout of 7000ms exceeded","level":"warn","message":"Polygon history fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:17:16"}
+{"error":"timeout of 7000ms exceeded","level":"warn","message":"Marketstack quote fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:17:18"}
+{"error":"Request failed with status code 429","level":"warn","message":"Marketstack history fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:17:19"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"HDFCBANK.NS","timestamp":"2026-04-28 15:17:19"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"HDFCBANK.NS","timestamp":"2026-04-28 15:17:19"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"HDFCBANK.NS","timestamp":"2026-04-28 15:17:19"}
+{"error":"timeout of 7000ms exceeded","level":"warn","message":"Marketstack history fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:17:20"}
+{"error":"timeout of 5000ms exceeded","level":"warn","message":"Stooq quote fetch failed.","service":"radar-backend","timestamp":"2026-04-28 15:17:23"}
+{"level":"error","message":"Live quotes unavailable for SOBHA.NS, AWHCL.NS, BANKBARODA.NS, INDIGO.NS, RBLBANK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:23"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"INFY.NS","timestamp":"2026-04-28 15:17:23"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:23"}
+{"error":"timeout of 5000ms exceeded","level":"warn","message":"Stooq history fetch failed.","service":"radar-backend","timestamp":"2026-04-28 15:17:24"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:17:26"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:17:26"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:26"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:17:26"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:17:27"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:27"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:27"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:17:27"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:29"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:17:31"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:17:32"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:17:32"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:17:33"}
+{"level":"info","message":"User disconnected: B7rDBBTxbKPWLbWdAAAE","service":"radar-backend","timestamp":"2026-04-28 15:17:34"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:17:34"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:17:35"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:17:35"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:17:35"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:40"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:40"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:40"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:40"}
+{"level":"info","message":"User connected: ueyBybwSU5W5zoPhAAAH","service":"radar-backend","timestamp":"2026-04-28 15:17:41"}
+{"level":"info","message":"User disconnected: ueyBybwSU5W5zoPhAAAH","service":"radar-backend","timestamp":"2026-04-28 15:17:41"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:17:42"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:17:42"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:17:42"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:17:43"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:17:44"}
+{"error":"timeout of 7000ms exceeded","level":"warn","message":"Finnhub general news failed","service":"radar-backend","timestamp":"2026-04-28 15:17:48"}
+{"error":"timeout of 7000ms exceeded","level":"warn","message":"MarketAux news fetch failed, trying GNews...","service":"radar-backend","timestamp":"2026-04-28 15:17:55"}
+{"level":"info","message":"Trying fallback source: finnhub","service":"radar-backend","timestamp":"2026-04-28 15:17:55"}
+{"level":"error","message":"Finnhub API error for TATAMOTORS.NS: timeout of 5000ms exceeded","service":"radar-backend","timestamp":"2026-04-28 15:18:00"}
+{"level":"info","message":"Trying fallback source: yahoo","service":"radar-backend","timestamp":"2026-04-28 15:18:00"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:18:16"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:18:19"}
+{"level":"error","message":"Twelve Data API error for ZOMATO.NS: timeout of 5000ms exceeded","service":"radar-backend","timestamp":"2026-04-28 15:18:58"}
+{"level":"info","message":"Trying fallback source: finnhub","service":"radar-backend","timestamp":"2026-04-28 15:18:58"}
+{"level":"info","message":"Trying fallback source: yahoo","service":"radar-backend","timestamp":"2026-04-28 15:19:00"}
+{"level":"info","message":"tier1: Refreshed 78/80 symbols in 139s","service":"radar-backend","timestamp":"2026-04-28 15:19:04"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:28"}
+{"level":"info","message":"User connected: N2eD5uJJPV11ucWeAAAM","service":"radar-backend","timestamp":"2026-04-28 15:19:28"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:29"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:19:29"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:19:29"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:19:29"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:19:29"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:19:29"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:19:29"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:29"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:19:29"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:30"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:19:30"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:30"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:19:30"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:31"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:31"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:31"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:19:31"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:31"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:19:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:19:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:19:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:19:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:32"}
+{"level":"info","message":"User disconnected: N2eD5uJJPV11ucWeAAAM","service":"radar-backend","timestamp":"2026-04-28 15:19:47"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:19:47"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:19:47"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"User connected: 73H4didn20_zv1MUAAAP","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"info","message":"User disconnected: 73H4didn20_zv1MUAAAP","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"info","message":"User connected: QJMSeM5HuBGHMHPuAAAS","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:19:59"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:20:00"}
+{"currentTime":"2026-04-28T09:50:00.037Z","isMarketOpen":true,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:20:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:20:00"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:20:04"}
+{"level":"info","message":"User disconnected: QJMSeM5HuBGHMHPuAAAS","service":"radar-backend","timestamp":"2026-04-28 15:20:07"}
+{"level":"info","message":"User connected: GPDbWbKunDqF-JlqAAAV","service":"radar-backend","timestamp":"2026-04-28 15:20:08"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:20:09"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:20:12"}
+{"error":"Request failed with status code 429","level":"warn","message":"Marketstack quote fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:20:25"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:20:25"}
+{"level":"info","message":"User disconnected: GPDbWbKunDqF-JlqAAAV","service":"radar-backend","timestamp":"2026-04-28 15:20:28"}
+{"level":"info","message":"User connected: CFdcdl03fqH09t4kAAAY","service":"radar-backend","timestamp":"2026-04-28 15:20:29"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:20:31"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:20:37"}
+{"level":"info","message":"User disconnected: CFdcdl03fqH09t4kAAAY","service":"radar-backend","timestamp":"2026-04-28 15:20:49"}
+{"level":"info","message":"User connected: wjzHF-_xrdkGZoYDAAAb","service":"radar-backend","timestamp":"2026-04-28 15:20:50"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:20:50"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:20:50"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:20:50"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:20:50"}
+{"error":"Request failed with status code 404","level":"warn","message":"Yahoo Finance history fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:20:53"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:20:53"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:20:53"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:20:53"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:20:55"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:20:56"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:20:58"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:20:58"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:20:59"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:21:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:21:10"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:21:11"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:21:13"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:21:13"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:21:13"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:21:13"}
+{"level":"info","message":"User disconnected: wjzHF-_xrdkGZoYDAAAb","service":"radar-backend","timestamp":"2026-04-28 15:21:19"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 85s","service":"radar-backend","timestamp":"2026-04-28 15:21:28"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:22:15"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:22:15"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:22:16"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:22:16"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:22:19"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:22:19"}
+{"error":"Request failed with status code 401","level":"warn","message":"Yahoo Finance quote fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:22:24"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:22:24"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:22:26"}
+{"level":"info","message":"User connected: ffjolrPMl30B7EDFAAAe","service":"radar-backend","timestamp":"2026-04-28 15:22:28"}
+{"level":"info","message":"User disconnected: ffjolrPMl30B7EDFAAAe","service":"radar-backend","timestamp":"2026-04-28 15:22:28"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:22:28"}
+{"level":"info","message":"User connected: dgDmrH9RqHIQuZFOAAAh","service":"radar-backend","timestamp":"2026-04-28 15:22:28"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:22:29"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:22:29"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:22:29"}
+{"level":"info","message":"User disconnected: dgDmrH9RqHIQuZFOAAAh","service":"radar-backend","timestamp":"2026-04-28 15:22:32"}
+{"level":"info","message":"User connected: NfpU399vMC-boV2dAAAk","service":"radar-backend","timestamp":"2026-04-28 15:22:33"}
+{"error":"Request failed with status code 404","level":"warn","message":"Yahoo Finance history fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:22:40"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:22:40"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:22:40"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:22:40"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:22:40"}
+{"level":"info","message":"Realtime Service Initialized","service":"radar-backend","timestamp":"2026-04-28 15:22:49"}
+{"level":"info","message":"Connected to Finnhub WebSocket","service":"radar-backend","timestamp":"2026-04-28 15:22:53"}
+{"level":"info","message":"Connected to Binance WebSocket","service":"radar-backend","timestamp":"2026-04-28 15:22:53"}
+{"level":"info","message":"Starting Advanced Alert Engine...","service":"radar-backend","timestamp":"2026-04-28 15:22:55"}
+{"level":"info","message":"Alert Engine started","service":"radar-backend","timestamp":"2026-04-28 15:22:55"}
+{"level":"info","message":"MongoDB Connected: ac-6hhl90p-shard-00-01.oxlqhqv.mongodb.net","service":"radar-backend","timestamp":"2026-04-28 15:22:55"}
+{"level":"info","message":"Time-series collection \"ohlcs\" already exists","service":"radar-backend","timestamp":"2026-04-28 15:22:55"}
+{"level":"info","message":"Initializing data update cron job...","service":"radar-backend","timestamp":"2026-04-28 15:22:55"}
+{"level":"info","message":"Data update cron job started","schedule":"*/5 * * * *","service":"radar-backend","timestamp":"2026-04-28 15:22:55","timezone":"Asia/Kolkata"}
+{"level":"info","message":"Data update cron job initialized","service":"radar-backend","timestamp":"2026-04-28 15:22:55"}
+{"level":"info","message":"Starting smart refresh service","service":"radar-backend","timestamp":"2026-04-28 15:22:55"}
+{"level":"info","message":"Smart refresh service initialized","service":"radar-backend","timestamp":"2026-04-28 15:22:55"}
+{"level":"info","message":"Server running on http://localhost:5000","service":"radar-backend","timestamp":"2026-04-28 15:22:55"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:22:56"}
+{"level":"info","message":"SmartRefresh tier1: loaded 208 symbols from DB","service":"radar-backend","timestamp":"2026-04-28 15:22:56"}
+{"level":"info","message":"User connected: Ng6xkNJtQGbANi1oAAAB","service":"radar-backend","timestamp":"2026-04-28 15:22:56"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:22:56"}
+{"isMarketOpen":true,"isPostMarket":false,"level":"info","message":"Running initial data check on startup","service":"radar-backend","timestamp":"2026-04-28 15:23:00"}
+{"level":"info","message":"Active market hours - skipping initial heavy backfill","nextClose":"2026-04-28T10:00:00.000Z","service":"radar-backend","timestamp":"2026-04-28 15:23:00"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:23:04"}
+{"level":"info","message":"User disconnected: Ng6xkNJtQGbANi1oAAAB","service":"radar-backend","timestamp":"2026-04-28 15:23:13"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:23:17"}
+{"error":"Request failed with status code 404","level":"warn","message":"Yahoo Finance history fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:23:17"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:23:18"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:23:19"}
+{"error":"Request failed with status code 429","level":"warn","message":"Tiingo history fetch failed, trying Finnhub...","service":"radar-backend","timestamp":"2026-04-28 15:23:20"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:23:20"}
+{"error":"Request failed with status code 403","level":"warn","message":"Finnhub history fetch failed, trying Polygon...","service":"radar-backend","timestamp":"2026-04-28 15:23:21"}
+{"error":"Request failed with status code 429","level":"warn","message":"Marketstack history fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:23:25"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"TCS","timestamp":"2026-04-28 15:23:25"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"TCS","timestamp":"2026-04-28 15:23:26"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"TCS","timestamp":"2026-04-28 15:23:26"}
+{"error":"timeout of 5000ms exceeded","level":"warn","message":"Stooq history fetch failed.","service":"radar-backend","timestamp":"2026-04-28 15:23:30"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"TCS","timestamp":"2026-04-28 15:23:30"}
+{"level":"info","message":"Retrieved 0 OHLC records for NIFTY","service":"radar-backend","timestamp":"2026-04-28 15:23:35"}
+{"level":"info","message":"Retrieved 0 OHLC records for TCS","service":"radar-backend","timestamp":"2026-04-28 15:23:35"}
+{"level":"info","message":"Retrieved 0 OHLC records for NIFTY","service":"radar-backend","timestamp":"2026-04-28 15:23:36"}
+{"level":"info","message":"Retrieved 0 OHLC records for TCS","service":"radar-backend","timestamp":"2026-04-28 15:23:36"}
+{"level":"info","message":"Retrieved 0 OHLC records for TCS","service":"radar-backend","timestamp":"2026-04-28 15:23:39"}
+{"level":"info","message":"Retrieved 0 OHLC records for TCS","service":"radar-backend","timestamp":"2026-04-28 15:23:40"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:23:42"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:23:42"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:23:42"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:23:42"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:23:42"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:23:42"}
+{"level":"info","message":"Retrieved 0 OHLC records for TCS","service":"radar-backend","timestamp":"2026-04-28 15:23:43"}
+{"level":"info","message":"Retrieved 0 OHLC records for NIFTY","service":"radar-backend","timestamp":"2026-04-28 15:23:43"}
+{"level":"info","message":"Retrieved 0 OHLC records for TCS","service":"radar-backend","timestamp":"2026-04-28 15:23:43"}
+{"level":"info","message":"Retrieved 0 OHLC records for NIFTY","service":"radar-backend","timestamp":"2026-04-28 15:23:43"}
+{"level":"info","message":"User connected: jTmUMGdswTOpliOKAAAE","service":"radar-backend","timestamp":"2026-04-28 15:23:57"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:23:57"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:23:57"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:23:57"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:23:57"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:23:57"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:23:59"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:23:59"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:23:59"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:23:59"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:24:00"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:24:01"}
+{"level":"info","message":"User disconnected: jTmUMGdswTOpliOKAAAE","service":"radar-backend","timestamp":"2026-04-28 15:24:01"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:24:01"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:01"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:24:02"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:24:02"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:24:02"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:03"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:24:03"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:04"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:04"}
+{"level":"info","message":"User connected: Flik8HRB5RVurF11AAAH","service":"radar-backend","timestamp":"2026-04-28 15:24:06"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:24:06"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:24:06"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:06"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:24:06"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:24:06"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:24:06"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:24:06"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:24:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:07"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:24:07"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:24:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:24:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:24:07"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:24:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:24:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:08"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:24:08"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:08"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:24:09"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 79s","service":"radar-backend","timestamp":"2026-04-28 15:24:15"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:24:36"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:24:36"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:24:36"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:24:36"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:24:36"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:24:36"}
+{"currentTime":"2026-04-28T09:55:00.020Z","isMarketOpen":true,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:25:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:25:00"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:25:06"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:25:06"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:25:15"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:25:36"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:25:36"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:25:36"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:25:36"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"^NSEI","timestamp":"2026-04-28 15:25:36"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:25:36"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:26:06"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:26:06"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 107s","service":"radar-backend","timestamp":"2026-04-28 15:27:02"}
+{"error":"timeout of 6000ms exceeded","level":"warn","message":"Yahoo Finance history fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:27:15"}
+{"error":"Request failed with status code 429","level":"warn","message":"Tiingo history fetch failed, trying Finnhub...","service":"radar-backend","timestamp":"2026-04-28 15:27:21"}
+{"error":"Request failed with status code 403","level":"warn","message":"Finnhub history fetch failed, trying Polygon...","service":"radar-backend","timestamp":"2026-04-28 15:27:24"}
+{"level":"warn","message":"Skipping Polygon history for unsupported symbol.","service":"radar-backend","symbol":"RELIANCE.NS","timestamp":"2026-04-28 15:27:24"}
+{"error":"Request failed with status code 429","level":"warn","message":"Marketstack history fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:27:30"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE.NS","timestamp":"2026-04-28 15:27:30"}
+{"level":"info","message":"User disconnected: Flik8HRB5RVurF11AAAH","service":"radar-backend","timestamp":"2026-04-28 15:27:31"}
+{"level":"info","message":"User connected: mQv0v4_1LMHnmxDrAAAK","service":"radar-backend","timestamp":"2026-04-28 15:27:32"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:27:33"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:27:33"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:27:33"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"INFY.NS","timestamp":"2026-04-28 15:27:35"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"INFY.NS","timestamp":"2026-04-28 15:27:35"}
+{"error":"Request failed with status code 404","level":"warn","message":"Yahoo Finance history fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:27:38"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"INFY.NS","timestamp":"2026-04-28 15:27:39"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:27:44"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:27:44"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:27:44"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:27:45"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:27:51"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:27:52"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:27:53"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:27:54"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:27:54"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:27:55"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:27:56"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:27:56"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:27:58"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:28:02"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:28:02"}
+{"level":"info","message":"User disconnected: mQv0v4_1LMHnmxDrAAAK","service":"radar-backend","timestamp":"2026-04-28 15:28:04"}
+{"level":"info","message":"User connected: IhKrv2LnyKfP93rGAAAN","service":"radar-backend","timestamp":"2026-04-28 15:28:04"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:28:05"}
+{"level":"info","message":"User disconnected: IhKrv2LnyKfP93rGAAAN","service":"radar-backend","timestamp":"2026-04-28 15:28:05"}
+{"level":"info","message":"User connected: ZQg8_M4yn2my9uGIAAAQ","service":"radar-backend","timestamp":"2026-04-28 15:28:05"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:28:05"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:28:05"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:28:05"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:28:05"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:28:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:28:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:28:07"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:28:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:28:07"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:28:08"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:28:09"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:28:10"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:28:10"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:28:11"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:28:11"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:28:12"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:28:36"}
+{"level":"info","message":"User disconnected: ZQg8_M4yn2my9uGIAAAQ","service":"radar-backend","timestamp":"2026-04-28 15:28:48"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 47s","service":"radar-backend","timestamp":"2026-04-28 15:28:48"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:29:43"}
+{"level":"info","message":"User connected: -En2xo-yE0SNFduxAAAT","service":"radar-backend","timestamp":"2026-04-28 15:29:44"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:29:45"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:29:48"}
+{"level":"info","message":"User disconnected: -En2xo-yE0SNFduxAAAT","service":"radar-backend","timestamp":"2026-04-28 15:29:50"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:29:51"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:29:51"}
+{"currentTime":"2026-04-28T10:00:00.041Z","isMarketOpen":true,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:30:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:30:00"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 17s","service":"radar-backend","timestamp":"2026-04-28 15:30:05"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:31:05"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 16s","service":"radar-backend","timestamp":"2026-04-28 15:31:22"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:32:22"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 17s","service":"radar-backend","timestamp":"2026-04-28 15:32:39"}
+{"level":"info","message":"User connected: 8d8cv5uVYE2QRWUoAAAW","service":"radar-backend","timestamp":"2026-04-28 15:33:16"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:33:16"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:33:19"}
+{"level":"info","message":"User disconnected: 8d8cv5uVYE2QRWUoAAAW","service":"radar-backend","timestamp":"2026-04-28 15:33:32"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:33:39"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 18s","service":"radar-backend","timestamp":"2026-04-28 15:33:57"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:34:57"}
+{"currentTime":"2026-04-28T10:05:00.029Z","isMarketOpen":false,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:35:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:35:00"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 16s","service":"radar-backend","timestamp":"2026-04-28 15:35:14"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:35:54"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:36:14"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 17s","service":"radar-backend","timestamp":"2026-04-28 15:36:31"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:37:31"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 18s","service":"radar-backend","timestamp":"2026-04-28 15:37:49"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:38:49"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 17s","service":"radar-backend","timestamp":"2026-04-28 15:39:06"}
+{"currentTime":"2026-04-28T10:10:00.041Z","isMarketOpen":false,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:40:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:40:00"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:40:06"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 32s","service":"radar-backend","timestamp":"2026-04-28 15:40:38"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:40:48"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:40:48"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:41:38"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 25s","service":"radar-backend","timestamp":"2026-04-28 15:42:03"}
+{"level":"info","message":"User connected: 3dqOlEihHHwkJZTzAAAZ","service":"radar-backend","timestamp":"2026-04-28 15:42:37"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:42:37"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:42:37"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:42:37"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:42:37"}
+{"level":"info","message":"User disconnected: 3dqOlEihHHwkJZTzAAAZ","service":"radar-backend","timestamp":"2026-04-28 15:42:41"}
+{"error":"Request failed with status code 401","level":"warn","message":"Yahoo Finance quote fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:42:46"}
+{"error":"Request failed with status code 429","level":"warn","message":"Marketstack quote fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:43:01"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:43:02"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:43:03"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:43:03"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:43:03"}
+{"level":"info","message":"User connected: H1W6MsTxMd6XUWFkAAAc","service":"radar-backend","timestamp":"2026-04-28 15:43:03"}
+{"level":"info","message":"User disconnected: H1W6MsTxMd6XUWFkAAAc","service":"radar-backend","timestamp":"2026-04-28 15:43:04"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 30s","service":"radar-backend","timestamp":"2026-04-28 15:43:33"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:15"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:15"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:15"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:15"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:44:16"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:44:16"}
+{"level":"info","message":"User connected: ZoOOuJfqzCXlQggFAAAf","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:25"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:44:26"}
+{"level":"info","message":"User disconnected: ZoOOuJfqzCXlQggFAAAf","service":"radar-backend","timestamp":"2026-04-28 15:44:29"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:44:33"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:47"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:47"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:48"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:44:48"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:44:48"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:44:49"}
+{"currentTime":"2026-04-28T10:15:00.037Z","isMarketOpen":false,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:45:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:45:00"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:45:02"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:45:02"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 36s","service":"radar-backend","timestamp":"2026-04-28 15:45:09"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:45:53"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:45:53"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:46:09"}
+{"level":"info","message":"User connected: uuYTfHr6Ay8adYhdAAAi","service":"radar-backend","timestamp":"2026-04-28 15:46:19"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:19"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:46:19"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:46:19"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:46:19"}
+{"error":"Request failed with status code 404","level":"warn","message":"Yahoo Finance history fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:46:23"}
+{"error":"Request failed with status code 429","level":"warn","message":"Tiingo history fetch failed, trying Finnhub...","service":"radar-backend","timestamp":"2026-04-28 15:46:25"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:46:25"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:46:25"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:46:25"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:25"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:46:25"}
+{"error":"Request failed with status code 403","level":"warn","message":"Finnhub history fetch failed, trying Polygon...","service":"radar-backend","timestamp":"2026-04-28 15:46:26"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:28"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:46:28"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:46:28"}
+{"error":"Request failed with status code 429","level":"warn","message":"Marketstack history fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:46:29"}
+{"interval":"5M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:46:29"}
+{"interval":"15M","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:46:29"}
+{"interval":"1H","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:46:29"}
+{"level":"info","message":"User disconnected: uuYTfHr6Ay8adYhdAAAi","service":"radar-backend","timestamp":"2026-04-28 15:46:29"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:46:29"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:29"}
+{"interval":"1D","level":"warn","message":"Using generated synthetic fallback history.","service":"radar-backend","symbol":"RELIANCE","timestamp":"2026-04-28 15:46:29"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:30"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:31"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 28s","service":"radar-backend","timestamp":"2026-04-28 15:46:37"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:46:44"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:46:44"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:44"}
+{"level":"info","message":"User connected: 0_ZRu7RXcr5JH3gmAAAl","service":"radar-backend","timestamp":"2026-04-28 15:46:44"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:46:47"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:46:47"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:47"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^CNXFIN","service":"radar-backend","timestamp":"2026-04-28 15:46:47"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:46:48"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^BSESN","service":"radar-backend","timestamp":"2026-04-28 15:46:49"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:46:49"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:50"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:46:50"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEBANK","service":"radar-backend","timestamp":"2026-04-28 15:46:51"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:51"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:52"}
+{"level":"info","message":"Retrieved 0 OHLC records for ^NSEI","service":"radar-backend","timestamp":"2026-04-28 15:46:52"}
+{"level":"info","message":"User disconnected: 0_ZRu7RXcr5JH3gmAAAl","service":"radar-backend","timestamp":"2026-04-28 15:47:23"}
+{"level":"info","message":"User connected: KPVi957X2jHKCEQ1AAAo","service":"radar-backend","timestamp":"2026-04-28 15:47:24"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:47:24"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:47:24"}
+{"level":"info","message":"User disconnected: KPVi957X2jHKCEQ1AAAo","service":"radar-backend","timestamp":"2026-04-28 15:47:35"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:47:36"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:47:36"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:47:37"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:47:43"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:47:44"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 20s","service":"radar-backend","timestamp":"2026-04-28 15:47:57"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:48:57"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:49:10"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:49:10"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:49:14"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:49:15"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 25s","service":"radar-backend","timestamp":"2026-04-28 15:49:22"}
+{"currentTime":"2026-04-28T10:20:00.047Z","isMarketOpen":false,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:50:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:50:00"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:50:22"}
+{"level":"info","message":"User connected: h02t9-EvrreOtMDlAAAr","service":"radar-backend","timestamp":"2026-04-28 15:50:35"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:50:36"}
+{"level":"info","message":"User disconnected: h02t9-EvrreOtMDlAAAr","service":"radar-backend","timestamp":"2026-04-28 15:50:37"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:50:40"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 26s","service":"radar-backend","timestamp":"2026-04-28 15:50:48"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:51:48"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 18s","service":"radar-backend","timestamp":"2026-04-28 15:52:05"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:53:05"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 34s","service":"radar-backend","timestamp":"2026-04-28 15:53:39"}
+{"level":"info","message":"User connected: NC1mrUPXQ9FXxShMAAAu","service":"radar-backend","timestamp":"2026-04-28 15:53:51"}
+{"level":"info","message":"User disconnected: NC1mrUPXQ9FXxShMAAAu","service":"radar-backend","timestamp":"2026-04-28 15:53:53"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:53:54"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:54:01"}
+{"level":"info","message":"tier1: Refreshing 208 symbols","service":"radar-backend","timestamp":"2026-04-28 15:54:40"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:54:46"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:54:46"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:54:46"}
+{"level":"info","message":"User connected: kKtTJfkQ1WdU6yOkAAAx","service":"radar-backend","timestamp":"2026-04-28 15:54:46"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:54:46"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:54:46"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:54:46"}
+{"level":"info","message":"User disconnected: kKtTJfkQ1WdU6yOkAAAx","service":"radar-backend","timestamp":"2026-04-28 15:54:53"}
+{"error":"Request failed with status code 401","level":"warn","message":"Yahoo Finance quote fetch failed, trying Tiingo...","service":"radar-backend","timestamp":"2026-04-28 15:54:54"}
+{"level":"info","message":"User connected: cwZ-0XRqWuwISn7oAAA0","service":"radar-backend","timestamp":"2026-04-28 15:54:56"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:54:57"}
+{"level":"info","message":"User disconnected: cwZ-0XRqWuwISn7oAAA0","service":"radar-backend","timestamp":"2026-04-28 15:54:58"}
+{"currentTime":"2026-04-28T10:25:00.019Z","isMarketOpen":false,"isPostMarket":false,"level":"info","message":"Cron: Checking if update is needed","service":"radar-backend","timestamp":"2026-04-28 15:55:00"}
+{"level":"info","message":"Cron: Active market hours - skipping heavy backfill to conserve API calls","service":"radar-backend","timestamp":"2026-04-28 15:55:00"}
+{"level":"warn","message":"MongoDB disconnected","service":"radar-backend","timestamp":"2026-04-28 15:55:09"}
+{"level":"info","message":"Alert Engine stopped","service":"radar-backend","timestamp":"2026-04-28 15:55:09"}
+{"level":"warn","message":"MongoDB unavailable. Retrying connection every 60s.","service":"radar-backend","timestamp":"2026-04-28 15:55:09"}
+{"level":"error","message":"Error retrieving latest OHLC: connection <monitor> to 159.41.207.17:27017 closed","service":"radar-backend","timestamp":"2026-04-28 15:55:37"}
+{"error":"timeout of 7000ms exceeded","level":"warn","message":"Marketstack quote fetch failed, trying Stooq...","service":"radar-backend","timestamp":"2026-04-28 15:55:37"}
+{"level":"info","message":"Starting Advanced Alert Engine...","service":"radar-backend","timestamp":"2026-04-28 15:55:40"}
+{"level":"info","message":"Alert Engine started","service":"radar-backend","timestamp":"2026-04-28 15:55:40"}
+{"level":"info","message":"MongoDB reconnected","service":"radar-backend","timestamp":"2026-04-28 15:55:40"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:55:41"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:55:41"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:55:41"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:55:41"}
+{"level":"info","message":"Trying fallback source: finnhub","service":"radar-backend","timestamp":"2026-04-28 15:55:43"}
+{"level":"info","message":"Trying fallback source: yahoo","service":"radar-backend","timestamp":"2026-04-28 15:55:44"}
+{"level":"debug","message":"Quote cached for HONAUT.NS","service":"radar-backend","timestamp":"2026-04-28 15:55:44"}
+{"level":"info","message":"tier1: Refreshed 208/208 symbols in 75s","service":"radar-backend","timestamp":"2026-04-28 15:55:55"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:06"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:06"}
+{"level":"info","message":"User connected: NxHCp9jr5xLSwxJyAAA2","service":"radar-backend","timestamp":"2026-04-28 15:56:06"}
+{"level":"warn","message":"Binance WS closed with code 1008.","service":"radar-backend","timestamp":"2026-04-28 15:56:08"}
+{"level":"warn","message":"Binance WS disconnected. Reconnecting in 5s.","service":"radar-backend","timestamp":"2026-04-28 15:56:08"}
+{"level":"info","message":"User disconnected: NxHCp9jr5xLSwxJyAAA2","service":"radar-backend","timestamp":"2026-04-28 15:56:13"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:13"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:13"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:13"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:13"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:13"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:13"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:13"}
+{"level":"warn","message":"All live quote providers failed. Serving stale cache for 208 symbols.","service":"radar-backend","timestamp":"2026-04-28 15:56:13"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:56:14"}
+{"level":"info","message":"Connected to Binance WebSocket","service":"radar-backend","timestamp":"2026-04-28 15:56:14"}
+{"level":"debug","message":"symbolRegistry: 208 symbols from OHLC collection","service":"radar-backend","timestamp":"2026-04-28 15:56:14"}
+{"level":"info","message":"User connected: kOLY7qMKjbefCEQFAAA5","service":"radar-backend","timestamp":"2026-04-28 15:56:14"}

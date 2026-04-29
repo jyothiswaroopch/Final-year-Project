@@ -190,6 +190,7 @@ function App() {
             <Route path="/trader/support" element={<TraderHelpSupportPage />} />
             <Route path="/trader/terminal/:symbol" element={<TradeTerminalPage />} />
             <Route path="/trader/charts/:symbol" element={<MinimalChartPage />} />
+            <Route path="/trader/watchlists" element={<WatchlistsPage />} />
 
             {/* Legacy/Redirect Routes */}
             <Route path="/dashboard" element={<Dashboard />} />

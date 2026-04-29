@@ -74,3 +74,45 @@
 {"level":"error","message":"Finnhub API error for NIFTY.NS: Request failed with status code 429","service":"radar-backend","timestamp":"2026-04-28 14:32:17"}
 {"level":"error","message":"Finnhub API error for NIFTY.NS: Request failed with status code 429","service":"radar-backend","timestamp":"2026-04-28 14:32:18"}
 {"level":"error","message":"Finnhub API error for BTC.NS: Request failed with status code 429","service":"radar-backend","timestamp":"2026-04-28 14:32:21"}
+{"level":"error","message":"Live quotes unavailable for SOBHA.NS, AWHCL.NS, BANKBARODA.NS, INDIGO.NS, RBLBANK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:23"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:23"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:26"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:27"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:27"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:29"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:32"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:40"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:40"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:40"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:17:40"}
+{"level":"error","message":"Finnhub API error for TATAMOTORS.NS: timeout of 5000ms exceeded","service":"radar-backend","timestamp":"2026-04-28 15:18:00"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:18:13"}
+{"level":"error","message":"Twelve Data API error for ZOMATO.NS: timeout of 5000ms exceeded","service":"radar-backend","timestamp":"2026-04-28 15:18:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:28"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:29"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:30"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:31"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:31"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:48"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:19:58"}
+{"level":"error","message":"Live quotes unavailable for OFSS.NS, RBLBANK.NS, BEML.NS, TIINDIA.NS, INDUSINDBK.NS... — no stale fallback either.","service":"radar-backend","timestamp":"2026-04-28 15:20:25"}
+{"level":"error","message":"Error retrieving latest OHLC: connection <monitor> to 159.41.207.17:27017 closed","service":"radar-backend","timestamp":"2026-04-28 15:55:37"}

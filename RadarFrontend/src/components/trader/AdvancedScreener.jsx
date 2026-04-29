@@ -234,29 +234,71 @@ const AdvancedScreener = () => {
         const scan = async () => {
             setIsLoading(true);
             try {
-                const data = await runScreenerScan(activeFilters);
+                // Map UI filter strings to backend numeric filters
+                const backendFilters = {};
+                
+                if (activeFilters.mcap && activeFilters.mcap !== 'Any') {
+                    if (activeFilters.mcap === 'Large') backendFilters.minMarketCap = 10000000000;
+                    if (activeFilters.mcap === 'Mid') { backendFilters.minMarketCap = 2000000000; backendFilters.maxMarketCap = 10000000000; }
+                    if (activeFilters.mcap === 'Small') { backendFilters.minMarketCap = 300000000; backendFilters.maxMarketCap = 2000000000; }
+                    if (activeFilters.mcap === 'Micro') backendFilters.maxMarketCap = 300000000;
+                }
+                if (activeFilters.change && activeFilters.change !== 'Any') {
+                    if (activeFilters.change === '> 0%') backendFilters.minChange = 0;
+                    if (activeFilters.change === '> 2%') backendFilters.minChange = 2;
+                    if (activeFilters.change === '> 5%') backendFilters.minChange = 5;
+                    if (activeFilters.change === '< 0%') backendFilters.maxChange = 0;
+                    // Strategy filters
+                    if (activeFilters.change === '< -3%') backendFilters.maxChange = -3;
+                    if (activeFilters.change === '> 1.5%') backendFilters.minChange = 1.5;
+                    if (activeFilters.change === '> 3%') backendFilters.minChange = 3;
+                    if (activeFilters.change === '> 1%') backendFilters.minChange = 1;
+                }
+                if (activeFilters.sector && activeFilters.sector !== 'All') {
+                    backendFilters.sectors = [activeFilters.sector];
+                }
+                if (activeFilters.pe && activeFilters.pe !== 'Any') {
+                    if (activeFilters.pe.includes('Low')) backendFilters.maxPe = 15;
+                    if (activeFilters.pe.includes('Medium')) { backendFilters.minPe = 15; backendFilters.maxPe = 30; }
+                    if (activeFilters.pe.includes('High')) backendFilters.minPe = 30;
+                }
+                if (activeFilters.volume && activeFilters.volume !== 'Any') {
+                    if (activeFilters.volume === 'Low') backendFilters.volumeStatus = 'low_volume';
+                    if (activeFilters.volume === 'Normal') backendFilters.volumeStatus = 'average';
+                    if (activeFilters.volume === 'High') backendFilters.volumeStatus = 'high_volume';
+                    if (activeFilters.volume === 'Very High' || activeFilters.volume === 'Extreme') backendFilters.volumeStatus = 'high_volume';
+                }
+                if (activeFilters.rsi && activeFilters.rsi !== 'Any') {
+                    if (activeFilters.rsi.includes('Oversold')) backendFilters.maxRsi = 30;
+                    if (activeFilters.rsi.includes('Overbought')) backendFilters.minRsi = 70;
+                    if (activeFilters.rsi.includes('Neutral')) { backendFilters.minRsi = 30; backendFilters.maxRsi = 70; }
+                }
+
+                const payload = { filters: backendFilters, limit: 50 };
+
+                const data = await runScreenerScan(payload);
                 if (!active) return;
                 const rows = data?.results ?? data?.stocks ?? (Array.isArray(data) ? data : []);
-                if (rows.length > 0) {
-                    setResults(rows.map((s, i) => ({
-                        id: (s.symbol || s.ticker || s.id || `r-${i}`).replace(/\.(NS|BO)$/i, ''),
-                        name: s.name || s.companyName || '',
-                        price: s.price != null ? `₹${Number(s.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '—',
-                        change: s.changePercent != null ? `${Number(s.changePercent) >= 0 ? '+' : ''}${Number(s.changePercent).toFixed(2)}%` : '0.00%',
-                        isPositive: Number(s.changePercent ?? 0) >= 0,
-                        mcap: s.marketCap ? `₹${(s.marketCap / 1e12).toFixed(1)}T` : '—',
-                        sector: s.sector || 'Equity',
-                        why: s.why || s.signal || s.reason || 'Matched screener criteria.',
-                        tags: s.tags || [s.sector || 'Equity'].filter(Boolean),
-                        confidence: Number(s.confidence ?? s.score ?? 80),
-                        yield: s.dividendYield ? `${s.dividendYield}%` : '—',
-                        beta: Number(s.beta ?? 1),
-                        volume: s.volume ? `${(Number(s.volume) / 1e6).toFixed(1)}M` : '—',
-                        pe: Number(s.pe ?? 0),
-                        roe: s.roe ? `${s.roe}%` : '—',
-                        trend: s.trend || Array.from({ length: 5 }, (_, k) => Number(s.price ?? 100) * (1 + k * 0.002)),
-                    })));
-                }
+                
+                // Even if empty, clear previous results
+                setResults(rows.map((s, i) => ({
+                    id: (s.symbol || s.ticker || s.id || `r-${i}`).replace(/\.(NS|BO)$/i, ''),
+                    name: s.name || s.companyName || s.displaySymbol || s.symbol || '',
+                    price: s.price != null ? `₹${Number(s.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : '—',
+                    change: s.change != null ? `${Number(s.change) >= 0 ? '+' : ''}${Number(s.change).toFixed(2)}%` : '0.00%',
+                    isPositive: Number(s.change ?? 0) >= 0,
+                    mcap: s.marketCapNumeric ? `₹${(s.marketCapNumeric / 1e12).toFixed(1)}T` : (s.marketCap || '—'),
+                    sector: s.sector || 'Equity',
+                    why: s.why || s.signal || s.reason || 'Matched screener criteria.',
+                    tags: s.tags || [s.sector || 'Equity'].filter(Boolean),
+                    confidence: Number(s.confidence ?? s.score ?? 80),
+                    yield: s.dividendYield ? `${s.dividendYield}%` : '—',
+                    beta: Number(s.beta ?? 1),
+                    volume: s.volume ? `${(Number(s.volume) / 1e6).toFixed(1)}M` : '—',
+                    pe: Number(s.pe ?? 0),
+                    roe: s.roe ? `${s.roe}%` : '—',
+                    trend: s.trend || Array.from({ length: 5 }, (_, k) => Number(s.price ?? 100) * (1 + (k - 2) * 0.01)),
+                })));
             } catch (err) {
                 console.warn('AdvancedScreener scan failed:', err.message);
             } finally {
