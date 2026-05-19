@@ -61,7 +61,7 @@ const clearAuthAndRedirect = () => {
 api.interceptors.response.use(
     (response) => {
         if (response && typeof response === 'object' && response.data !== undefined) {
-            response.data = sanitizeStockSuffixes(response.data);
+            //response.data = sanitizeStockSuffixes(response.data);
         }
         return response;
     },
@@ -70,10 +70,13 @@ api.interceptors.response.use(
         const msg = error.response?.data?.error || '';
 
         // Stale / invalid token — wipe it and force re-login
+        // DISABLED for development bypass
+        /*
         if (status === 401 && (msg.includes('token failed') || msg.includes('invalid signature') || msg.includes('Not authorized'))) {
             clearAuthAndRedirect();
             return Promise.reject(error);
         }
+        */
 
         if (typeof window !== 'undefined' && msg) {
             const event = new CustomEvent('api-error', { detail: { message: msg } });

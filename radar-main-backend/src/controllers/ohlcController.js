@@ -48,32 +48,25 @@ const getHistoricalData = asyncHandler(async (req, res) => {
 });
 
 
+const liveMarketService = require('../services/liveMarketService');
+
 const getLatestCandle = asyncHandler(async (req, res) => {
     const { symbol } = req.params;
-    const { exchange = 'NSE', timeframe = '1d' } = req.query;
 
     if (!symbol) {
         res.status(400);
         throw new Error('Symbol is required');
     }
 
-    const result = await ohlcService.getLatestOHLC(symbol, exchange, timeframe);
+    const result = await liveMarketService.getLiveMarketData(symbol);
 
     if (!result.success) {
         res.status(500);
-        throw new Error('Failed to fetch latest OHLC data');
-    }
-
-    if (!result.data) {
-        res.status(404);
-        throw new Error('No data found for this symbol');
+        throw new Error(result.message || 'Failed to fetch live market data');
     }
 
     res.json({
         success: true,
-        symbol,
-        exchange,
-        timeframe,
         data: result.data,
     });
 });
@@ -120,9 +113,44 @@ const getCompareData = asyncHandler(async (req, res) => {
     res.json(results);
 });
 
+const getChartData = asyncHandler(async (req, res) => {
+
+    const { symbol } = req.params;
+    const { timeframe = '1Y' } = req.query;
+
+    if (!symbol) {
+        res.status(400);
+        throw new Error('Symbol is required');
+    }
+
+    const chartService = require('../services/chartService');
+
+    let interval = '1d';
+
+    // Convert frontend timeframe to Yahoo intervals
+    if (timeframe === '1D') interval = '5m';
+    else if (timeframe === '5D') interval = '1h';
+    else if (timeframe === '1M') interval = '1h';
+    else if (timeframe === '3M') interval = '1d';
+    else if (timeframe === '6M') interval = '1d';
+    else if (timeframe === '1Y') interval = '1d';
+    else if (timeframe === '5Y') interval = '1wk';
+
+    const data = await chartService.getChartData(symbol, interval);
+
+    res.json({
+        success: true,
+        symbol,
+        timeframe,
+        data
+    });
+
+});
+
 module.exports = {
     getHistoricalData,
     getLatestCandle,
     getAvailableSymbols,
-    getCompareData
+    getCompareData,
+    getChartData
 };

@@ -1,4 +1,5 @@
 const axios = require('axios');
+const universe = require('../data/universe.json');
 const { generateHistory } = require('../utils/mockGenerator');
 const logger = require('../utils/logger');
 const { getActiveSymbolsWithSuffix, SEED_SYMBOLS } = require('../utils/symbolRegistry');
@@ -122,9 +123,12 @@ const warnThrottled = (key, message, meta = {}) => {
     logger.warn(message, meta);
 };
 
+
 const parseStockSymbols = async () => {
-    // getDefaultSymbols already handles env override + DB + fallback
-    return getDefaultSymbols();
+
+    return universe.map(
+        asset => asset.symbol
+    );
 };
 
 const fallbackStockMeta = {
@@ -186,6 +190,14 @@ const fallbackStockMeta = {
     INDUSINDBK:  { name: 'IndusInd Bank Ltd',             sector: 'Financial Services',       peRatio: 10.2,  dividendYield: 1.40 },
     HDFCLIFE:    { name: 'HDFC Life Insurance',           sector: 'Financial Services',       peRatio: 88.3,  dividendYield: 0.30 },
     SBILIFE:     { name: 'SBI Life Insurance',            sector: 'Financial Services',       peRatio: 72.5,  dividendYield: 0.20 },
+    // ── Indices ──────────────────────────────────────────────────────────────
+    NIFTY:       { name: 'Nifty 50',                      sector: 'Index',                    peRatio: 22.4,  dividendYield: 1.25 },
+    '^NSEI':     { name: 'Nifty 50',                      sector: 'Index',                    peRatio: 22.4,  dividendYield: 1.25 },
+    'NIFTY 50':  { name: 'Nifty 50',                      sector: 'Index',                    peRatio: 22.4,  dividendYield: 1.25 },
+    SENSEX:      { name: 'BSE Sensex',                    sector: 'Index',                    peRatio: 23.1,  dividendYield: 1.15 },
+    '^BSESN':    { name: 'BSE Sensex',                    sector: 'Index',                    peRatio: 23.1,  dividendYield: 1.15 },
+    BANKNIFTY:   { name: 'Nifty Bank',                    sector: 'Index',                    peRatio: 16.8,  dividendYield: 0.85 },
+    '^NSEBANK':  { name: 'Nifty Bank',                    sector: 'Index',                    peRatio: 16.8,  dividendYield: 0.85 },
     // ── US stocks ────────────────────────────────────────────────────────────
     AAPL: { name: 'Apple Inc.', sector: 'Technology', peRatio: 29.4, dividendYield: 0.52 },
     MSFT: { name: 'Microsoft Corporation', sector: 'Technology', peRatio: 36.1, dividendYield: 0.74 },
@@ -257,6 +269,13 @@ const fallbackPriceMap = {
     WMT: 68.3,
     BA: 177.9,
     JINDRILL: 562.9,
+    NIFTY: 1931.25,
+    '^NSEI': 1931.25,
+    'NIFTY 50': 1931.25,
+    SENSEX: 65320.50,
+    '^BSESN': 65320.50,
+    BANKNIFTY: 43950.00,
+    '^NSEBANK': 43950.00,
 };
 
 const buildFallbackQuotes = (symbols) => symbols.map((symbol, index) => {
@@ -378,7 +397,7 @@ const fetchYahooQuotes = async (symbols) => {
             financials: null,
         }));
 };
-
+/*
 const fetchYahooChartQuotes = async (symbols) => {
     const requests = symbols.map(async (symbol) => {
         const normalizedSymbol = String(symbol || '').toUpperCase();
@@ -397,6 +416,47 @@ const fetchYahooChartQuotes = async (symbols) => {
             });
 
             const result = response.data?.chart?.result?.[0];
+            // Fetch company fundamentals
+           const profileResponse = await axios.get(
+                'https://finnhub.io/api/v1/stock/profile2',
+                {
+                    params: {
+                        symbol: normalizedSymbol,
+                        token: process.env.FINNHUB_API_KEY,
+                    },
+                    timeout: 6000,
+                }
+            );
+
+            const metricResponse = await axios.get(
+                'https://finnhub.io/api/v1/stock/metric',
+                {
+                    params: {
+                        symbol: normalizedSymbol,
+                        metric: 'all',
+                        token: process.env.FINNHUB_API_KEY,
+                    },
+                    timeout: 6000,
+                }
+            );
+
+            const profile = profileResponse.data;
+
+            const metrics = metricResponse.data?.metric || {};
+
+            const marketCap =
+                profile?.marketCapitalization
+                    ? profile.marketCapitalization * 1000000
+                    : NaN;
+
+            const peRatio =
+                metrics?.peNormalizedAnnual || metrics?.peTTM || NaN;
+
+            const sector =
+                profile?.finnhubIndustry || 'Unknown';
+
+            const dividendYield =
+                metrics?.dividendYieldIndicatedAnnual || NaN;
             const closes = result?.indicators?.quote?.[0]?.close || [];
             const volumes = result?.indicators?.quote?.[0]?.volume || [];
             const lows = result?.indicators?.quote?.[0]?.low || [];
@@ -425,15 +485,16 @@ const fetchYahooChartQuotes = async (symbols) => {
                 type: 'STOCK',
                 details: buildStockDetails(
                     normalizedSymbol,
-                    NaN,
-                    fallbackStockMeta[normalizedSymbol]?.sector,
+                    marketCap,
+                    sector,
                     result?.meta?.longName || result?.meta?.shortName,
-                    NaN,
-                    NaN,
+                    peRatio,
+                    dividendYield,
                 ),
                 financials: null,
             };
-        } catch (_error) {
+        }catch (error) {
+            console.log("YAHOO ERROR:", normalizedSymbol, error.message);
             return null;
         }
     });
@@ -441,7 +502,7 @@ const fetchYahooChartQuotes = async (symbols) => {
     const rows = await Promise.all(requests);
     return rows.filter(Boolean);
 };
-
+*/
 const fetchTiingoQuotes = async (symbols) => {
     if (!process.env.TIINGO_API_KEY) {
         throw new Error('Missing TIINGO_API_KEY');
@@ -555,10 +616,17 @@ const fetchFinnhubQuotes = async (symbols) => {
     }
 
     const requests = normalizedSymbols.map(async (symbol) => {
-        const ticker = symbol.endsWith('.NS') || symbol.endsWith('.BO')
-            ? symbol.split('.')[0]
-            : symbol;
+        // const ticker = symbol.endsWith('.NS') || symbol.endsWith('.BO')
+        //     ? symbol.split('.')[0]
+        //     : symbol;
+        let ticker = symbol;
 
+        if (symbol.endsWith('.NS')) {
+            ticker = `NSE:${symbol.split('.')[0]}`;
+        }
+        else if (symbol.endsWith('.BO')) {
+            ticker = `BSE:${symbol.split('.')[0]}`;
+        }
         try {
             const response = await axios.get(`${FINNHUB_BASE_URL}/quote`, {
                 params: {
@@ -567,6 +635,7 @@ const fetchFinnhubQuotes = async (symbols) => {
                 },
                 timeout: 6000,
             });
+            console.log("FINNHUB RESPONSE:", ticker, response.data);
 
             const current = Number(response.data?.c);
             const previousClose = Number(response.data?.pc);
@@ -595,6 +664,63 @@ const fetchFinnhubQuotes = async (symbols) => {
     });
 
     const rows = await Promise.all(requests);
+    console.log("FINNHUB ROWS:", rows);
+    return rows.filter(Boolean);
+};
+const fetchTwelveDataQuotes = async (symbols) => {
+    if (!process.env.TWELVEDATA_API_KEY) {
+        throw new Error('Missing TWELVEDATA_API_KEY');
+    }
+
+    const requests = symbols.map(async (symbol) => {
+        try {
+            const ticker = symbol.replace('.NS', ':NSE');
+
+            const response = await axios.get(
+                'https://api.twelvedata.com/quote',
+                {
+                    params: {
+                        symbol: ticker,
+                        apikey: process.env.TWELVEDATA_API_KEY,
+                    },
+                    timeout: 6000,
+                }
+            );
+
+            const data = response.data;
+
+            console.log("TWELVE DATA:", ticker, data);
+
+            if (!data || !data.close) {
+                return null;
+            }
+
+            return {
+                symbol,
+                name: data.name || symbol,
+                price: Number(data.close),
+                change: Number(data.percent_change || 0),
+                type: 'STOCK',
+                details: buildStockDetails(
+                    symbol,
+                    Number(data.market_cap || NaN),
+                    fallbackStockMeta[symbol]?.sector || 'Unknown',
+                    data.name,
+                    Number(data.pe || NaN),
+                    NaN
+                ),
+                financials: null,
+            };
+        } catch (error) {
+            console.log("TWELVEDATA ERROR:", symbol, error.message);
+            return null;
+        }
+    });
+
+    const rows = await Promise.all(requests);
+
+    console.log("TWELVEDATA ROWS:", rows);
+
     return rows.filter(Boolean);
 };
 
@@ -604,9 +730,17 @@ const fetchFinnhubHistory = async (symbol, interval = '1D') => {
     }
 
     const normalized = String(symbol || '').toUpperCase();
-    const ticker = normalized.endsWith('.NS') || normalized.endsWith('.BO')
-        ? normalized.split('.')[0]
-        : normalized;
+    //const ticker = normalized.endsWith('.NS') || normalized.endsWith('.BO')
+        //? normalized.split('.')[0]
+        //: normalized;
+    let ticker = normalized;
+
+    if (normalized.endsWith('.NS')) {
+        ticker = `NSE:${normalized.split('.')[0]}`;
+    }
+    else if (normalized.endsWith('.BO')) {
+        ticker = `BSE:${normalized.split('.')[0]}`;
+    }
     const resolutionMap = {
         '5M': { resolution: '5', days: 7 },
         '15M': { resolution: '15', days: 15 },
@@ -957,16 +1091,53 @@ const fetchStockData = async (customSymbols = null) => {
 
             if (!hasEnoughLiveData(yahooQuotes)) {
                 try {
-                    const existingSymbols = new Set(yahooQuotes.map((item) => String(item.symbol || '').toUpperCase()));
-                    const missingSymbols = symbols.filter((symbol) => !existingSymbols.has(String(symbol || '').toUpperCase()));
-                    const chartQuotes = await fetchYahooChartQuotes(missingSymbols.length ? missingSymbols : symbols);
-                    const mergedQuotes = [...yahooQuotes, ...chartQuotes].filter((item, index, array) => {
-                        const symbol = String(item.symbol || '').toUpperCase();
-                        return array.findIndex((row) => String(row.symbol || '').toUpperCase() === symbol) === index;
+
+                    const existingSymbols = new Set(
+                        yahooQuotes.map((item) =>
+                            String(item.symbol || '').toUpperCase()
+                        )
+                    );
+
+                    const missingSymbols = symbols.filter(
+                        (symbol) =>
+                            !existingSymbols.has(
+                                String(symbol || '').toUpperCase()
+                            )
+                    );
+
+                    const finnhubQuotes = await fetchFinnhubQuotes(
+                        missingSymbols.length
+                            ? missingSymbols
+                            : symbols
+                    );
+
+                    const mergedQuotes = [
+                        ...yahooQuotes,
+                        ...finnhubQuotes
+                    ].filter((item, index, array) => {
+
+                        const symbol = String(
+                            item.symbol || ''
+                        ).toUpperCase();
+
+                        return (
+                            array.findIndex(
+                                (row) =>
+                                    String(
+                                        row.symbol || ''
+                                    ).toUpperCase() === symbol
+                            ) === index
+                        );
                     });
 
                     yahooQuotes = mergedQuotes;
-                } catch (_error) {
+
+                } catch (error) {
+
+                    console.log(
+                        "FINNHUB FALLBACK ERROR:",
+                        error.message
+                    );
                 }
             }
 
@@ -1285,4 +1456,10 @@ const fetchStockHistory = async (symbol, interval = '1D', options = {}) => {
     return generateHistory(150, 0.02, normalizedInterval);
 };
 
-module.exports = { fetchStockData, fetchStockHistory };
+
+module.exports = {
+    fetchStockData,
+    fetchStockHistory,
+    fetchFinnhubQuotes,
+    fetchTwelveDataQuotes
+};

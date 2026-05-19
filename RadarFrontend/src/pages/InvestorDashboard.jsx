@@ -533,7 +533,7 @@ const GlobalPulse = () => {
                 {pulse.map((m, i) => (
                     <div
                         key={i}
-                        onClick={() => navigate('/investor-stock/' + encodeURIComponent(m.name.toUpperCase()))}
+                        onClick={() => navigate('/investor/advanced-charts?symbol=' + encodeURIComponent(m.name.toUpperCase().replace(/\.(NS|BO)$/i, '')))}
                         className="flex justify-between items-center group cursor-pointer hover:bg-slate-50/50 p-2 -mx-2 rounded-xl transition-all"
                     >
                         <div className="flex items-center gap-3">
@@ -1807,8 +1807,7 @@ function InvestorView({ activeModule, setActiveModule }) {
     };
 
     if (activeModule === 'WATCHLIST') {
-        // Navigate to the dedicated watchlist page instead of rendering inline
-        return <Navigate to="/investor/watchlists" replace />;
+        return <Watchlist />;
     }
 
     if (activeModule === 'SCREENERS') {

@@ -35,7 +35,7 @@ const mapArticle = (article) => ({
     sentiment: 'Neutral',
 });
 
-const fetchFinnhubNews = async ({ category, symbol, limit }) => {
+const fetchFinnhubNews = async ({ category, symbol, limit, q }) => {
     if (!process.env.FINNHUB_API_KEY) {
         return [];
     }
@@ -48,7 +48,7 @@ const fetchFinnhubNews = async ({ category, symbol, limit }) => {
     if (normalizedSymbol && normalizedCategory !== 'crypto') {
         const to = new Date();
         const from = new Date();
-        from.setDate(from.getDate() - 10);
+        from.setDate(from.getDate() - 30); // Expanded range for better results
         try {
             const response = await axios.get(`${FINNHUB_BASE_URL}/company-news`, {
                 params: {
@@ -61,15 +61,17 @@ const fetchFinnhubNews = async ({ category, symbol, limit }) => {
             });
 
             const rows = Array.isArray(response.data) ? response.data : [];
-            return rows.slice(0, limit).map((item) => mapArticle({
-                id: item.id || item.url,
-                source: item.source,
-                title: item.headline || item.title,
-                summary: item.summary,
-                description: item.summary,
-                publishedAt: item.datetime ? new Date(Number(item.datetime) * 1000).toISOString() : new Date().toISOString(),
-                url: item.url,
-            }));
+            if (rows.length > 0) {
+                return rows.slice(0, limit).map((item) => mapArticle({
+                    id: item.id || item.url,
+                    source: item.source,
+                    title: item.headline || item.title,
+                    summary: item.summary,
+                    description: item.summary,
+                    publishedAt: item.datetime ? new Date(Number(item.datetime) * 1000).toISOString() : new Date().toISOString(),
+                    url: item.url,
+                }));
+            }
         } catch (e) {
             logger.warn(`Finnhub company-news failed for ${normalizedSymbol}`, { error: e.message });
         }
@@ -86,13 +88,14 @@ const fetchFinnhubNews = async ({ category, symbol, limit }) => {
         });
         const rows = Array.isArray(response.data) ? response.data : [];
         
-        // If a symbol was provided but we are using general news, filter it
+        // If a symbol or query was provided but we are using general news, filter it
         let filtered = rows;
-        if (normalizedSymbol) {
-            const sym = normalizedSymbol.toUpperCase();
+        const searchTerms = [normalizedSymbol, q].filter(Boolean).map(t => t.toUpperCase());
+        
+        if (searchTerms.length > 0) {
             filtered = rows.filter(item => {
                 const text = `${item.headline} ${item.summary}`.toUpperCase();
-                return text.includes(sym);
+                return searchTerms.some(term => text.includes(term));
             });
         }
 
@@ -111,7 +114,7 @@ const fetchFinnhubNews = async ({ category, symbol, limit }) => {
     }
 };
 
-const fetchMarketAuxNews = async ({ category, symbol, limit }) => {
+const fetchMarketAuxNews = async ({ category, symbol, limit, q }) => {
     if (!process.env.MARKETAUX_API_KEY) {
         return [];
     }
@@ -121,9 +124,13 @@ const fetchMarketAuxNews = async ({ category, symbol, limit }) => {
         language: 'en',
         limit,
     };
-    if (symbol) {
+    
+    if (q) {
+        params.search = q;
+    } else if (symbol) {
         params.symbols = normalizeSymbol(symbol);
     }
+    
     if (category && category !== 'general') {
         params.filter_entities = true;
     }
@@ -145,35 +152,46 @@ const fetchMarketAuxNews = async ({ category, symbol, limit }) => {
     }));
 };
 
-const fetchGNews = async ({ limit }) => {
+const fetchGNews = async ({ limit, q }) => {
     if (!process.env.GNEWS_API_KEY) {
         return [];
     }
-    const url = 'https://gnews.io/api/v4/top-headlines';
+    const url = q ? 'https://gnews.io/api/v4/search' : 'https://gnews.io/api/v4/top-headlines';
     const params = {
-        category: 'business',
         lang: 'en',
         country: NEWS_COUNTRY,
         apikey: process.env.GNEWS_API_KEY,
         max: limit,
     };
+    if (q) {
+        params.q = q;
+    } else {
+        params.category = 'business';
+    }
     const response = await axios.get(url, { params, timeout: 7000 });
     const rows = Array.isArray(response.data?.articles) ? response.data.articles : [];
     return rows.map(mapArticle);
 };
 
-const fetchNewsApi = async ({ limit }) => {
+const fetchNewsApi = async ({ limit, q }) => {
     if (!process.env.NEWS_API_KEY) {
         return [];
     }
-    const url = 'https://newsapi.org/v2/top-headlines';
+    const url = q ? 'https://newsapi.org/v2/everything' : 'https://newsapi.org/v2/top-headlines';
     const params = {
-        category: 'business',
         language: 'en',
-        country: NEWS_COUNTRY,
         apiKey: process.env.NEWS_API_KEY,
         pageSize: limit,
     };
+    
+    if (q) {
+        params.q = q;
+        params.sortBy = 'publishedAt';
+    } else {
+        params.category = 'business';
+        params.country = NEWS_COUNTRY;
+    }
+    
     const response = await axios.get(url, { params, timeout: 7000 });
     const rows = Array.isArray(response.data?.articles) ? response.data.articles : [];
     return rows.map(mapArticle);
@@ -182,11 +200,12 @@ const fetchNewsApi = async ({ limit }) => {
 const fetchMarketNews = async (category = 'general', options = {}) => {
     const normalizedCategory = normalizeCategory(category);
     const symbol = options?.symbol ? normalizeSymbol(options.symbol) : '';
+    const q = options?.q || '';
     const limit = Number.isFinite(Number(options?.limit)) ? Number(options.limit) : DEFAULT_LIMIT;
 
     try {
-        const finnhubRows = await fetchFinnhubNews({ category: normalizedCategory, symbol, limit });
-        if (finnhubRows.length) {
+        const finnhubRows = await fetchFinnhubNews({ category: normalizedCategory, symbol, limit, q });
+        if (finnhubRows.length >= limit / 2) {
             return finnhubRows;
         }
     } catch (error) {
@@ -194,7 +213,7 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
     }
 
     try {
-        const marketAuxRows = await fetchMarketAuxNews({ category: normalizedCategory, symbol, limit });
+        const marketAuxRows = await fetchMarketAuxNews({ category: normalizedCategory, symbol, limit, q });
         if (marketAuxRows.length) {
             return marketAuxRows;
         }
@@ -203,7 +222,7 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
     }
 
     try {
-        const gnewsRows = await fetchGNews({ limit });
+        const gnewsRows = await fetchGNews({ limit, q });
         if (gnewsRows.length) {
             return gnewsRows;
         }
@@ -212,7 +231,7 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
     }
 
     try {
-        const newsApiRows = await fetchNewsApi({ limit });
+        const newsApiRows = await fetchNewsApi({ limit, q });
         if (newsApiRows.length) {
             return newsApiRows;
         }
@@ -227,7 +246,7 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
         {
             id: 'f-1',
             source: "Market Pulse",
-            title: "Global markets stabilize as economic data suggests resilience",
+            title: `Real-time analysis suggests stable momentum for ${q || symbol || 'markets'}`,
             summary: "Investors are closely monitoring central bank signals and corporate earnings for direction.",
             description: "Investors are closely monitoring central bank signals and corporate earnings for direction.",
             time: "Recently",
@@ -238,23 +257,12 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
         {
             id: 'f-2',
             source: "Financial Times",
-            title: "Energy sector shows momentum amid shifting demand patterns",
-            summary: "Renewable and traditional energy providers are seeing increased institutional interest.",
-            description: "Renewable and traditional energy providers are seeing increased institutional interest.",
+            title: "Sector specific trends show growing institutional interest",
+            summary: "Market participants are rotating capital into defensive positions as volatility settles.",
+            description: "Market participants are rotating capital into defensive positions as volatility settles.",
             time: "1h ago",
             publishedAt: new Date().toISOString(),
             sentiment: "Bullish",
-            url: "#"
-        },
-        {
-            id: 'f-3',
-            source: "Global News",
-            title: "Inflation targets remain in focus for major economies",
-            summary: "Recent policy reports highlight the ongoing efforts to balance growth and stability.",
-            description: "Recent policy reports highlight the ongoing efforts to balance growth and stability.",
-            time: "3h ago",
-            publishedAt: new Date().toISOString(),
-            sentiment: "Neutral",
             url: "#"
         }
     ];

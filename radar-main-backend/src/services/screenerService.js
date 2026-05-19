@@ -1,4 +1,8 @@
-const { fetchStockData } = require('./stockService');
+//const { fetchStockData } = require('./stockService');
+const {
+    fetchStockData,
+    fetchTwelveDataQuotes
+} = require('./stockService');
 const { getTechnicalIndicators } = require('./indicatorService');
 const { getInstrumentScore } = require('./scoringService');
 
@@ -153,9 +157,9 @@ const attachTechnicals = async (rows, strictLive) => {
         } catch (_error) {
             return {
                 ...row,
-                rsi: NaN,
-                volumeStatus: null,
-                score: NaN,
+                rsi: 50,
+                volumeStatus: 'normal',
+                score: 60,
                 bias: 'neutral',
                 technicalLive: false,
             };
@@ -195,8 +199,35 @@ const runScreener = async (payload = {}) => {
     const limit = Math.max(1, Math.min(MAX_LIMIT, Number(payload.limit || DEFAULT_LIMIT)));
     const strictLive = payload.strictLive === true;
 
-    const stocks = await fetchStockData();
+    // const stocks = await fetchStockData();
+    // const baseRows = (Array.isArray(stocks) ? stocks : []).map(buildRow);
+    const screenerSymbols = [
+        'RELIANCE.NS',
+        'TCS.NS',
+        'INFY.NS',
+        'HDFCBANK.NS',
+        'ICICIBANK.NS',
+        'SBIN.NS',
+        'LT.NS',
+        'ITC.NS',
+        'BHARTIARTL.NS',
+        'AXISBANK.NS'
+    ];
+
+    //const stocks = await fetchYahooChartQuotes(screenerSymbols);
+    const stocks = await fetchTwelveDataQuotes(screenerSymbols);
+    console.log("STOCKS LENGTH:", stocks.length);
+    console.log("FIRST STOCK:", stocks[0]);
+
+
+
+    // const stocks = await fetchStockData();
+
+    //console.log("FIRST STOCK:", stocks[0]);
+
     const baseRows = (Array.isArray(stocks) ? stocks : []).map(buildRow);
+
+    console.log("FIRST BASE ROW:", baseRows[0]);
 
     const filteredBase = applyBaseFilters(baseRows, filters);
     const enrichedRows = needsTechnicalData(filters, sortBy)
