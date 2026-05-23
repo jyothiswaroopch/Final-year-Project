@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { fetchLiveUniversePrices } from "../../services/apiHelpers";
+import { fetchMarketData } from "../../api/marketApi";
 
 /* ─── Keyframes injected once into the document head ─── */
 const STYLE_ID = "ticker-tape-keyframes";
@@ -38,7 +38,7 @@ const indiaFallbackTickers = [
 ];
 
 const investorClasses = {
-    container: "w-full relative overflow-hidden py-2.5 select-none bg-transparent",
+    container: "w-full relative overflow-hidden py-4 select-none bg-transparent",
     symbol:    "text-[10px] font-black text-slate-400 tracking-[0.15em] uppercase mb-1 block",
     value:     "text-sm font-black text-slate-800 font-mono",
     positive:  "text-emerald-500 bg-emerald-50 border-emerald-100",
@@ -56,7 +56,7 @@ const investorClasses = {
 };
 
 const darkClasses = {
-    container: "w-full bg-[#0a2a30]/90 backdrop-blur-md border-b border-white/5 overflow-hidden py-2 flex relative z-50",
+    container: "w-full bg-[#0a2a30]/90 backdrop-blur-md border-b border-white/5 overflow-hidden py-3 flex relative z-50",
     symbol:    "font-bold text-white/80",
     value:     "text-white font-mono",
     positive:  "text-[#42C0A5] bg-[#42C0A5]/10",
@@ -106,13 +106,6 @@ export default function TickerTape({ variant = "dark" }) {
             try {
                 setLoading(true);
                 setError(false);
-<<<<<<< HEAD
-                const res = await fetchLiveUniversePrices();
-                if (res && res.length > 0) {
-                    // Take first 8 items; map them to display format
-                    setItems(res.slice(0, 8).map((item) => {
-                        const price       = Number(item.price ?? item.ltp ?? 0);
-=======
                 
                 const savedCustom = localStorage.getItem('investorTickerCustom');
                 let customStocks = savedCustom ? JSON.parse(savedCustom) : [];
@@ -150,12 +143,11 @@ export default function TickerTape({ variant = "dark" }) {
                         const isStock     = type === "stock" || type === "equity";
                         const currSymbol  = isCrypto ? "$" : (isInvestor && !isStock ? "" : "₹");
                         const price       = Number(item.price);
->>>>>>> repo2/main
                         return {
-                            symbol: String(item.symbol || "ASSET").split(".")[0].substring(0, 10),
-                            value:  Number.isFinite(price) ? `₹${price.toLocaleString()}` : "--",
+                            symbol: String(item.symbol || item.name || "ASSET").split(".")[0].substring(0, 10),
+                            value:  Number.isFinite(price) ? `${currSymbol}${price.toLocaleString()}` : "--",
                             change: (() => {
-                                const raw  = Number(item.change_24h ?? item.changePercent ?? item.pChange ?? 0);
+                                const raw  = Number(item.change_24h ?? item.change ?? 0);
                                 const safe = Number.isFinite(raw) ? raw : 0;
                                 return `${safe > 0 ? "+" : ""}${safe.toFixed(2)}%`;
                             })(),

@@ -1,17 +1,10 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import api from '../api/api';
-import { fetchCourses, getProgressKey } from '../api/learningApi';
-import { submitSupportMessage } from '../api/supportApi';
 import Header from '../components/common/Header';
-<<<<<<< HEAD
-import InvestorWatchlist from '../components/investor/Watchlist';
-import TraderWatchlist from '../components/trader/AdvancedWatchlist';
-=======
 import AdvancedWatchlistDashboard from '../components/watchlist/AdvancedWatchlistDashboard';
 import Watchlist from '../components/investor/Watchlist';
 import MainLayout from '../components/layout/MainLayout';
->>>>>>> repo2/main
 import './Profile.css';
 import './InvestorDashboard.css';
 import { 
@@ -26,10 +19,7 @@ import {
     Shield, 
     AlertCircle,
     ArrowRight,
-    ArrowLeft,
     LayoutDashboard,
-    Globe,
-    MapPin,
     Star,
     Filter,
     Newspaper,
@@ -88,6 +78,9 @@ const PageShell = ({ title, subtitle, children }) => (
             <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
                 <h1 className="text-2xl font-black tracking-tight">{title}</h1>
                 <p className="mt-2 text-sm text-slate-300">{subtitle}</p>
+                <div className="mt-4">
+                    <Link to="/dashboard" className="text-sm font-bold text-cyan-300 hover:text-cyan-200">Back to Dashboard</Link>
+                </div>
             </div>
             {children}
         </div>
@@ -96,68 +89,6 @@ const PageShell = ({ title, subtitle, children }) => (
 
 const scheduleAsync = (fn) => {
     Promise.resolve().then(fn);
-};
-
-const formatDateTime = (value) => {
-    if (!value) return 'Not recorded';
-    const date = new Date(value);
-    if (Number.isNaN(date.getTime())) return 'Not recorded';
-    return date.toLocaleString(undefined, {
-        month: 'short',
-        day: 'numeric',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
-
-const getCurrentSession = () => {
-    if (typeof window === 'undefined') {
-        return {
-            id: 'current',
-            device: 'Current browser',
-            location: 'This device',
-            active: 'Active now',
-            current: true,
-            iconType: 'desktop'
-        };
-    }
-
-    const ua = window.navigator.userAgent || '';
-    const platform = window.navigator.platform || 'Unknown platform';
-    const browser = ua.includes('Edg/')
-        ? 'Microsoft Edge'
-        : ua.includes('Chrome/')
-            ? 'Chrome'
-            : ua.includes('Firefox/')
-                ? 'Firefox'
-                : ua.includes('Safari/')
-                    ? 'Safari'
-                    : 'Browser';
-    const isMobile = /Mobi|Android|iPhone|iPad/i.test(ua);
-
-    return {
-        id: 'current',
-        device: `${browser} on ${platform}`,
-        location: 'Current authenticated session',
-        active: 'Active now',
-        current: true,
-        iconType: isMobile ? 'mobile' : 'desktop'
-    };
-};
-
-const SessionIcon = ({ type, size = 14 }) => (
-    type === 'mobile' ? <Smartphone size={size} /> : <Monitor size={size} />
-);
-
-const getStoredInvestorDNA = () => {
-    if (typeof window === 'undefined') return null;
-
-    try {
-        return JSON.parse(localStorage.getItem('investorDNA') || 'null');
-    } catch (_error) {
-        return null;
-    }
 };
 
 export function VerifyEmailPage() {
@@ -400,113 +331,34 @@ export function CalendarPage() {
 }
 
 export function NewsPage() {
-    const navigate = useNavigate();
     const [rows, setRows] = useState([]);
-    const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState('live');
     const [sortBy, setSortBy] = useState('latest');
     const [selectedSource, setSelectedSource] = useState('all');
     const [searchQuery, setSearchQuery] = useState('');
-    const [region, setRegion] = useState(() => localStorage.getItem('news_region') || 'IN');
-    const [watchlistNews, setWatchlistNews] = useState([]);
-    const [watchlistLoading, setWatchlistLoading] = useState(false);
-    const [watchlistError, setWatchlistError] = useState('');
 
-    const userMode = localStorage.getItem('mode') || 'INVESTOR';
-    const dashboardPath = userMode === 'TRADER' ? '/trader/dashboard' : '/investor/dashboard';
-
-    // Fetch main news feed whenever region changes
     useEffect(() => {
         const load = async () => {
-            setLoading(true);
-            setSelectedSource('all');
-            try {
-                const response = await api.get('/news', { params: { region } }).catch(() => ({ data: [] }));
-                const payload = toPayload(response.data, []);
-                setRows(Array.isArray(payload) ? payload : []);
-            } finally {
-                setLoading(false);
-            }
+            const response = await api.get('/news/general').catch(() => ({ data: [] }));
+            const payload = toPayload(response.data, []);
+            setRows(Array.isArray(payload) ? payload : []);
         };
         load();
-    }, [region]);
+    }, []);
 
-    const handleRegionChange = (newRegion) => {
-        setRegion(newRegion);
-        localStorage.setItem('news_region', newRegion);
-    };
-
-    // Load watchlist news when that tab is selected
-    useEffect(() => {
-        if (activeTab !== 'watchlist') return;
-        const loadWatchlist = async () => {
-            setWatchlistLoading(true);
-            setWatchlistError('');
-            try {
-                const wlRes = await api.get('/watchlist').catch(() => ({ data: [] }));
-                const lists = Array.isArray(wlRes.data) ? wlRes.data : [];
-                const symbols = lists.length > 0
-                    ? (lists[0].items || []).map(i => {
-                        const sym = typeof i === 'string' ? i : (i?.symbol || i?.sym || '');
-                        return sym.replace(/\.(NS|BO)$/i, '');
-                    }).filter(Boolean)
-                    : [];
-
-                if (!symbols.length) {
-                    setWatchlistError('Your watchlist is empty. Add stocks to see symbol-specific news.');
-                    setWatchlistNews([]);
-                    return;
-                }
-
-                const top5 = symbols.slice(0, 5);
-                const results = await Promise.allSettled(
-                    top5.map(sym => api.get('/news', { params: { symbol: sym, region, limit: 4 } }).catch(() => ({ data: [] })))
-                );
-
-                const seen = new Set();
-                const merged = [];
-                results.forEach((res, idx) => {
-                    if (res.status === 'fulfilled') {
-                        const articles = Array.isArray(res.value.data) ? res.value.data : (toPayload(res.value.data, []) || []);
-                        articles.forEach(article => {
-                            const key = article.title?.toLowerCase().trim();
-                            if (key && !seen.has(key)) {
-                                seen.add(key);
-                                merged.push({ ...article, affectedSymbol: top5[idx] });
-                            }
-                        });
-                    }
-                });
-                setWatchlistNews(merged);
-            } catch (err) {
-                setWatchlistError('Failed to load watchlist news.');
-            } finally {
-                setWatchlistLoading(false);
-            }
-        };
-        loadWatchlist();
-    }, [activeTab, region]);
-
-    // Compute display rows based on active tab
-    const baseRows = activeTab === 'watchlist' ? watchlistNews : rows;
-
-    const filteredNews = baseRows.filter(item => {
+    // Filter and sort news
+    const filteredNews = rows.filter(item => {
         const matchesSource = selectedSource === 'all' || item.source === selectedSource;
-        const matchesSearch = searchQuery === '' || item.title?.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = searchQuery === '' || item.title.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesSource && matchesSearch;
     }).sort((a, b) => {
-        if (activeTab === 'top news') {
-            const score = (item) => item.sentiment === 'positive' ? 2 : item.sentiment === 'negative' ? 0 : 1;
-            const diff = score(b) - score(a);
-            if (diff !== 0) return diff;
-        }
         if (sortBy === 'latest') {
-            return new Date(b.publishedAt || b.time || 0) - new Date(a.publishedAt || a.time || 0);
+            return new Date(b.publishedAt || b.time) - new Date(a.publishedAt || a.time);
         }
         return 0;
     });
 
-    const uniqueSources = ['all', ...Array.from(new Set(baseRows.map(item => item.source).filter(Boolean)))];
+    const uniqueSources = ['all', ...Array.from(new Set(rows.map(item => item.source)))];
 
     const getImpactBadge = (item) => {
         if (item.sentiment === 'positive') return { text: 'Bullish', color: 'emerald' };
@@ -514,58 +366,11 @@ export function NewsPage() {
         return { text: 'Neutral', color: 'slate' };
     };
 
-    const TABS = ['live', 'top news', 'watchlist'];
-
     return (
-        <div className="min-h-screen bg-slate-950 text-slate-100 px-4 py-8">
-            <div className="max-w-6xl mx-auto space-y-6">
-
-                {/* Page Header */}
-                <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-                    <div className="flex items-center justify-between flex-wrap gap-4">
-                        <div className="flex items-center gap-4">
-                            {/* Back to Dashboard */}
-                            <button
-                                onClick={() => navigate(dashboardPath)}
-                                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/10 text-slate-400 hover:text-cyan-400 hover:border-cyan-400/40 hover:bg-cyan-400/5 transition-all text-sm font-semibold"
-                            >
-                                <ArrowLeft size={16} strokeWidth={2.5} />
-                                <LayoutDashboard size={15} className="opacity-70" />
-                                <span>Dashboard</span>
-                            </button>
-                            <div>
-                                <h1 className="text-2xl font-black tracking-tight">Financial News</h1>
-                                <p className="mt-0.5 text-sm text-slate-400">Aggregated market feed from configured news providers.</p>
-                            </div>
-                        </div>
-
-                        {/* India / Global Region Toggle */}
-                        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900 border border-white/10">
-                            <button
-                                onClick={() => handleRegionChange('IN')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                                    region === 'IN'
-                                        ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/25'
-                                        : 'text-slate-400 hover:text-slate-200'
-                                }`}
-                            >
-                                <MapPin size={14} strokeWidth={2.5} />
-                                🇮🇳 India
-                            </button>
-                            <button
-                                onClick={() => handleRegionChange('GLOBAL')}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-bold transition-all ${
-                                    region === 'GLOBAL'
-                                        ? 'bg-cyan-500 text-slate-950 shadow-lg shadow-cyan-500/25'
-                                        : 'text-slate-400 hover:text-slate-200'
-                                }`}
-                            >
-                                <Globe size={14} strokeWidth={2.5} />
-                                Global
-                            </button>
-                        </div>
-                    </div>
-                </div>
+        <PageShell
+            title="Financial News"
+            subtitle="Aggregated market feed from configured news providers."
+        >
             <div className="space-y-6">
                 {/* Controls Section */}
                 <div className="rounded-2xl border border-white/10 bg-white/5 p-6 space-y-4">
@@ -588,7 +393,7 @@ export function NewsPage() {
                     {/* Tabs and Filters */}
                     <div className="flex items-center justify-between gap-4 flex-wrap">
                         <div className="flex gap-2">
-                            {TABS.map((tab) => (
+                            {['live', 'top news', 'watchlist', 'my feeds'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
@@ -635,45 +440,13 @@ export function NewsPage() {
                             </div>
                         </div>
                     </div>
-
-                    {/* Tab context hint */}
-                    {activeTab === 'top news' && (
-                        <p className="text-xs text-cyan-400/70 font-semibold">
-                            Showing highest-impact stories sorted by market sentiment
-                        </p>
-                    )}
-                    {activeTab === 'watchlist' && (
-                        <p className="text-xs text-amber-400/70 font-semibold">
-                            News filtered to your watchlist stocks only
-                        </p>
-                    )}
                 </div>
 
                 {/* News Grid */}
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main News Column */}
                     <div className="lg:col-span-2 space-y-3">
-                        {/* Main feed loading state (region change) */}
-                        {loading && activeTab !== 'watchlist' && (
-                            <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
-                                <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-                                <p className="text-slate-400 text-sm">Loading {region === 'IN' ? '🇮🇳 India' : '🌐 Global'} news...</p>
-                            </div>
-                        )}
-                        {/* Watchlist loading / error states */}
-                        {activeTab === 'watchlist' && watchlistLoading && (
-                            <div className="flex flex-col items-center justify-center py-12 text-center space-y-3">
-                                <div className="w-8 h-8 border-2 border-cyan-400 border-t-transparent rounded-full animate-spin" />
-                                <p className="text-slate-400 text-sm">Fetching watchlist news...</p>
-                            </div>
-                        )}
-                        {activeTab === 'watchlist' && !watchlistLoading && watchlistError && (
-                            <div className="flex flex-col items-center justify-center py-12 text-center">
-                                <Star size={40} className="text-amber-400/40 mb-3" />
-                                <p className="text-slate-400 text-sm">{watchlistError}</p>
-                            </div>
-                        )}
-                        {(!watchlistLoading || activeTab !== 'watchlist') && !watchlistError && filteredNews.length > 0 ? (
+                        {filteredNews.length > 0 ? (
                             filteredNews.map((item, index) => {
                                 const impactBadge = getImpactBadge(item);
                                 return (
@@ -686,7 +459,7 @@ export function NewsPage() {
                                             <div className="flex-shrink-0">
                                                 <div className="w-12 h-12 rounded-lg bg-slate-800 border border-white/10 flex items-center justify-center">
                                                     <span className="text-lg font-black text-cyan-400">
-                                                        {item.source?.charAt(0).toUpperCase() || 'N'}
+                                                        {item.source?.charAt(0).toUpperCase() || '📰'}
                                                     </span>
                                                 </div>
                                             </div>
@@ -726,13 +499,6 @@ export function NewsPage() {
                                                     <span className={`inline-block px-2.5 py-1 rounded-full text-xs font-semibold bg-${impactBadge.color}-500/20 text-${impactBadge.color}-300 border border-${impactBadge.color}-500/30`}>
                                                         {impactBadge.text}
                                                     </span>
-                                                    {/* Watchlist symbol tag */}
-                                                    {item.affectedSymbol && (
-                                                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/20">
-                                                            <Star size={10} className="fill-amber-400" />
-                                                            {item.affectedSymbol}
-                                                        </span>
-                                                    )}
                                                     {item.symbols && item.symbols.length > 0 && (
                                                         <div className="flex gap-1">
                                                             {item.symbols.slice(0, 3).map((symbol) => (
@@ -753,14 +519,14 @@ export function NewsPage() {
                                     </article>
                                 );
                             })
-                        ) : (!watchlistLoading && !watchlistError) ? (
+                        ) : (
                             <div className="flex flex-col items-center justify-center py-12 text-center">
                                 <svg className="w-12 h-12 text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                 </svg>
                                 <p className="text-slate-400 text-sm">No news found matching your criteria</p>
                             </div>
-                        ) : null}
+                        )}
                     </div>
 
                     {/* Sidebar */}
@@ -786,7 +552,7 @@ export function NewsPage() {
                             <h3 className="font-black text-sm">SOURCES</h3>
                             <div className="space-y-2">
                                 {uniqueSources.slice(1, 6).map((source) => {
-                                    const count = baseRows.filter(item => item.source === source).length;
+                                    const count = rows.filter(item => item.source === source).length;
                                     return (
                                         <div
                                             key={source}
@@ -803,19 +569,23 @@ export function NewsPage() {
                     </div>
                 </div>
             </div>
-            </div>
-        </div>
+        </PageShell>
     );
 }
 
-export function InvestorWatchlistsPage() {
-    return <InvestorWatchlist />;
-}
+export function WatchlistsPage() {
+    const isTrader = typeof window !== 'undefined' && localStorage.getItem('mode') === 'TRADER';
+    
+    if (isTrader) {
+        return (
+            <MainLayout>
+                <div style={{ height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
+                    <AdvancedWatchlistDashboard />
+                </div>
+            </MainLayout>
+        );
+    }
 
-<<<<<<< HEAD
-export function TraderWatchlistsPage() {
-    return <TraderWatchlist />;
-=======
     return (
         <div className="dashboard-container investor-theme pt-4">
             <Header />
@@ -824,7 +594,6 @@ export function TraderWatchlistsPage() {
             </main>
         </div>
     );
->>>>>>> repo2/main
 }
 
 export function PortfolioPage() {
@@ -1052,17 +821,12 @@ export function ReportsExportPage() {
     );
 }
 
-export function ProfilePage({ embedded = false } = {}) {
+export function ProfilePage() {
     const [profile, setProfile] = useState(null);
     const [portfolio, setPortfolio] = useState(null);
     const [insights, setInsights] = useState([]);
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [notifications, setNotifications] = useState({
-        priceAlerts:     { enabled: true },
-        earningsUpdates: { enabled: true },
-        importantNews:   { enabled: true }
-    });
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editData, setEditData] = useState({
@@ -1087,105 +851,25 @@ export function ProfilePage({ embedded = false } = {}) {
         }
     }, [profile]);
 
-    const isGoogleUser = profile?.authProvider === 'google';
-
     const handleEditSave = async (e) => {
         e.preventDefault();
-        const username = editData.username.trim();
-        const email = editData.email.trim();
-
-        try {
-            const response = await api.patch('/user/profile', { username, email });
-            if (response.data?.success) {
-                setProfile(prev => ({
-                    ...prev,
-                    username: response.data.data.username,
-                    email: response.data.data.email
-                }));
-            }
-            setIsEditModalOpen(false);
-        } catch (error) {
-            console.error('Profile update failed', error);
-        }
+        setIsEditModalOpen(false);
     };
-
-    const [academyProgress, setAcademyProgress] = useState(0);
-    const [academyCourses, setAcademyCourses] = useState([]);
 
     useEffect(() => {
         const loadDashboardData = async () => {
             try {
                 const [profileRes, portfolioRes, insightsRes, eventsRes] = await Promise.all([
-                    api.get('/user/profile').catch(() => ({ data: null })),
+                    api.get('/user/profile').catch(() => ({ data: { username: 'Investor', email: 'guest@radar.com', joinedDate: 'Joined Feb 2024' } })),
                     api.get('/user/portfolio').catch(() => ({ data: null })),
                     api.get('/user/insights').catch(() => ({ data: [] })),
                     api.get('/user/events').catch(() => ({ data: [] }))
                 ]);
 
-                // Load courses for this persona (investor profile = investor audience)
-                const coursesPayload = await fetchCourses('investor');
-
-                const storedDNA = getStoredInvestorDNA();
-                const profilePayload = toPayload(profileRes.data, null);
-                
-                let mergedDNA = storedDNA;
-                let needsSync = false;
-
-                if (profilePayload) {
-                    if (profilePayload.investorDNA && profilePayload.investorDNA.dominant) {
-                        mergedDNA = profilePayload.investorDNA;
-                    } else if (storedDNA && storedDNA.dominant) {
-                        mergedDNA = storedDNA;
-                        needsSync = true;
-                    }
-                }
-
-                setProfile(profilePayload
-                    ? {
-                        ...profilePayload,
-                        investorDNA: mergedDNA
-                    }
-                    : {
-                        username: localStorage.getItem('userEmail')?.split('@')[0] || 'Investor',
-                        email: localStorage.getItem('userEmail') || 'Signed-in user',
-                        joinedDate: 'Joined Recently',
-                        investorDNA: storedDNA
-                    }
-                );
-
-                // Load notification preferences
-                if (profilePayload?.notificationPreferences) {
-                    setNotifications({
-                        priceAlerts:     { enabled: Boolean(profilePayload.notificationPreferences.priceAlerts) },
-                        earningsUpdates: { enabled: Boolean(profilePayload.notificationPreferences.earningsUpdates) },
-                        importantNews:   { enabled: Boolean(profilePayload.notificationPreferences.importantNews) }
-                    });
-                }
-
-                if (needsSync && mergedDNA) {
-                    api.post('/user/dna', mergedDNA).catch(err => {
-                        console.error('Background DNA sync failed:', err);
-                    });
-                }
-
+                setProfile(toPayload(profileRes.data, null));
                 setPortfolio(toPayload(portfolioRes.data, null));
                 setInsights(toPayload(insightsRes.data, []));
                 setEvents(toPayload(eventsRes.data, []));
-
-                // Set courses + compute academy progress
-                setAcademyCourses(coursesPayload);
-                if (coursesPayload.length > 0) {
-                    const totalChapters = coursesPayload.reduce((sum, c) => sum + (c.chapters?.length || 0), 0);
-                    let doneChapters = 0;
-                    coursesPayload.forEach(c => {
-                        try {
-                            const progress = JSON.parse(localStorage.getItem(getProgressKey(c.id, 'investor')) || '{}');
-                            doneChapters += Object.values(progress?.chapters || {}).filter(Boolean).length;
-                        } catch (e) { /* ignore */ }
-                    });
-                    setAcademyProgress(totalChapters > 0 ? Math.round((doneChapters / totalChapters) * 100) : 0);
-                }
-
             } catch (error) {
                 console.error("Failed to load profile data", error);
             } finally {
@@ -1220,10 +904,16 @@ export function ProfilePage({ embedded = false } = {}) {
         </div>
     );
 
+    const learningProgress = [
+        { title: 'Stock Market Basics', status: 'Completed', progress: 100, icon: <BookOpen size={14} /> },
+        { title: 'Technical Indicators', status: 'In Progress', progress: 70, icon: <TrendingUp size={14} /> },
+        { title: 'Risk Management', status: 'Not Started', progress: 0, icon: <ShieldCheck size={14} /> }
+    ];
+
     const dna = profile?.investorDNA || null;
     const hasDNA = dna && dna.dominant;
-    const assessmentTakenAt = hasDNA ? formatDateTime(dna.completedAt) : null;
 
+    // Fallback persona labels when no DNA saved
     const personaName = hasDNA ? dna.personaName : 'No Assessment Yet';
     const personaBlurb = hasDNA ? dna.personaDescription : 'Take the assessment to generate your investor identity.';
     const investorPct = hasDNA ? dna.investorPercent : null;
@@ -1241,227 +931,10 @@ export function ProfilePage({ embedded = false } = {}) {
     const horizonLabel = hasDNA
         ? (dna.metrics?.patience >= 75 ? '5-10 Years' : dna.metrics?.patience >= 40 ? '1-5 Years' : '< 1 Year')
         : '-';
-    const marketBehaviorRows = hasDNA
-        ? [
-            { label: 'Investor Tilt', value: investorPct || 0, color: 'bg-blue-600' },
-            { label: 'Trader Tilt', value: traderPct || 0, color: 'bg-cyan-500' }
-        ]
-        : [];
-
-    const profileContent = (
-        <main className="max-w-[1400px] mx-auto px-6 py-12">
-            
-            {/* Unified Profile Container */}
-            <div className="bg-white rounded-[32px] border border-blue-100/50 shadow-sm p-8 md:p-12 space-y-12">
-                
-                {/* Header Section (Inline) */}
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 pb-10 border-b border-slate-50">
-                    <div className="flex items-center gap-6">
-                        <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-blue-100 border-4 border-white">
-                            {initial}
-                        </div>
-                        <div className="user-meta">
-                            <h1 className="text-3xl font-black text-slate-800 tracking-tight">{profile?.username}</h1>
-                            <p className="text-sm font-bold text-slate-500">{profile?.email}</p>
-                            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400 mt-2 uppercase tracking-wider">
-                                <Clock size={12} /> {profile?.joinedDate || 'Joined Recently'} • <Zap size={12} className="text-blue-500" fill="currentColor" /> Investor Mode
-                            </div>
-                            <p className="text-[10px] text-slate-400 font-bold mt-3 italic">Manage your account settings in <span className="text-blue-500 cursor-pointer hover:underline" onClick={() => navigate('/investor/settings')}>Settings</span></p>
-                        </div>
-                    </div>
-                    <div className="flex flex-col gap-3">
-                        <button className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2" onClick={() => navigate('/onboarding')}>
-                            <RefreshCw size={14} /> Retake Assessment
-                        </button>
-                        <button className="px-6 py-3 bg-slate-50 text-slate-600 rounded-xl text-xs font-black border border-slate-200 hover:bg-slate-100 transition-all flex items-center gap-2" onClick={() => navigate('/investor/settings')}>
-                            <Settings size={14} /> Go to Settings
-                        </button>
-                    </div>
-                </div>
-
-
-                {/* DNA HERO */}
-                <div className="bg-blue-50/50 rounded-[28px] p-10 border border-blue-100/50">
-                    <div className="flex flex-col gap-2">
-                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Investor Identity</span>
-                        <h2 className="text-2xl font-black text-slate-800">{personaName}</h2>
-                        <p className="text-slate-500 font-medium max-w-2xl leading-relaxed mt-2">
-                            {hasDNA ? (
-                                <>You are a <strong className="text-slate-800">{dna.dominant === 'INVESTOR' ? 'Growth-focused' : 'Active Trader'}</strong> with a <strong className="text-slate-800">{riskLabel} risk appetite</strong> and a <strong className="text-slate-800">{horizonLabel} horizon</strong>. {dna.hybridLine}</>
-                            ) : personaBlurb}
-                        </p>
-                        <div className={`mt-4 inline-flex w-fit items-center gap-2 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-widest ${hasDNA ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-amber-50 text-amber-600 border border-amber-100'}`}>
-                            <CheckCircle size={14} />
-                            {hasDNA ? `Assessment taken: ${assessmentTakenAt}` : 'Assessment not taken yet'}
-                        </div>
-                        {dnaTraits.length > 0 && (
-                            <div className="flex gap-2 mt-4">
-                                {dnaTraits.map((t, i) => (
-                                    <span key={i} className="px-4 py-2 bg-white text-blue-600 rounded-lg text-xs font-black border border-blue-100 shadow-sm">{t}</span>
-                                ))}
-                            </div>
-                        )}
-                        {!hasDNA && (
-                            <button onClick={() => navigate('/onboarding')} className="mt-4 self-start px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black shadow hover:bg-blue-700 transition-all">
-                                Take Assessment →
-                            </button>
-                        )}
-                    </div>
-                </div>
-
-                {/* INSIGHTS GRID — driven by real DNA */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    <div className="p-8 rounded-[24px] bg-slate-50/50 border border-slate-100 space-y-4">
-                        <div className="flex justify-between items-center text-slate-400">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest">Behavior Profile</h3>
-                            <BarChart2 size={16} />
-                        </div>
-                        <div className="space-y-4 pt-4">
-                            {marketBehaviorRows.length > 0 ? marketBehaviorRows.map((row) => (
-                                <div key={row.label} className="space-y-2">
-                                    <div className="flex justify-between items-center"><span className="text-[11px] font-black text-slate-800">{row.label}</span><span className="text-[11px] font-black text-blue-600">{row.value}%</span></div>
-                                    <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div className={`${row.color} h-full rounded-full shadow-sm`} style={{ width: `${row.value}%` }} /></div>
-                                </div>
-                            )) : (
-                                <div className="flex justify-between items-center"><span className="text-[11px] font-black text-slate-800">UNKNOWN</span><span className="text-[11px] font-black text-blue-600">-</span></div>
-                            )}
-                            <p className="text-[11px] text-slate-500 font-bold leading-relaxed pt-2">{hasDNA ? dna.hybridLine : 'Complete the assessment to see your behavior breakdown.'}</p>
-                        </div>
-                    </div>
-                    <div className="p-8 rounded-[24px] bg-slate-50/50 border border-slate-100 space-y-4">
-                        <div className="flex justify-between items-center text-slate-400">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest">Sector Allocation</h3>
-                            <PieChartIcon size={16} />
-                        </div>
-                        <div className="flex items-center gap-4 h-[120px]">
-                            <div className="w-1/2 h-full">
-                                <ResponsiveContainer width="100%" height="100%">
-                                    <PieChart>
-                                        <Pie 
-                                            data={portfolio?.sectorWeights?.length > 0 ? portfolio.sectorWeights : [{ name: 'None', value: 1 }]} 
-                                            cx="50%" cy="50%" innerRadius={35} outerRadius={50} paddingAngle={5} dataKey="value"
-                                        >
-                                            <Cell fill="#3b82f6" />
-                                            <Cell fill="#60a5fa" />
-                                            <Cell fill="#93c5fd" />
-                                            <Cell fill="#bfdbfe" />
-                                            <Cell fill="#dbeafe" />
-                                        </Pie>
-                                    </PieChart>
-                                </ResponsiveContainer>
-                            </div>
-                            <div className="w-1/2">
-                                <p className="text-[9px] font-black text-slate-400 uppercase">Top Sector</p>
-                                <p className="text-[13px] font-black text-slate-800 truncate">{portfolio?.sectorWeights?.[0]?.name || 'Diversified'}</p>
-                                <p className="text-[11px] text-blue-600 font-bold mt-0.5">{portfolio?.sectorWeights?.[0]?.weightPct || 0}% weight</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="p-8 rounded-[24px] bg-slate-50/50 border border-slate-100 space-y-4">
-                        <div className="flex justify-between items-center text-emerald-500">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Risk Profile</h3>
-                            <ShieldCheck size={16} />
-                        </div>
-                        <div className="pt-6">
-                            <p className="text-2xl font-black text-slate-800 tracking-tight">{riskLabel}</p>
-                            <p className="text-[11px] text-slate-500 font-bold mt-2">{riskDesc}</p>
-                        </div>
-                    </div>
-                    <div className="p-8 rounded-[24px] bg-slate-50/50 border border-slate-100 space-y-4">
-                        <div className="flex justify-between items-center text-slate-400">
-                            <h3 className="text-[10px] font-black uppercase tracking-widest">Preferences</h3>
-                            <Settings size={16} />
-                        </div>
-                        <div className="space-y-4 pt-4">
-                            <div className="flex justify-between items-center"><span className="text-[10px] font-black text-slate-400 uppercase">Horizon</span><span className="text-[11px] font-black text-slate-800">{horizonLabel}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-[10px] font-black text-slate-400 uppercase">Strategy</span><span className="text-[11px] font-black text-slate-800">{strategyLabel}</span></div>
-                            <div className="flex justify-between items-center"><span className="text-[10px] font-black text-slate-400 uppercase">Confidence</span><span className="text-[11px] font-black text-slate-800">{hasDNA ? dna.confidence : '-'}</span></div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* LEARNING JOURNEY */}
-                <div className="pt-12 border-t border-slate-50">
-                    <div className="flex justify-between items-center mb-8">
-                        <div>
-                            <h2 className="text-xl font-black text-slate-800 uppercase tracking-widest">Learning Journey</h2>
-                            <p className="text-xs text-slate-500 font-bold mt-1">Progress through financial intelligence modules</p>
-                        </div>
-                        <button onClick={() => navigate('/investor/dashboard/academy')} className="px-3 py-1 bg-blue-50 rounded-lg text-[10px] font-black text-blue-600 hover:bg-blue-100 transition-all">
-                            {academyProgress}% TOTAL PROGRESS • OPEN ACADEMY
-                        </button>
-                    </div>
-
-                    {academyCourses.length === 0 ? (
-                        <div className="flex items-center gap-3 p-5 rounded-2xl bg-slate-50 border border-slate-100 text-slate-400 text-sm font-bold">
-                            <BookOpen size={16} /> No courses loaded. <button onClick={() => navigate('/investor/dashboard/academy')} className="text-blue-500 hover:underline ml-1">Open Academy →</button>
-                        </div>
-                    ) : (
-                        <div
-                            className="flex gap-5 overflow-x-auto pb-3"
-                            style={{ scrollbarWidth: 'thin', scrollbarColor: '#cbd5e1 transparent' }}
-                        >
-                            {academyCourses.map((course, idx) => {
-                                let done = 0;
-                                try {
-                                    const p = JSON.parse(localStorage.getItem(getProgressKey(course.id, 'investor')) || '{}');
-                                    done = Object.values(p?.chapters || {}).filter(Boolean).length;
-                                } catch (e) { /* ignore */ }
-                                const total = course.chapters?.length || 0;
-                                const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-                                const status = pct === 100 ? 'Completed' : pct > 0 ? 'In Progress' : 'Not Started';
-                                const statusColor = pct === 100
-                                    ? 'bg-emerald-50 text-emerald-600'
-                                    : pct > 0
-                                    ? 'bg-blue-50 text-blue-600'
-                                    : 'bg-slate-100 text-slate-500';
-                                return (
-                                    <div
-                                        key={course.id || idx}
-                                        onClick={() => navigate('/investor/dashboard/academy')}
-                                        className="flex-shrink-0 w-56 p-5 rounded-[20px] bg-white border border-slate-100 shadow-sm flex flex-col gap-4 cursor-pointer hover:shadow-md hover:border-blue-200 transition-all"
-                                    >
-                                        <div className="flex justify-between items-start">
-                                            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
-                                                <BookOpen size={16} />
-                                            </div>
-                                            <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md ${statusColor}`}>
-                                                {status}
-                                            </span>
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="text-sm font-black text-slate-800 leading-snug">{course.title}</h4>
-                                            <p className="text-[10px] text-slate-400 font-bold mt-1">{total} chapters</p>
-                                        </div>
-                                        <div>
-                                            <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                                                <div className="bg-blue-500 h-full rounded-full transition-all duration-700" style={{ width: `${pct}%` }} />
-                                            </div>
-                                            <p className="text-[10px] text-slate-400 font-bold mt-1">{pct}% complete</p>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    )}
-                </div>
-
-            </div>
-        </main>
-    );
-
-    if (embedded) {
-        return profileContent;
-    }
 
     return (
-        <div className="dashboard-container investor-theme pt-2 min-h-screen">
-            <Header />
-<<<<<<< HEAD
-            {profileContent}
-=======
-
-            <main className="max-w-[1400px] mx-auto px-6 py-12">
+        <div className="fade-in">
+            <main className="max-w-[1400px] mx-auto px-4 md:px-10 pb-12">
                 
                 {/* Unified Profile Container */}
                 <div className="bg-white rounded-[32px] border border-blue-100/50 shadow-sm p-8 md:p-12 space-y-12">
@@ -1620,7 +1093,6 @@ export function ProfilePage({ embedded = false } = {}) {
 
                 </div>
             </main>
->>>>>>> repo2/main
         </div>
     );
 }
@@ -1631,14 +1103,13 @@ export function SettingsPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false);
-<<<<<<< HEAD
-=======
     const [selectedImage, setSelectedImage] = useState(() => localStorage.getItem('profileImage'));
     const fileInputRef = useRef(null);
->>>>>>> repo2/main
 
-
-    const [sessions, setSessions] = useState(() => [getCurrentSession()]);
+    const [sessions, setSessions] = useState([
+        { id: 1, device: 'Chrome on Windows', location: 'Hyderabad, IN (Current)', active: 'Active Now', current: true, icon: <Monitor size={14} /> },
+        { id: 2, device: 'Safari on iPhone 15', location: 'Bangalore, IN', active: 'Active 2h ago', current: false, icon: <Smartphone size={14} /> }
+    ]);
     
     const [notifications, setNotifications] = useState({
         priceAlerts: { enabled: true },
@@ -1646,8 +1117,6 @@ export function SettingsPage() {
         importantNews: { enabled: true }
     });
 
-<<<<<<< HEAD
-=======
     const [preferences, setPreferences] = useState({
         sectors: ['Technology', 'Financials'],
         risk: 'Moderate',
@@ -1665,6 +1134,30 @@ export function SettingsPage() {
     const [searchResults, setSearchResults] = useState([]);
     const [isSearching, setIsSearching] = useState(false);
     const [showDropdown, setShowDropdown] = useState(false);
+
+    // Load custom tickers from DB on mount
+    useEffect(() => {
+        api.get('/user/settings')
+            .then(res => {
+                const symbols = res.data?.ticker?.customSymbols || [];
+                if (symbols.length > 0) {
+                    setCustomTickers(symbols);
+                    localStorage.setItem('investorTickerCustom', JSON.stringify(symbols));
+                }
+            })
+            .catch(() => { /* keep localStorage cache */ });
+    }, []);
+
+    // Helper: persist ticker list to DB + localStorage
+    const persistTickers = async (symbols) => {
+        localStorage.setItem('investorTickerCustom', JSON.stringify(symbols));
+        window.dispatchEvent(new Event('ticker_tape_updated'));
+        try {
+            await api.patch('/user/settings', { ticker: { customSymbols: symbols } });
+        } catch (err) {
+            console.error('Failed to save ticker settings to DB:', err);
+        }
+    };
 
     useEffect(() => {
         const fetchSearch = async () => {
@@ -1698,7 +1191,7 @@ export function SettingsPage() {
         return () => clearTimeout(timer);
     }, [newTicker]);
 
-    const handleAddTicker = (e) => {
+    const handleAddTicker = async (e) => {
         e.preventDefault();
         const symbol = newTicker.trim().toUpperCase();
         if (!symbol) return;
@@ -1707,28 +1200,23 @@ export function SettingsPage() {
             setTimeout(() => setStatus(''), 3000);
             return;
         }
-        // Ensure it has .NS or .BO
         const finalSymbol = symbol.includes('.') ? symbol : `${symbol}.NS`;
-        
         const newTickers = [...customTickers, finalSymbol];
         setCustomTickers(newTickers);
-        localStorage.setItem('investorTickerCustom', JSON.stringify(newTickers));
-        window.dispatchEvent(new Event('ticker_tape_updated'));
+        await persistTickers(newTickers);
         setNewTicker('');
-        setStatus('Ticker added successfully.');
+        setStatus('Ticker added and saved.');
         setTimeout(() => setStatus(''), 3000);
     };
 
-    const handleRemoveTicker = (ticker) => {
+    const handleRemoveTicker = async (ticker) => {
         const newTickers = customTickers.filter(t => t !== ticker);
         setCustomTickers(newTickers);
-        localStorage.setItem('investorTickerCustom', JSON.stringify(newTickers));
-        window.dispatchEvent(new Event('ticker_tape_updated'));
-        setStatus('Ticker removed successfully.');
+        await persistTickers(newTickers);
+        setStatus('Ticker removed and saved.');
         setTimeout(() => setStatus(''), 3000);
     };
 
->>>>>>> repo2/main
     useEffect(() => {
         const fullBackground = 'linear-gradient(180deg, #f0f9ff 0%, #e1effe 100%)';
         document.documentElement.style.setProperty('--investor-bg', fullBackground);
@@ -1753,7 +1241,6 @@ export function SettingsPage() {
             } catch (err) { console.error(err); }
         };
         load();
-        setSessions([getCurrentSession()]);
 
         return () => {
             document.documentElement.style.removeProperty('--investor-bg');
@@ -1774,38 +1261,6 @@ export function SettingsPage() {
             // Revert on failure
             setNotifications(prev => ({ ...prev, [key]: { enabled: !newEnabled } }));
             console.error('Failed to save notification preference', err);
-        }
-    };
-
-    const isGoogleUser = profile?.authProvider === 'google';
-
-    const handlePasswordChange = async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const newPassword = String(formData.get('newPassword') || '');
-        const confirmPassword = String(formData.get('confirmPassword') || '');
-
-        if (newPassword !== confirmPassword) {
-            setStatus('New passwords do not match.');
-            setTimeout(() => setStatus(''), 3000);
-            return;
-        }
-
-        try {
-            if (isGoogleUser) {
-                await api.post('/user/set-password', { newPassword });
-                setStatus('Password set! You can now also log in with email.');
-            } else {
-                const currentPassword = String(formData.get('currentPassword') || '');
-                await api.patch('/user/password', { currentPassword, newPassword });
-                setStatus('Password updated successfully.');
-            }
-            e.target.reset();
-            setIsPasswordModalOpen(false);
-        } catch (err) {
-            setStatus(err?.response?.data?.error || 'Password update failed.');
-        } finally {
-            setTimeout(() => setStatus(''), 3000);
         }
     };
 
@@ -1909,26 +1364,18 @@ export function SettingsPage() {
                                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Password Management</h3>
                                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
                                     <div>
-                                        <p className="text-[10px] text-slate-400 font-black uppercase mb-1">
-                                            {isGoogleUser ? 'Password Status' : 'Current Password'}
-                                        </p>
-                                        {isGoogleUser ? (
-                                            <p className="text-sm font-bold text-amber-600">Signed in via Google — no password set</p>
-                                        ) : (
-                                            <p className="text-sm font-bold text-slate-800 tracking-tighter">••••••••••••</p>
-                                        )}
+                                        <p className="text-[10px] text-slate-400 font-black uppercase mb-1">Current Password</p>
+                                        <p className="text-sm font-bold text-slate-800 tracking-tighter">••••••••••••</p>
                                     </div>
                                     <button 
                                         onClick={() => setIsPasswordModalOpen(true)}
                                         className="text-[10px] font-black text-blue-600 hover:underline"
                                     >
-                                        {isGoogleUser ? 'Set Password' : 'Change Password'}
+                                        Change Password
                                     </button>
                                 </div>
                                 <p className="text-[11px] text-slate-400 font-bold leading-relaxed px-1">
-                                    {isGoogleUser
-                                        ? 'Set a password to enable email + password login in addition to Google.'
-                                        : 'Use a strong password that includes symbols and numbers to protect your account insights.'}
+                                    Use a strong password that includes symbols and numbers to protect your account insights.
                                 </p>
                             </div>
 
@@ -1942,7 +1389,7 @@ export function SettingsPage() {
                                         </div>
                                         <div>
                                             <p className="text-[10px] text-slate-400 font-black uppercase">Active Sessions</p>
-                                            <p className="text-sm font-bold text-slate-800 tracking-tighter">{sessions.length} Active Session</p>
+                                            <p className="text-sm font-bold text-slate-800 tracking-tighter">{sessions.length} Devices Logged In</p>
                                         </div>
                                     </div>
                                     <button 
@@ -1953,10 +1400,19 @@ export function SettingsPage() {
                                     </button>
                                 </div>
                                 <p className="text-[11px] text-slate-400 font-bold leading-relaxed px-1">
-                                    Showing your current browser session. Sign out to invalidate the active token.
+                                    Recent logins detect activity from {sessions.length} unique sources.
                                 </p>
-                                <p className="text-[10px] text-slate-300 font-bold px-1 mt-1 italic">
-                                    Note: Only the current session is tracked — multi-device session management is not yet available.
+                            </div>
+                        </div>
+
+                        <div className="pt-4 border-t border-slate-50 flex flex-col md:flex-row items-start md:items-center gap-4">
+                            <div className="w-full md:w-auto px-6 py-4 bg-slate-50 border border-slate-100 rounded-xl">
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Account Visibility</p>
+                                <p className="text-sm font-bold text-slate-800 tracking-tighter">Public Profile Enabled</p>
+                            </div>
+                            <div className="flex-1 p-5 bg-blue-50/30 rounded-xl border border-blue-100/50">
+                                <p className="text-[11px] text-blue-600 font-bold leading-relaxed">
+                                    Privacy Tip: Managing active sessions ensures that your financial DNA is only accessible to you.
                                 </p>
                             </div>
                         </div>
@@ -2088,14 +1544,24 @@ export function SettingsPage() {
                             setIsEditModalOpen(false);
                         }}>
                             
-                            {/* Avatar Initial Display */}
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl font-black shadow-xl shadow-blue-100 border-4 border-white">
-                                    {profile?.username?.charAt(0).toUpperCase() || 'U'}
+                            {/* Profile Photo Section (Centered) */}
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="relative group">
+                                    <div className="w-24 h-24 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl font-black shadow-xl shadow-blue-100 overflow-hidden border-4 border-white">
+                                        {selectedImage ? (
+                                            <img src={selectedImage} alt="Profile Preview" className="w-full h-full object-cover" />
+                                        ) : (
+                                            profile?.username?.charAt(0).toUpperCase() || 'I'
+                                        )}
+                                    </div>
+                                    <button 
+                                        type="button"
+                                        onClick={() => fileInputRef.current?.click()}
+                                        className="absolute bottom-0 right-0 w-8 h-8 bg-white text-slate-600 rounded-full flex items-center justify-center shadow-lg border border-slate-100 opacity-0 group-hover:opacity-100 transition-opacity hover:text-blue-600"
+                                    >
+                                        <Camera size={14} />
+                                    </button>
                                 </div>
-<<<<<<< HEAD
-                                <p className="text-[10px] text-slate-400 font-bold">Profile photo upload coming soon</p>
-=======
                                 <input 
                                     type="file" 
                                     ref={fileInputRef}
@@ -2119,7 +1585,6 @@ export function SettingsPage() {
                                 >
                                     Change Photo
                                 </button>
->>>>>>> repo2/main
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -2149,39 +1614,20 @@ export function SettingsPage() {
                     <div className="relative w-full max-w-md bg-white rounded-[32px] shadow-2xl p-10 border border-blue-50 animate-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center mb-8">
                             <div>
-                                <h3 className="text-lg font-black text-slate-800">
-                                    {isGoogleUser ? 'Set a Password' : 'Change Password'}
-                                </h3>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
-                                    {isGoogleUser ? 'Enable email login' : 'Strengthen your account'}
-                                </p>
+                                <h3 className="text-lg font-black text-slate-800">Change Password</h3>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Strengthen your account</p>
                             </div>
                             <button onClick={() => setIsPasswordModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-slate-600">✕</button>
                         </div>
                         
-                        {isGoogleUser && (
-                            <div className="mb-6 p-4 bg-amber-50 border border-amber-100 rounded-xl flex items-start gap-3">
-                                <span className="text-amber-500 mt-0.5">ℹ️</span>
-                                <p className="text-[11px] text-amber-700 font-bold leading-relaxed">
-                                    You signed in with Google. Setting a password lets you also log in with your email and this new password.
-                                </p>
+                        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setIsPasswordModalOpen(false); setStatus('Password Updated!'); setTimeout(() => setStatus(''), 3000); }}>
+                            <div className="space-y-1.5">
+                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Current Password</label>
+                                <input type="password" placeholder="••••••••" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
                             </div>
-                        )}
-
-                        <form className="space-y-6" onSubmit={handlePasswordChange}>
-                            {!isGoogleUser && (
-                                <div className="space-y-1.5">
-                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Current Password</label>
-                                    <input type="password" name="currentPassword" required placeholder="Current password" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
-                                </div>
-                            )}
                             <div className="space-y-1.5">
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">New Password</label>
-                                <input type="password" name="newPassword" required minLength={8} placeholder="Min. 8 characters" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
-                            </div>
-                            <div className="space-y-1.5">
-                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Confirm New Password</label>
-                                <input type="password" name="confirmPassword" required minLength={8} placeholder="Repeat new password" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
+                                <input type="password" placeholder="Min. 8 characters" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
                             </div>
 
                             <div className="p-4 bg-slate-50 rounded-xl border border-dotted border-slate-200">
@@ -2190,9 +1636,7 @@ export function SettingsPage() {
 
                             <div className="pt-4 flex gap-3">
                                 <button type="button" onClick={() => setIsPasswordModalOpen(false)} className="flex-1 py-4 rounded-2xl border border-slate-200 text-xs font-black text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
-                                <button type="submit" className="flex-1 py-4 rounded-2xl bg-blue-600 text-white text-xs font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">
-                                    {isGoogleUser ? 'Set Password' : 'Update'}
-                                </button>
+                                <button type="submit" className="flex-1 py-4 rounded-2xl bg-blue-600 text-white text-xs font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">Update</button>
                             </div>
                         </form>
                     </div>
@@ -2207,7 +1651,7 @@ export function SettingsPage() {
                         <div className="flex justify-between items-center mb-8">
                             <div>
                                 <h3 className="text-lg font-black text-slate-800">Manage Active Sessions</h3>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Active Browser Sessions ({sessions.length})</p>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Logged In Devices ({sessions.length})</p>
                             </div>
                             <button onClick={() => setIsSessionsModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-slate-600">✕</button>
                         </div>
@@ -2217,7 +1661,7 @@ export function SettingsPage() {
                                 <div key={s.id} className="p-5 rounded-2xl border border-slate-100 flex items-center justify-between group hover:border-blue-100 transition-all">
                                     <div className="flex items-center gap-4">
                                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.current ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'}`}>
-                                            <SessionIcon type={s.iconType} />
+                                            {s.icon}
                                         </div>
                                         <div>
                                             <p className="text-sm font-black text-slate-800 flex items-center gap-2">
@@ -2229,15 +1673,23 @@ export function SettingsPage() {
                                             </p>
                                         </div>
                                     </div>
+                                    {!s.current && (
+                                        <button 
+                                            onClick={() => setSessions(sessions.filter(sess => sess.id !== s.id))}
+                                            className="text-[10px] font-black text-red-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
+                                        >
+                                            Sign Out
+                                        </button>
+                                    )}
                                 </div>
                             ))}
 
                             <div className="pt-8 border-t border-slate-50 flex flex-col gap-4">
                                 <button 
-                                    onClick={() => { localStorage.removeItem('token'); setIsSessionsModalOpen(false); setStatus('Signed out from this device'); setTimeout(() => { setStatus(''); window.location.href = '/login'; }, 800); }}
+                                    onClick={() => { setSessions(sessions.filter(s => s.current)); setIsSessionsModalOpen(false); setStatus('Logged out from other devices'); setTimeout(() => setStatus(''), 3000); }}
                                     className="w-full py-4 rounded-2xl bg-slate-100 text-slate-600 text-xs font-black hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
                                 >
-                                    <LogOut size={14} /> Sign Out from This Device
+                                    <LogOut size={14} /> Sign Out from All Other Devices
                                 </button>
                                 <button 
                                     onClick={() => setIsSessionsModalOpen(false)}
@@ -2315,7 +1767,6 @@ export function HelpSupportPage() {
     const [openFaq, setOpenFaq] = useState(null);
     const [formStatus, setFormStatus] = useState(null);
     const [copied, setCopied] = useState(false);
-    const [toast, setToast] = useState(null);
     const contactRef = useRef(null);
 
     const faqs = [
@@ -2353,31 +1804,8 @@ export function HelpSupportPage() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const form = e.currentTarget;
-        const formData = new FormData(form);
-
-        setFormStatus('loading');
-
-        submitSupportMessage({
-            name: String(formData.get('name') || '').trim(),
-            email: String(formData.get('email') || '').trim(),
-            subject: String(formData.get('subject') || '').trim(),
-            message: String(formData.get('message') || '').trim(),
-            page: 'contact-form',
-        })
-            .then(() => {
-                setFormStatus('success');
-                setToast({ type: 'success', message: 'Message sent successfully.' });
-                form.reset();
-                setTimeout(() => setFormStatus(null), 5000);
-                setTimeout(() => setToast(null), 5000);
-            })
-            .catch((submitError) => {
-                setFormStatus('error');
-                setToast({ type: 'error', message: submitError?.response?.data?.error || submitError?.response?.data?.message || 'Failed to send message' });
-                setTimeout(() => setFormStatus(null), 5000);
-                setTimeout(() => setToast(null), 5000);
-            });
+        setFormStatus('success');
+        setTimeout(() => setFormStatus(null), 5000);
     };
 
     return (
@@ -2454,17 +1882,6 @@ export function HelpSupportPage() {
                             <p className="text-sm text-slate-500 font-medium">Have a specific inquiry? Fill out the form below.</p>
                         </div>
 
-                        {toast && (
-                            <div className={`mb-6 rounded-2xl border px-4 py-3 text-sm font-semibold flex items-center gap-3 ${
-                                toast.type === 'success'
-                                    ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
-                                    : 'border-rose-200 bg-rose-50 text-rose-700'
-                            }`}>
-                                {toast.type === 'success' ? <CheckCircle size={18} /> : <AlertTriangle size={18} />}
-                                <span>{toast.message}</span>
-                            </div>
-                        )}
-
                         {formStatus === 'success' ? (
                             <div className="bg-emerald-50 border border-emerald-100 p-10 rounded-[20px] flex flex-col items-center text-center gap-4 animate-in zoom-in duration-300">
                                 <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-emerald-600 shadow-sm border border-emerald-50">
@@ -2475,38 +1892,28 @@ export function HelpSupportPage() {
                                     <p className="text-sm text-emerald-600 font-bold">Our team will get back to you shortly.</p>
                                 </div>
                             </div>
-                        ) : formStatus === 'error' ? (
-                            <div className="bg-rose-50 border border-rose-100 p-10 rounded-[20px] rounded-[20px] flex flex-col items-center text-center gap-4 animate-in zoom-in duration-300">
-                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-rose-600 shadow-sm border border-rose-50">
-                                    <AlertTriangle size={32} />
-                                </div>
-                                <div>
-                                    <h4 className="text-lg font-black text-rose-800">Message Failed</h4>
-                                    <p className="text-sm text-rose-600 font-bold">Please try again in a moment.</p>
-                                </div>
-                            </div>
                         ) : (
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Name</label>
-                                        <input name="name" type="text" required placeholder="John Doe" className="w-full px-5 py-4 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 transition-all" />
+                                        <input type="text" required placeholder="John Doe" className="w-full px-5 py-4 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 transition-all" />
                                     </div>
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Email Address</label>
-                                        <input name="email" type="email" required placeholder="john@example.com" className="w-full px-5 py-4 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 transition-all" />
+                                        <input type="email" required placeholder="john@example.com" className="w-full px-5 py-4 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 transition-all" />
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Subject</label>
-                                    <input name="subject" type="text" required placeholder="How can we help?" className="w-full px-5 py-4 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 transition-all" />
+                                    <input type="text" required placeholder="How can we help?" className="w-full px-5 py-4 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 transition-all" />
                                 </div>
                                 <div className="space-y-1.5">
                                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest pl-1">Message</label>
-                                    <textarea name="message" required rows="5" placeholder="Tell us more about your issue..." className="w-full px-5 py-4 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 transition-all resize-none" />
+                                    <textarea required rows="5" placeholder="Tell us more about your issue..." className="w-full px-5 py-4 rounded-xl bg-white border border-slate-200 text-xs font-bold outline-none focus:border-blue-500 transition-all resize-none" />
                                 </div>
-                                <button type="submit" className="w-full md:w-auto px-10 py-4 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-200 flex items-center justify-center gap-2 hover:bg-blue-700 transition-all" disabled={formStatus === 'loading'}>
-                                    {formStatus === 'loading' ? 'Sending...' : <>Send Message <Send size={14} /></>}
+                                <button type="submit" className="w-full md:w-auto px-10 py-4 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-200 flex items-center justify-center gap-2 hover:bg-blue-700 transition-all">
+                                    Send Message <Send size={14} />
                                 </button>
                             </form>
                         )}
@@ -2549,3 +1956,6 @@ export function HelpSupportPage() {
         </div>
     );
 }
+
+export function InvestorWatchlistsPage() { return <Watchlist />; }
+export function TraderWatchlistsPage() { return <AdvancedWatchlistDashboard />; }

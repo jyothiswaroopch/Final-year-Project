@@ -1,15 +1,5 @@
-<<<<<<< HEAD
 const { fetchStockData } = require('./stockService');
 const { getTechnicalIndicators, getTechnicalIndicatorsFromOHLC } = require('./indicatorService');
-=======
-//const { fetchStockData } = require('./stockService');
-const {
-    fetchStockData,
-    fetchTwelveDataQuotes,
-    fetchYahooFundamentals
-} = require('./stockService');
-const { getTechnicalIndicators } = require('./indicatorService');
->>>>>>> repo2/main
 const { getInstrumentScore } = require('./scoringService');
 const yahooFinanceService = require('./yahooFinanceService');
 
@@ -50,17 +40,10 @@ const isFiniteNumber = (value) => Number.isFinite(Number(value));
 const inRange = (value, min, max) => {
     const hasMin = isFiniteNumber(min);
     const hasMax = isFiniteNumber(max);
-<<<<<<< HEAD
     // No constraint at all — always pass
     if (!hasMin && !hasMax) return true;
     // Value must be finite when a bound IS specified
     if (!isFiniteNumber(value)) return false;
-=======
-    if (!hasMin && !hasMax) return true; // No filter applied for this field
-    
-    if (!isFiniteNumber(value)) return false; // Filter is applied, but value is missing
-    
->>>>>>> repo2/main
     if (hasMin && Number(value) < Number(min)) return false;
     if (hasMax && Number(value) > Number(max)) return false;
     return true;
@@ -237,12 +220,7 @@ const buildRow = (stock) => ({
     score: NaN,
     bias: 'neutral',
     technicalLive: false,
-<<<<<<< HEAD
     technicalSource: 'pending',
-=======
-    roe: toNumber(stock.details?.roe, NaN),
-    dividendYield: toNumber(stock.details?.dividend_yield, NaN),
->>>>>>> repo2/main
 });
 
 const getValidFundamental = (yahooVal, fallbackVal) => {
@@ -314,7 +292,6 @@ const runScreener = async (payload = {}) => {
 
     const filteredRows = applyTechnicalFilters(enrichedRows, filters);
     const sorted = sortRows(filteredRows, sortBy, sortOrder);
-<<<<<<< HEAD
     const results = sorted.slice(0, limit).map((row) => ({
         symbol: row.symbol,
         displaySymbol: row.displaySymbol,
@@ -340,46 +317,6 @@ const runScreener = async (payload = {}) => {
                 : 'Stock matched screener criteria. No directional signal.',
         tags: [row.sector || 'Equity', row.bias || 'neutral'].filter(Boolean),
         confidence: Number.isFinite(row.score) ? Math.min(99, Math.max(50, row.score)) : 75,
-=======
-    console.log("DEBUG: enrichedBaseRows length:", enrichedBaseRows.length);
-    console.log("DEBUG: sorted length:", sorted.length);
-    const finalRows = sorted.length > 0 ? sorted : sortRows(enrichedBaseRows, sortBy, sortOrder);
-    console.log("DEBUG: finalRows length:", finalRows.length);
-    
-    const results = await Promise.all(finalRows.slice(0, limit).map(async (row) => {
-        let sparklineData = null;
-        try {
-            // Fetch real-time trend data for the top matched stocks for the last 30 days
-            const hist = await yahooFinanceService.fetchHistoricalData(row.symbol, '1d', '1mo');
-            if (hist.success && hist.data) {
-                // Plot 1 day candle for a history of 15 days
-                sparklineData = hist.data.slice(-15).map(c => ({ value: c.close || c.adjustedClose }));
-            } else {
-                console.log('Sparkline fetch failed for', row.symbol, hist.error);
-            }
-        } catch (e) {
-            console.log('Sparkline catch block:', row.symbol, e.message);
-        }
-
-        return {
-            symbol: row.symbol,
-            displaySymbol: row.displaySymbol,
-            name: row.name,
-            price: Number.isFinite(row.price) ? Number(row.price.toFixed(2)) : null,
-            change: Number.isFinite(row.change) ? Number(row.change.toFixed(2)) : null,
-            sector: row.sector,
-            pe: Number.isFinite(row.pe) ? Number(row.pe.toFixed(2)) : null,
-            marketCap: row.marketCap,
-            rsi: Number.isFinite(row.rsi) ? Number(row.rsi.toFixed(2)) : null,
-            score: Number.isFinite(row.score) ? Number(row.score.toFixed(0)) : null,
-            bias: row.bias,
-            volumeStatus: row.volumeStatus,
-            technicalLive: row.technicalLive,
-            roe: Number.isFinite(row.roe) ? Number(row.roe.toFixed(2)) : null,
-            dividendYield: Number.isFinite(row.dividendYield) ? Number(row.dividendYield.toFixed(2)) : null,
-            sparklineData
-        };
->>>>>>> repo2/main
     }));
 
     return {

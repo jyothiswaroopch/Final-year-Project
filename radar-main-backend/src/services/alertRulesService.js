@@ -133,13 +133,10 @@ const evaluateRules = async (userId) => {
 
             await Notification.create({
                 user: userId,
-                type: 'PRICE_ALERT',
-                title: `Rule triggered: ${rule.name}`,
-                message: `${rule.symbol} matched ${rule.logic} conditions.`,
-                metadata: new Map([
-                    ['ruleId', String(rule._id)],
-                    ['symbol', rule.symbol],
-                ]),
+                type: 'price_alert',
+                title: `Alert Triggered: ${rule.name}`,
+                message: `${rule.symbol} matched your alert conditions (${rule.logic} rules met).`,
+                relatedId: rule.symbol,
             });
 
             triggered.push({

@@ -24,7 +24,6 @@ const normalizeSymbolForStorage = (sym) => {
 
 const getWatchlists = async (req, res) => {
     try {
-<<<<<<< HEAD
         // Optional ?mode=trader|investor query param.
         // If omitted, return ALL watchlists for the user (backward compat).
         const query = { userId: req.user._id };
@@ -32,18 +31,6 @@ const getWatchlists = async (req, res) => {
             query.mode = String(req.query.mode).toLowerCase();
         }
         const watchlists = await Watchlist.find(query).sort({ createdAt: 1 });
-=======
-        let watchlists = await Watchlist.find({ userId: req.user._id });
-        if (watchlists.length === 0) {
-            const defaultWatchlist = new Watchlist({
-                userId: req.user._id,
-                name: 'My Watchlist',
-                items: []
-            });
-            await defaultWatchlist.save();
-            watchlists = [defaultWatchlist];
-        }
->>>>>>> repo2/main
         res.json(watchlists);
     } catch (error) {
         console.error("Watchlist GET Error:", error);

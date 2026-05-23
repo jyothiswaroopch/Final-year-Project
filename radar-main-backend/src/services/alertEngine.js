@@ -59,6 +59,83 @@ const evaluateUserRules = async (userId) => {
 };
 
 /**
+ * Check simple price alerts (Alert model) for a user against live prices.
+ * Creates a Notification and marks the alert as triggered when price crosses target.
+ */
+const checkPriceAlerts = async (userId) => {
+    try {
+        const alerts = await Alert.find({
+            $or: [{ userId }, { user: userId }],
+            isActive: true,
+            targetPrice: { $exists: true, $ne: null },
+            $or: [{ status: 'ACTIVE' }, { status: { $exists: false } }]
+        }).lean();
+
+        if (!alerts.length) return;
+
+        // Group by symbol to batch-fetch live prices
+        const symbols = [...new Set(alerts.map(a => String(a.symbol).toUpperCase()))];
+        const quotes = await fetchStockData(symbols).catch(() => []);
+        const priceMap = new Map(
+            (Array.isArray(quotes) ? quotes : []).map(q => [
+                String(q.symbol).toUpperCase().replace(/\.(NS|BO)$/i, ''),
+                Number(q.price)
+            ])
+        );
+
+        for (const alert of alerts) {
+            const cleanSym = String(alert.symbol).toUpperCase().replace(/\.(NS|BO)$/i, '');
+            const livePrice = priceMap.get(cleanSym);
+            if (!livePrice || livePrice <= 0) continue;
+
+            const target = Number(alert.targetPrice ?? alert.threshold ?? alert.value);
+            if (!target || target <= 0) continue;
+
+            // Cooldown: skip if triggered in the last 4 hours
+            const lastTriggered = alert.lastEvaluatedAt ? new Date(alert.lastEvaluatedAt).getTime() : 0;
+            if (Date.now() - lastTriggered < 4 * 60 * 60 * 1000) continue;
+
+            const direction = alert.condition || (target > livePrice ? 'crosses_above' : 'crosses_below');
+            const triggered =
+                (direction === 'crosses_above' && livePrice >= target) ||
+                (direction === 'crosses_below' && livePrice <= target);
+
+            if (!triggered) continue;
+
+            const ownerUserId = alert.userId ?? alert.user;
+            if (!ownerUserId) continue;
+
+            // Create notification
+            await Notification.create({
+                user: ownerUserId,
+                type: 'price_alert',
+                title: 'Price Alert Triggered',
+                message: `${cleanSym} ${direction === 'crosses_above' ? 'rose above' : 'dropped below'} your target of ₹${target.toLocaleString('en-IN')}. Current price: ₹${livePrice.toLocaleString('en-IN')}.`,
+                relatedId: cleanSym,
+            });
+
+            // Mark alert as evaluated (cooldown)
+            await Alert.updateOne(
+                { _id: alert._id },
+                { $set: { lastEvaluatedAt: new Date() } }
+            );
+
+            logger.info(`Price alert triggered: ${cleanSym} for user ${ownerUserId} (target ₹${target}, live ₹${livePrice})`);
+
+            emitAlertTriggered({
+                userId: ownerUserId,
+                symbol: cleanSym,
+                targetPrice: target,
+                livePrice,
+                direction,
+            });
+        }
+    } catch (err) {
+        logger.warn(`checkPriceAlerts error: ${err.message}`);
+    }
+};
+
+/**
  * Main alert checking function - evaluates all active users' rules
  * respecting their individual refresh rate settings
  */
@@ -89,12 +166,10 @@ const checkAlerts = async () => {
                 continue;
             }
             
-            // Evaluate this user's rules
+            // 1. Evaluate AlertRule (custom multi-condition rules)
             const result = await evaluateUserRules(user._id);
             if (result.triggeredCount > 0) {
                 logger.info(`User ${userId}: ${result.triggeredCount} rule(s) triggered (${result.evaluated} evaluated)`);
-                
-                // Emit event for each triggered rule
                 result.triggered.forEach(trigger => {
                     emitAlertTriggered({
                         userId: user._id,
@@ -105,14 +180,36 @@ const checkAlerts = async () => {
                     });
                 });
             }
-            
+
             // Update last check timestamp
             userCheckTimestamps.set(userId, Date.now());
         }
+
+        // 2. Check simple price alerts (Alert model) — runs every cycle for all users
+        const allPriceAlertUsers = await Alert.find({
+            isActive: true,
+            targetPrice: { $exists: true, $ne: null },
+        }).distinct('userId').lean();
+
+        const extraUsers = await Alert.find({
+            isActive: true,
+            targetPrice: { $exists: true, $ne: null },
+        }).distinct('user').lean();
+
+        const uniquePriceAlertUserIds = [...new Set([
+            ...allPriceAlertUsers.map(String),
+            ...extraUsers.map(String)
+        ])].filter(Boolean);
+
+        for (const uid of uniquePriceAlertUserIds) {
+            await checkPriceAlerts(uid);
+        }
+
     } catch (error) {
         logger.error(`Error in Alert Engine: ${error.message}`);
     }
 };
+
 
 
 const startAlertEngine = () => {

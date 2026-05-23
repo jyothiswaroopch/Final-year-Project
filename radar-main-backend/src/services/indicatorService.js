@@ -42,7 +42,6 @@ const getTechnicalIndicators = async (assetType, symbol, interval = '1D', option
         signal: validMacd[validMacd.length - 1].signal
     } : null;
 
-<<<<<<< HEAD
     const prices = history.map(h => h.price);
     const bollingerRaw = calculateBollinger(history, 20);
     const latestBollinger = bollingerRaw.length > 0 ? bollingerRaw[bollingerRaw.length - 1] : null;
@@ -54,15 +53,6 @@ const getTechnicalIndicators = async (assetType, symbol, interval = '1D', option
     } : null;
 
     const emaRaw = calculateEMA(prices, 20);
-=======
-    //const prices = history.map(h => h.price);
-    const closes = history.map(h => h.close);
-
-    const highs = history.map(h => h.high);
-    const lows = history.map(h => h.low);
-    const volumes = history.map(h => h.volume);
-    const emaRaw = calculateEMA(closes, 20);
->>>>>>> repo2/main
     const ema20 = emaRaw.length > 0 ? parseFloat(emaRaw[emaRaw.length - 1].toFixed(2)) : null;
 
     let support = null;

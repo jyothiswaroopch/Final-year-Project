@@ -3,7 +3,6 @@ const logger = require('../utils/logger');
 
 const getMarketNews = async (req, res) => {
     try {
-<<<<<<< HEAD
         const symbol = String(req.query.symbol || '').trim();
         const limit = Number.parseInt(req.query.limit || '15', 10);
 
@@ -27,31 +26,6 @@ const getMarketNews = async (req, res) => {
             limit: Number.isFinite(limit) ? limit : 6,
             region,    // null = use server env default
             assetClass,
-=======
-        let category = String(req.query.category || 'business').toLowerCase();
-        const assetClass = String(req.query.assetClass || '').toLowerCase();
-        
-        // Map asset class to category for Finnhub
-        if (assetClass === 'crypto') {
-            category = 'crypto';
-        } else if (category === 'all') {
-            category = 'general';
-        }
-
-        const symbol = String(req.query.symbol || '').trim();
-        const limit = Number.parseInt(req.query.limit || '60', 10);
-        const region = String(req.query.region || '').toLowerCase();
-        
-        // Pass region as search query to force relevance
-        const q = region === 'india' ? 'india' : '';
-
-        const news = await fetchMarketNews(category, {
-            symbol: symbol || undefined,
-            limit: Number.isFinite(limit) ? limit : 60,
-            q: q || undefined,
-            region: region || undefined,
-            assetClass: assetClass || undefined,
->>>>>>> repo2/main
         });
         res.json(news);
 

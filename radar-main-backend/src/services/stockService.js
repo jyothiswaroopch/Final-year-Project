@@ -349,18 +349,12 @@ const buildFallbackQuotes = (symbols) => symbols.map((symbol, index) => {
     };
 });
 
-<<<<<<< HEAD
 const hasEnoughLiveData = (quotes, expectedCount = 0) => {
     if (!Array.isArray(quotes)) {
-=======
-const hasEnoughLiveData = (quotes) => {
-    if (!Array.isArray(quotes) || quotes.length === 0) {
->>>>>>> repo2/main
         return false;
     }
 
     const validPriced = quotes.filter((quote) => Number(quote.price) > 0).length;
-<<<<<<< HEAD
     
     if (expectedCount > 0 && expectedCount < 6) {
         return validPriced >= Math.max(1, Math.floor(expectedCount * 0.5));
@@ -371,9 +365,6 @@ const hasEnoughLiveData = (quotes) => {
     }
 
     return validPriced >= Math.max(4, Math.floor(quotes.length * 0.5));
-=======
-    return validPriced >= Math.max(1, Math.floor(quotes.length * 0.5));
->>>>>>> repo2/main
 };
 
 const buildStockDetails = (symbol, marketCap, sector, longName, peRatio, dividendYield) => {
@@ -702,14 +693,7 @@ const fetchFinnhubQuotes = async (symbols) => {
     }
 
     const requests = normalizedSymbols.map(async (symbol) => {
-<<<<<<< HEAD
         const ticker = symbol;
-=======
-        // const ticker = symbol.endsWith('.NS') || symbol.endsWith('.BO')
-        //     ? symbol.split('.')[0]
-        //     : symbol;
-        let ticker = symbol;
->>>>>>> repo2/main
 
         if (symbol.endsWith('.NS')) {
             ticker = `NSE:${symbol.split('.')[0]}`;
@@ -820,21 +804,7 @@ const fetchFinnhubHistory = async (symbol, interval = '1D') => {
     }
 
     const normalized = String(symbol || '').toUpperCase();
-<<<<<<< HEAD
     const ticker = normalized;
-=======
-    //const ticker = normalized.endsWith('.NS') || normalized.endsWith('.BO')
-    //? normalized.split('.')[0]
-    //: normalized;
-    let ticker = normalized;
-
-    if (normalized.endsWith('.NS')) {
-        ticker = `NSE:${normalized.split('.')[0]}`;
-    }
-    else if (normalized.endsWith('.BO')) {
-        ticker = `BSE:${normalized.split('.')[0]}`;
-    }
->>>>>>> repo2/main
     const resolutionMap = {
         '5M': { resolution: '5', days: 7 },
         '15M': { resolution: '15', days: 15 },

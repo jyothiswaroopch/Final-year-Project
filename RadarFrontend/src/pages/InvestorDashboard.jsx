@@ -431,6 +431,7 @@ const ValuationThermometer = () => {
 };
 
 const GlobalPulse = () => {
+    const navigate = useNavigate();
     const [pulse, setPulse] = useState([]);
     const [error, setError] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -1609,15 +1610,7 @@ const InvestorNewsFeed = () => {
     const [error, setError] = useState(null);
     const [selectedCategories, setSelectedCategories] = useState([]);
     const [assetClass, setAssetClass] = useState("Stocks");
-<<<<<<< HEAD
-    const [isWatchlistOnly, setIsWatchlistOnly] = useState(false);
-
-    // Cache key per region+assetClass — v2 busts old uncategorised cache entries
     const cacheKey = `radar_investor_news_v2_${region.toLowerCase()}_${assetClass.toLowerCase()}`;
-
-=======
-    const [region, setRegion] = useState("India");
->>>>>>> repo2/main
     // Toggle multi-select category logic
     const toggleCategory = (cat) => {
         if (cat === "All") {
@@ -1670,65 +1663,6 @@ const InvestorNewsFeed = () => {
             setIsLoading(true);
             setError(null);
 
-<<<<<<< HEAD
-            let data;
-
-            if (isWatchlistOnly) {
-                // --- WATCHLIST MODE: fetch per-symbol news and merge ---
-                const symbols = await fetchUserWatchlist();
-
-                if (!symbols.length) {
-                    // Empty watchlist — show friendly empty state
-                    setRawNews([]);
-                    setError("Your watchlist is empty. Add stocks to see watchlist-specific news.");
-                    data = [];
-                } else {
-                    // Fire parallel requests for each symbol (cap at 5 to avoid rate limits)
-                    const top5 = symbols.slice(0, 5);
-                    const results = await Promise.allSettled(
-                        top5.map(sym =>
-                            fetchMarketNews({ symbol: sym, limit: 4 })
-                        )
-                    );
-
-                    // Merge all articles, tag with symbol, deduplicate by title
-                    const seen = new Set();
-                    const merged = [];
-                    results.forEach((res, idx) => {
-                        if (res.status === 'fulfilled' && Array.isArray(res.value)) {
-                            res.value.forEach(article => {
-                                const key = article.title?.toLowerCase().trim();
-                                if (key && !seen.has(key)) {
-                                    seen.add(key);
-                                    merged.push({
-                                        ...article,
-                                        isToday: true,
-                                        affectedSymbol: top5[idx],
-                                    });
-                                }
-                            });
-                        }
-                    });
-                    data = merged;
-                }
-            } else {
-                // --- NORMAL MODE: fetch regional/asset news with higher limit ---
-                data = await fetchMarketNews({
-                    category: "all",
-                    region: region.toLowerCase(),
-                    assetClass: assetClass.toLowerCase(),
-                    limit: 15,
-                });
-            }
-
-
-            if (data && Array.isArray(data) && data.length > 0) {
-                const processed = data.map(item => ({ ...item, isToday: true }));
-                setRawNews(processed);
-                if (!isWatchlistOnly) {
-                    // Only cache non-watchlist results (watchlist changes frequently)
-                    localStorage.setItem(cacheKey, JSON.stringify(processed));
-=======
             // To support robust frontend filtering, we fetch a broader set of news (All Category)
             const data = await fetchMarketNews({
                 category: "all",
@@ -1743,7 +1677,6 @@ const InvestorNewsFeed = () => {
                     localStorage.setItem('radar_investor_news', JSON.stringify(processed));
                 } else {
                     setRawNews([]);
->>>>>>> repo2/main
                 }
             } else if (!rawNews.length) {
                 // High-fidelity fallback if everything fails and no cache
@@ -1924,13 +1857,6 @@ function InvestorView({ activeModule, setActiveModule }) {
 
     if (activeModule === 'WATCHLIST') {
         return <Watchlist />;
-<<<<<<< HEAD
-    }
-
-    if (activeModule === 'PROFILE') {
-        return <ProfilePage embedded />;
-=======
->>>>>>> repo2/main
     }
 
     if (activeModule === 'SCREENERS') {
@@ -1943,6 +1869,10 @@ function InvestorView({ activeModule, setActiveModule }) {
 
     if (activeModule === 'ACADEMY') {
         return <LearningAcademy />;
+    }
+
+    if (activeModule === 'PROFILE') {
+        return <ProfilePage />;
     }
 
     // Default: DASHBOARD

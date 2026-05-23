@@ -1,14 +1,8 @@
-<<<<<<< HEAD
-import React, { useState, useEffect } from 'react';
-import { Search, ChevronDown, CheckCircle, AlertTriangle, ShieldAlert, Plus, Bell, Activity, TrendingUp, TrendingDown, Info, ArrowRight, Filter, BookOpen, Bookmark, SlidersHorizontal, Trash2, PieChart, BarChart3 } from 'lucide-react';
-=======
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, ChevronDown, CheckCircle, AlertTriangle, Eye, ShieldAlert, Plus, Bell, Activity, TrendingUp, TrendingDown, Info, ArrowRight, CornerRightDown, AlignLeft, Filter, BookOpen, Bookmark, SlidersHorizontal, Trash2, PieChart, BarChart3, ExternalLink, X } from 'lucide-react';
->>>>>>> repo2/main
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, CartesianGrid } from 'recharts';
 import api from '../../api/api';
-import { createWatchlist as createBackendWatchlist } from '../../api/watchlistApi';
 import { useSocket } from '../../hooks/useSocket';
 import { AlertsDrawer } from './charts/SidebarDrawers';
 
@@ -29,7 +23,6 @@ const mockWatchlistGrid = [];
 
 const mockWhyThisMatters = [];
 const mockCompareAndReflect = [];
-const ALERT_PROXIMITY_PERCENT = 5;
 
 const TooltipInfo = ({ text }) => (
     <div className="relative group/tooltip inline-flex items-center ml-2 align-middle">
@@ -93,79 +86,6 @@ const AttentionCard = ({ stock }) => {
                 </div>
             </div>
 
-<<<<<<< HEAD
-const AlertModal = ({ stock, onClose, onSave, existingAlertPrice }) => {
-    const [price, setPrice] = useState(() => {
-        if (existingAlertPrice) return existingAlertPrice;
-        const rawPrice = stock.price.replace(/[^0-9.]/g, '');
-        return Math.floor(parseFloat(rawPrice) * 0.95);
-    });
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    const handleSubmit = async () => {
-        if (!price || isNaN(price)) return;
-        setIsSubmitting(true);
-        try {
-            await api.post('/alerts', { symbol: stock.name, targetPrice: parseFloat(price) });
-            onSave(parseFloat(price));
-        } catch (err) {
-            console.error(err);
-            alert('Failed to set alert.');
-        } finally {
-            setIsSubmitting(false);
-            onClose();
-        }
-    };
-
-    return (
-        <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4">
-            <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
-            <div className="bg-white rounded-[24px] shadow-2xl w-full max-w-sm relative z-10 overflow-hidden animate-in fade-in zoom-in duration-200">
-                <div className="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                    <h3 className="text-[15px] font-black text-slate-800 flex items-center gap-2">
-                        <Bell size={18} className="text-blue-600" /> Set Price Alert
-                    </h3>
-                    <button onClick={onClose} className="w-7 h-7 rounded-full bg-white border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 shadow-sm">
-                        <Trash2 size={14} className="rotate-45" />
-                    </button>
-                </div>
-                <div className="p-6">
-                    <div className="flex justify-between items-end mb-4">
-                        <div>
-                            <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1">{stock.name}</div>
-                            <div className="text-[20px] font-black text-slate-800 leading-none">{stock.price}</div>
-                        </div>
-                    </div>
-                    
-                    <div className="relative mb-6">
-                        <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">Target Price (₹)</label>
-                        <input 
-                            type="number"
-                            value={price}
-                            onChange={(e) => setPrice(e.target.value)}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-[16px] font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
-                            autoFocus
-                        />
-                    </div>
-                    
-                    <div className="flex gap-2">
-                        <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-[13px] hover:bg-slate-50 transition-colors">
-                            Cancel
-                        </button>
-                        <button 
-                            onClick={handleSubmit} 
-                            disabled={isSubmitting}
-                            className="flex-[2] py-2.5 rounded-xl bg-blue-600 text-white font-bold text-[13px] hover:bg-blue-700 transition-colors shadow-md disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                        >
-                            {isSubmitting ? (
-                                <>
-                                    <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                    Saving...
-                                </>
-                            ) : 'Create Alert'}
-                        </button>
-                    </div>
-=======
             <div className="flex justify-end mt-auto">
                 <button
                     onClick={() => navigate(`/investor/advanced-charts?symbol=${encodeURIComponent(stock.name.toUpperCase().replace(/\.(NS|BO)$/i, ''))}`)}
@@ -205,22 +125,12 @@ const SetAlertModal = ({ isOpen, onClose, symbol }) => {
                     <button onClick={onClose} className="px-6 py-2.5 bg-blue-600 border border-blue-700 rounded-xl text-sm font-bold text-white hover:bg-blue-700 transition-colors shadow-sm">
                         Done
                     </button>
->>>>>>> repo2/main
                 </div>
             </div>
         </div>
     );
 };
 
-<<<<<<< HEAD
-const GridCard = ({ stock, onRemove }) => {
-    const [isEditing, setIsEditing] = useState(false);
-    const [thesis, setThesis] = useState(stock.note || '');
-    const [hasNote, setHasNote] = useState(stock.hasNote || false);
-    const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
-    const [alertSuccess, setAlertSuccess] = useState(false);
-    const [activeAlertPrice, setActiveAlertPrice] = useState(null);
-=======
 const GridCard = ({ stock, onRemove, customAlerts = [] }) => {
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
@@ -228,7 +138,6 @@ const GridCard = ({ stock, onRemove, customAlerts = [] }) => {
     const [hasNote, setHasNote] = useState(stock.hasNote || false);
     const [currentAlertIndex, setCurrentAlertIndex] = useState(0);
     const [isAlertModalOpen, setIsAlertModalOpen] = useState(false);
->>>>>>> repo2/main
 
     const handleSave = () => {
         if (thesis.trim()) {
@@ -399,37 +308,6 @@ const GridCard = ({ stock, onRemove, customAlerts = [] }) => {
                 </div>
             </div>
 
-<<<<<<< HEAD
-            {activeAlertPrice && (
-                <div className="bg-slate-50 border border-emerald-100 rounded-xl p-3 mb-4 flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                        <Bell size={14} className="text-emerald-500" />
-                        <span className="text-[11px] font-bold text-slate-600 uppercase tracking-widest">Active Alert</span>
-                    </div>
-                    <div className="text-[13px] font-black text-emerald-600">
-                        ₹{activeAlertPrice}
-                    </div>
-                </div>
-            )}
-
-            <div className="flex items-center gap-2 mt-auto">
-                <button 
-                    onClick={() => setIsAlertModalOpen(true)}
-                    className={`flex-1 border py-2.5 rounded-xl text-xs font-bold transition-all shadow-sm flex items-center justify-center gap-1.5 ${
-                        alertSuccess 
-                        ? 'bg-emerald-50 border-emerald-200 text-emerald-600' 
-                        : 'bg-white border-slate-200 hover:border-blue-500 hover:text-blue-700 text-slate-600'
-                    }`}
-                >
-                    {alertSuccess ? (
-                        <><CheckCircle size={14} /> Alert Set</>
-                    ) : (
-                        <><Bell size={14} className="opacity-70" /> {activeAlertPrice ? 'Edit Alert' : 'Set Alert'}</>
-                    )}
-                </button>
-
-                <button 
-=======
             {alertBox}
 
             <div className="flex items-center gap-2 mt-auto">
@@ -440,7 +318,6 @@ const GridCard = ({ stock, onRemove, customAlerts = [] }) => {
                     Set Alert
                 </button>
                 <button
->>>>>>> repo2/main
                     onClick={(e) => { e.stopPropagation(); onRemove && onRemove(stock.id); }}
                     className="p-2.5 bg-white border border-slate-200 text-slate-400 hover:text-rose-500 hover:bg-rose-50 hover:border-rose-200 rounded-xl transition-all shadow-sm flex items-center justify-center group/trash"
                     title="Remove from Watchlist"
@@ -491,19 +368,6 @@ const GridCard = ({ stock, onRemove, customAlerts = [] }) => {
                         + Add investment thesis
                     </button>
                 </div>
-            )}
-            
-            {isAlertModalOpen && (
-                <AlertModal 
-                    stock={stock} 
-                    existingAlertPrice={activeAlertPrice}
-                    onClose={() => setIsAlertModalOpen(false)} 
-                    onSave={(price) => {
-                        setActiveAlertPrice(price);
-                        setAlertSuccess(true);
-                        setTimeout(() => setAlertSuccess(false), 3000);
-                    }}
-                />
             )}
         </div>
     );
@@ -841,10 +705,6 @@ const Watchlist = () => {
     const [watchlist, setWatchlist] = useState([]);
     const [isLoadingLive, setIsLoadingLive] = useState(true);
     const [watchlistId, setWatchlistId] = useState(null);
-<<<<<<< HEAD
-    const [priceAlerts, setPriceAlerts] = useState([]);
-    const [indicatorSignals, setIndicatorSignals] = useState([]);
-=======
     const [customAlerts, setCustomAlerts] = useState(() => {
         try { return JSON.parse(localStorage.getItem('radar_active_alerts') || '[]'); } catch { return []; }
     });
@@ -856,7 +716,6 @@ const Watchlist = () => {
         window.addEventListener('radar_alerts_updated', handleAlertsUpdate);
         return () => window.removeEventListener('radar_alerts_updated', handleAlertsUpdate);
     }, []);
->>>>>>> repo2/main
 
     const { on } = useSocket(['ticker']);
 
@@ -978,108 +837,28 @@ const Watchlist = () => {
         };
     };
 
-    const getCleanSymbol = (value) => String(value || '')
-        .trim()
-        .toUpperCase()
-        .replace(/\.(NS|BO)$/i, '');
-
-    const parseDisplayPrice = (value) => Number(String(value || '').replace(/[^0-9.-]/g, '')) || 0;
-
-    const normalizeAlert = (alert, quoteMap, watchlistSymbols) => {
-        const symbol = getCleanSymbol(alert.symbol);
-        const quote = quoteMap[symbol] || {};
-        const currentPrice = Number(quote.price ?? quote.ltp ?? quote.lastPrice ?? 0);
-        const targetPrice = Number(alert.targetPrice ?? alert.threshold ?? 0);
-        const distancePercent = currentPrice > 0 && targetPrice > 0
-            ? Math.abs(((targetPrice - currentPrice) / currentPrice) * 100)
-            : null;
-        const changePercent = Number(quote.changePercent ?? quote.change ?? 0);
-
-        return {
-            ...alert,
-            symbol,
-            currentPrice,
-            targetPrice,
-            distancePercent,
-            isInWatchlist: watchlistSymbols.has(symbol),
-            changePercent,
-        };
-    };
-
     useEffect(() => {
         let active = true;
         const load = async (isBackground = false) => {
             if (!isBackground) setIsLoadingLive(true);
             try {
-<<<<<<< HEAD
-                // 1. Fetch user's watchlist symbols - Investor mode
-                const wlRes = await api.get('/watchlist', { params: { mode: 'investor' } });
-=======
                 // 1. Fetch user's watchlist symbols
                 const wlRes = await api.get('/watchlist');
->>>>>>> repo2/main
                 const wlData = wlRes.data?.data ?? wlRes.data;
-                
-                // The Watchlist model stores items as objects: {symbol: "RELIANCE.NS", addedAt: ...}
-                // Handle both plain strings and {symbol: string} objects
-                const extractSymbol = (item) => {
-                    if (!item) return null;
-                    if (typeof item === 'string') return item;
-                    if (typeof item === 'object') return item.symbol || item.sym || null;
-                    return null;
-                };
-
                 const symbols = (Array.isArray(wlData)
-<<<<<<< HEAD
-                    ? wlData.flatMap(w => (w.items ?? w.symbols ?? w.stocks ?? []).map(extractSymbol))
-=======
                     ? wlData.flatMap(w => (w.items ? w.items.map(i => i.symbol) : (w.symbols ?? w.stocks ?? [])))
->>>>>>> repo2/main
                     : []).filter(Boolean);
 
                 if (Array.isArray(wlData) && wlData.length > 0) {
                     setWatchlistId(wlData[0]._id || wlData[0].id);
-                } else if (Array.isArray(wlData) && wlData.length === 0) {
-                    const created = await createBackendWatchlist('Investor Portfolio', 'investor');
-                    if (created?._id || created?.id) {
-                        setWatchlistId(created._id || created.id);
-                    }
                 }
 
-<<<<<<< HEAD
-                const alertsRes = await api.get('/alerts').catch(() => ({ data: [] }));
-                const activeAlerts = (Array.isArray(alertsRes.data) ? alertsRes.data : [])
-                    .filter(alert => alert.isActive !== false && Number(alert.targetPrice ?? alert.threshold ?? 0) > 0);
-                const alertSymbols = activeAlerts.map(alert => alert.symbol).filter(Boolean);
-=======
                 if (!symbols.length || !active) { if (!isBackground) setIsLoadingLive(false); return; }
->>>>>>> repo2/main
 
-                if (!symbols.length && !alertSymbols.length) {
-                    if (active) setIsLoadingLive(false);
-                    return;
-                }
-
-                // 2. Fetch live quotes for watchlist and alert-only symbols
-                const quoteSymbols = [...new Set([...symbols, ...alertSymbols])];
-                const symbolStr = quoteSymbols.join(',');
+                // 2. Fetch live quotes for all symbols
+                const symbolStr = symbols.join(',');
                 const mktRes = await api.get(`/market/quotes?symbols=${encodeURIComponent(symbolStr)}`);
                 const quotes = mktRes.data?.data ?? mktRes.data;
-<<<<<<< HEAD
-                const quoteMap = {};
-                (Array.isArray(quotes) ? quotes : []).forEach(quote => {
-                    quoteMap[getCleanSymbol(quote.symbol)] = quote;
-                });
-
-                if (Array.isArray(quotes) && quotes.length && active) {
-                    const watchlistSymbolSet = new Set(symbols.map(getCleanSymbol));
-                    setWatchlist(
-                        quotes
-                            .filter(quote => watchlistSymbolSet.has(getCleanSymbol(quote.symbol)))
-                            .map(normalizeToGridCard)
-                    );
-                    setPriceAlerts(activeAlerts.map(alert => normalizeAlert(alert, quoteMap, watchlistSymbolSet)));
-=======
                 const quotesWithCharts = await Promise.all(
                     quotes.map(async (quote) => {
                         try {
@@ -1115,15 +894,9 @@ const Watchlist = () => {
 
                 if (Array.isArray(quotesWithCharts) && quotesWithCharts.length && active) {
                     setWatchlist(quotesWithCharts.map(normalizeToGridCard));
->>>>>>> repo2/main
                 } else if (active && (!symbols.length || !quotes.length)) {
                     // Keep the default mocks if no symbols found in backend
                     console.log("No symbols in backend, keeping mocks.");
-                }
-
-                const signalsRes = await api.get('/technical/signals').catch(() => ({ data: [] }));
-                if (active) {
-                    setIndicatorSignals(Array.isArray(signalsRes.data) ? signalsRes.data : []);
                 }
             } catch (err) {
                 console.warn('Investor Watchlist live load failed, keeping mock data:', err.message);
@@ -1311,61 +1084,6 @@ const Watchlist = () => {
     }, [customAlerts]);
 
     const dynamicAttentionStocks = React.useMemo(() => {
-<<<<<<< HEAD
-        const watchlistMap = new Map(watchlist.map(stock => [getCleanSymbol(stock.name || stock.sym), stock]));
-
-        return priceAlerts
-            .filter(alert => alert.distancePercent !== null && alert.distancePercent <= ALERT_PROXIMITY_PERCENT)
-            .sort((a, b) => a.distancePercent - b.distancePercent)
-            .slice(0, 6)
-            .map(alert => {
-                const watched = watchlistMap.get(alert.symbol);
-                const currentPrice = alert.currentPrice || parseDisplayPrice(watched?.price);
-                const change = watched?.changeToday || `${alert.changePercent >= 0 ? '+' : ''}${alert.changePercent.toFixed(2)}%`;
-                const direction = currentPrice <= alert.targetPrice ? 'below' : 'above';
-                const distance = alert.distancePercent?.toFixed(2);
-
-                return {
-                    id: alert._id || alert.id || alert.symbol,
-                    name: alert.symbol,
-                    price: currentPrice
-                        ? `₹${currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
-                        : watched?.price || '-',
-                    change,
-                    isPositive: !String(change).startsWith('-'),
-                    tagTop: alert.isInWatchlist ? 'Watchlist Alert' : 'Alert Only',
-                    tagTopColor: distance <= 1 ? 'rose' : 'amber',
-                    insight: `${alert.symbol} is ${distance}% ${direction} your alert target of ₹${alert.targetPrice.toLocaleString('en-IN')}.`
-                };
-            });
-    }, [priceAlerts, watchlist]);
-
-    const dynamicRecentChanges = React.useMemo(() => {
-        const signalRank = { High: 0, Medium: 1, Low: 2 };
-
-        return indicatorSignals
-            .sort((a, b) => (signalRank[a.strength] ?? 3) - (signalRank[b.strength] ?? 3))
-            .slice(0, 5)
-            .map(signal => {
-                const signalType = String(signal.signal || '').toUpperCase();
-                const isBullish = signalType === 'BULLISH';
-                const isBearish = signalType === 'BEARISH';
-                return {
-                    title: `${signal.symbol} ${signal.value}`,
-                    desc: `${signal.value} detected with ${String(signal.strength || 'watchlist').toLowerCase()} sensitivity.`,
-                    type: isBullish ? 'positive' : isBearish ? 'negative' : 'neutral',
-                    date: 'Today',
-                    time: 'Live'
-                };
-            });
-    }, [indicatorSignals]);
-
-    const holdingsGridClass = watchlist.length <= 1
-        ? 'grid grid-cols-1 gap-6'
-        : watchlist.length === 2
-            ? 'grid grid-cols-1 lg:grid-cols-2 gap-6'
-            : 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6';
-=======
         if (proximityAlerts !== null) {
             return proximityAlerts.map(a => ({
                 id: a.id,
@@ -1430,7 +1148,6 @@ const Watchlist = () => {
                 };
             });
     }, [recentChangesData, watchlist]);
->>>>>>> repo2/main
 
     const handleRemoveFromWatchlist = async (stockSymbol) => {
         // Optimistic UI update
@@ -1696,212 +1413,6 @@ const Watchlist = () => {
                         )}
                     </div>
                 </div>
-<<<<<<< HEAD
-
-            <div className="space-y-6">
-
-                {/* Loading state */}
-                {isLoadingLive && (
-                    <div className="flex flex-col items-center justify-center p-16 bg-white rounded-[20px] border border-slate-100 shadow-sm min-h-[400px]">
-                        <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-4">
-                            <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                        </div>
-                        <div className="text-slate-800 font-bold mb-1">Syncing Intelligence Hub</div>
-                        <div className="text-slate-500 text-[12px]">Connecting to live market feeds...</div>
-                    </div>
-                )}
-
-                {/* Empty state — no stocks tracked */}
-                {!isLoadingLive && watchlist.length === 0 && dynamicAttentionStocks.length === 0 && (
-                    <EmptyState onAdd={handleAddToWatchlist} />
-                )}
-
-                {/* Full dashboard — only shown when stocks exist */}
-                {!isLoadingLive && (watchlist.length > 0 || dynamicAttentionStocks.length > 0) && (
-                    <>
-                    {/* Watchlist Overview */}
-                    <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6">
-                        <div className="text-[11px] font-black uppercase text-slate-400 tracking-widest mb-4 flex items-center">
-                            Watchlist Overview
-                            <TooltipInfo text="High-level aggregate metrics representing the overall performance and status of all stocks currently in your watchlist." />
-                        </div>
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                            <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center justify-between">
-                                <div>
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Tracked</div>
-                                    <div className="text-2xl font-black text-slate-800">{stats?.total || 0} <span className="text-xs font-bold text-slate-500">Stk</span></div>
-                                </div>
-                                <div className="flex items-end gap-1 flex-col text-[10px] font-bold">
-                                    <span className="text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">{stats?.gains || 0} Gain</span>
-                                    <span className="text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">{stats?.losses || 0} Loss</span>
-                                </div>
-                            </div>
-
-                            <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center justify-between">
-                                <div className="flex flex-col">
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center">
-                                        Watchlist Valuation Snapshot
-                                        <TooltipInfo text="Based on valuation classification of tracked stocks" />
-                                    </div>
-                                    <div className="text-lg font-black text-slate-800">{stats?.valuation?.label}</div>
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5">{stats?.valuation?.breakdown}</div>
-                                </div>
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${
-                                    stats?.valuation?.colorKey === 'blue' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                    stats?.valuation?.colorKey === 'rose' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-amber-50 text-amber-600 border-amber-100'
-                                }`}>
-                                    {stats?.valuation?.label === "Undervalued Opportunity" ? <TrendingUp size={18}/> : stats?.valuation?.label === "Overvalued Zone" ? <TrendingDown size={18}/> : <CheckCircle size={18}/>}
-                                </div>
-                            </div>
-
-                            <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center justify-between">
-                                <div className="flex flex-col">
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center">
-                                        Watchlist Risk Level
-                                        <TooltipInfo text="Based on average beta (volatility vs market)" />
-                                    </div>
-                                    <div className="text-lg font-black text-slate-800">
-                                        {stats?.risk?.label} <span className="text-xs font-bold text-slate-500">({stats?.risk?.avgBeta}x beta)</span>
-                                    </div>
-                                    <div className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mt-0.5 italic pr-2">"{stats?.risk?.insight}"</div>
-                                </div>
-                                <div className={`w-10 h-10 rounded-full flex items-center justify-center border ${
-                                    stats?.risk?.colorKey === 'blue' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                                    stats?.risk?.colorKey === 'rose' ? 'bg-rose-50 text-rose-600 border-rose-100' : 'bg-amber-50 text-amber-600 border-amber-100'
-                                }`}>
-                                   <Activity size={18}/>
-                                </div>
-                            </div>
-
-                            <div className="bg-slate-50 border border-slate-100 p-4 rounded-2xl flex items-center justify-between cursor-pointer hover:border-slate-200 transition-colors group">
-                                <div>
-                                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Needs Attention</div>
-                                    <div className="text-2xl font-black text-amber-600">{dynamicAttentionStocks.length} <span className="text-[11px] font-bold opacity-70 text-slate-500">Stocks</span></div>
-                                </div>
-                                <div className="w-10 h-10 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform border border-amber-100/50">
-                                    <AlertTriangle size={18} />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* What Needs Attention + Recent Changes */}
-                    <div className="flex flex-col lg:flex-row gap-6">
-                        <div className="lg:w-[65%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 transition-all">
-                            <div className="flex items-center justify-between mb-5">
-                                <h3 className="text-[15px] font-black text-slate-800 flex items-center gap-2">
-                                    <AlertTriangle size={18} className="text-amber-500" />
-                                    What Needs Attention
-                                    <TooltipInfo text="Stocks that have triggered a predefined manual or system-level alert requiring immediate review by the investor." />
-                                </h3>
-                                <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">Priority Review</span>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {dynamicAttentionStocks.length > 0 ? dynamicAttentionStocks.map(stock => (
-                                    <AttentionCard key={stock.id} stock={stock} />
-                                )) : (
-                                    <div className="col-span-1 md:col-span-3 py-8 text-center text-slate-500 text-[13px] font-medium border border-dashed border-slate-200 rounded-xl">
-                                        All clear — no stocks require immediate attention.
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-
-                        <div className="lg:w-[35%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col h-full min-h-[260px] lg:min-h-[320px]">
-                            <h3 className="text-[16px] font-black text-slate-800 mb-6 flex items-center gap-2">
-                                <Activity size={18} className="text-blue-500" />
-                                Recent Changes
-                                <TooltipInfo text="A chronological activity log of objective, factual events affecting the stocks on your watchlist." />
-                            </h3>
-                            <div className="flex-grow space-y-6">
-                                {dynamicRecentChanges.length > 0 ? dynamicRecentChanges.map((change, i) => (
-                                    <div key={i} className="flex gap-4 relative">
-                                        <div className="mt-1.5 flex flex-col items-center">
-                                            {change.type === 'positive' ? <div className="w-3 h-3 rounded-full bg-blue-500 ring-4 ring-blue-50 relative z-10"></div> :
-                                             change.type === 'negative' ? <div className="w-3 h-3 rounded-full bg-rose-500 ring-4 ring-rose-50 relative z-10"></div> :
-                                             <div className="w-3 h-3 rounded-full bg-amber-500 ring-4 ring-amber-50 relative z-10"></div>}
-                                            {i !== dynamicRecentChanges.length - 1 && <div className="w-px h-full bg-slate-100 absolute top-4"></div>}
-                                        </div>
-                                        <div className="pb-2 w-full">
-                                            <div className="flex justify-between items-start w-full">
-                                                <div className="text-[14px] font-bold text-slate-800">{change.title}</div>
-                                                <div className="text-[10px] font-bold text-slate-400 mt-0.5 tracking-wide">{change.date}, {change.time}</div>
-                                            </div>
-                                            <div className="text-[12px] font-medium text-slate-500 leading-relaxed mt-1.5 pr-2">{change.desc}</div>
-                                        </div>
-                                    </div>
-                                )) : (
-                                    <div className="py-8 text-center text-slate-500 text-[13px] font-medium border border-dashed border-slate-200 rounded-xl">
-                                        No sensitive technical changes detected right now.
-                                    </div>
-                                )}
-                            </div>
-                            <div className="mt-auto pt-6">
-                                <button className="w-full text-[12px] font-bold text-blue-700 bg-blue-50/50 border border-blue-100/60 py-3 rounded-[12px] hover:bg-blue-50 hover:border-blue-200 transition-colors">
-                                    View Full Activity Log
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Watchlist Holdings grid */}
-                    <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6">
-                        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                            <h3 className="text-[15px] font-black text-slate-800 flex items-center">
-                                Watchlist Holdings
-                                <TooltipInfo text="Your primary grid of tracked stocks, displaying real-time technicals, valuations, and customized target proximity bars." />
-                            </h3>
-                            <div className="flex items-center gap-3">
-                                <div className="relative group">
-                                    <button className="flex items-center gap-1.5 bg-white border border-slate-200 px-3 py-1.5 rounded-lg text-slate-600 text-[11px] font-bold hover:bg-slate-50 hover:text-blue-700 hover:border-blue-200 transition-all shadow-sm">
-                                        <Filter size={13} className="text-slate-400 group-hover:text-blue-500" />
-                                        Tags
-                                        <span className="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded text-[9px] ml-1 group-hover:bg-blue-50 group-hover:text-blue-700">All Tracks</span>
-                                        <ChevronDown size={14} className="ml-1 opacity-60" />
-                                    </button>
-                                </div>
-                                <div className="relative group">
-                                    <button className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1.5 rounded-lg text-slate-600 text-[11px] font-bold hover:bg-slate-100 transition-colors shadow-sm">
-                                        Sort: <span className="text-blue-700">Valuation Gap</span>
-                                        <ChevronDown size={14} />
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                        <div className={holdingsGridClass}>
-                            {watchlist.map(stock => (
-                                <GridCard
-                                    key={stock.id}
-                                    stock={stock}
-                                    onRemove={() => handleRemoveFromWatchlist(stock.sym)}
-                                />
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Market Behavior Mirror + Heatmap */}
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <MarketBehaviorMirror stats={stats} />
-
-                        <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 opacity-95">
-                            <div className="flex items-center justify-between mb-1">
-                                <div className="flex items-center gap-2 text-slate-800 font-black text-[15px]">
-                                    <SlidersHorizontal size={18} className="text-slate-500" />
-                                    Watchlist Heatmap Insights
-                                    <TooltipInfo text="A compact, interactive comparison of your watchlist stocks across key fundamental and technical metrics." />
-                                </div>
-                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Research Tool</span>
-                            </div>
-                            <div className="text-[11px] font-medium text-slate-500 mb-5">Click any tile to compare all tracked stocks</div>
-                            <div className="h-[250px] sm:h-[300px]">
-                                <WatchlistHeatmap watchlist={watchlist} />
-                            </div>
-                        </div>
-                    </div>
-                    </>
-                )}
-=======
->>>>>>> repo2/main
             </div>
         </div>
     );

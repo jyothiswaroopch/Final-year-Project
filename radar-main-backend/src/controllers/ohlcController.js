@@ -54,7 +54,17 @@ const getHistoricalData = async (req, res) => {
     }
 };
 
-<<<<<<< HEAD
+const getOHLCData = asyncHandler(async (req, res) => {
+    const { symbol, exchange, timeframe, startDate, endDate, limit = 500 } = req.query;
+
+    if (!symbol) {
+        res.status(400);
+        throw new Error('Symbol is required');
+    }
+
+    const actualStartDate = startDate || new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+    const actualEndDate = endDate || new Date().toISOString().slice(0, 10);
+
     let result = await ohlcService.getOHLCData({
         symbol,
         exchange,
@@ -103,9 +113,6 @@ const getHistoricalData = async (req, res) => {
         data: result.data,
     });
 });
-=======
->>>>>>> repo2/main
-
 const liveMarketService = require('../services/liveMarketService');
 
 const getLatestCandle = asyncHandler(async (req, res) => {
@@ -268,6 +275,7 @@ const getStockDetails = asyncHandler(async (req, res) => {
 });
 module.exports = {
     getHistoricalData,
+    getOHLCData,
     getLatestCandle,
     getAvailableSymbols,
     getCompareData,

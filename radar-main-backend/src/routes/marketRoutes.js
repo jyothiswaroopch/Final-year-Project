@@ -11,10 +11,8 @@ const {
 } = require('../controllers/marketController');
 const { getHistory } = require('../controllers/historyController');
 const { getOrderBook } = require('../controllers/depthController');
-const { getStatus } = require('../controllers/statusController');
 const { getMarketNews, getNewsInsight } = require('../controllers/newsController');
 const { getStatus, getProviderHealth } = require('../controllers/statusController');
-const { getMarketNews } = require('../controllers/newsController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { getMarketData: getUnifiedData } = require('../services/marketDataService');
 const { validateRequest, validateSymbolParam } = require('../middleware/validationMiddleware');
@@ -287,8 +285,6 @@ router.get('/quotes', async (req, res) => {
         const enriched = await Promise.all(
             priceResults.map(async (resObj, i) => {
                 const sym = symbols[i];
-                const changePercent = resObj.percentChange;
-            symbols.map(async (sym) => {
                 const key = String(sym).toUpperCase().replace(/\.(NS|BO)$/i, '');
                 let priceDataRaw = priceMap.get(key) || {};
                 let priceData = priceDataRaw.raw || priceDataRaw;
@@ -330,7 +326,7 @@ router.get('/quotes', async (req, res) => {
                     }
                 }
 
-                const fundamentals = await getFundamentals(sym, changePercent);
+                const fundamentals = await getFundamentals(sym, changePercent || resObj.percentChange || 0);
 
                 return {
                     symbol:        sym,
@@ -374,11 +370,7 @@ router.get('/quotes', async (req, res) => {
                     bookValue:     fundamentals.bookValue,
                     valStatus:     fundamentals.valStatus,
                     // Crypto-native fields
-                    category:      fundamentals.sector || 'Equity',
-                    layer:         null,
-                    consensus:     null,
-                    tradeCount:    null,
-                    category:      priceData?.category || fundamentals.sector,
+                    category:      priceData?.category || fundamentals.sector || 'Equity',
                     layer:         priceData?.layer || null,
                     consensus:     priceData?.consensus || null,
                     tradeCount:    priceData?.tradeCount || null,

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     Filter, 
     Star, 
@@ -15,6 +15,7 @@ import {
     SlidersHorizontal,
     Plus,
     X,
+    Info,
     Check,
     ArrowUpRight,
     Zap,
@@ -22,21 +23,8 @@ import {
     Trash2,
     Download
 } from 'lucide-react';
-<<<<<<< HEAD
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
-import {
-    runScreenerScan,
-    createCustomFilter,
-    getCustomFilters,
-    deleteCustomFilter,
-    createSavedScreener,
-    getSavedScreeners,
-    deleteSavedScreener
-} from '../../api/screenerApi';
-=======
 import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts';
-import { runScreenerScan, createCustomFilter, getCustomFilters, deleteCustomFilter } from '../../api/screenerApi';
->>>>>>> repo2/main
+import { runScreenerScan, createCustomFilter, getCustomFilters, deleteCustomFilter, createSavedScreener, getSavedScreeners, deleteSavedScreener } from '../../api/screenerApi';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import api, { saveToDefaultWatchlist } from '../../api/api';
@@ -92,59 +80,12 @@ const allFilters = [
 ];
 
 
-// ── Translate human-readable UI filter values → backend numeric format ──────
-const translateFilters = (uiFilters) => {
-    const out = {};
-
-    // Change %
-    const changeMap = { '> 0%': { minChange: 0 }, '> 2%': { minChange: 2 }, '> 5%': { minChange: 5 }, '< 0%': { maxChange: -0.01 } };
-    if (uiFilters.change && changeMap[uiFilters.change]) Object.assign(out, changeMap[uiFilters.change]);
-
-    // P/E
-    const peMap = { 'Low (<15)': { maxPe: 15 }, 'Medium': { minPe: 15, maxPe: 30 }, 'High': { minPe: 30 } };
-    if (uiFilters.pe && peMap[uiFilters.pe]) Object.assign(out, peMap[uiFilters.pe]);
-
-    // Price
-    const priceMap = { '< ₹500': { maxPrice: 500 }, '₹500 - ₹2k': { minPrice: 500, maxPrice: 2000 }, '> ₹2k': { minPrice: 2000 } };
-    if (uiFilters.price && priceMap[uiFilters.price]) Object.assign(out, priceMap[uiFilters.price]);
-
-    // Market Cap (in INR)
-    const mcapMap = { 'Large': { minMarketCap: 200_000_000_000 }, 'Mid': { minMarketCap: 20_000_000_000, maxMarketCap: 200_000_000_000 }, 'Small': { minMarketCap: 1_000_000_000, maxMarketCap: 20_000_000_000 }, 'Micro': { maxMarketCap: 1_000_000_000 } };
-    if (uiFilters.mcap && mcapMap[uiFilters.mcap]) Object.assign(out, mcapMap[uiFilters.mcap]);
-
-    // Sector
-    if (uiFilters.sector && uiFilters.sector !== 'All') out.sectors = [uiFilters.sector];
-
-    // ROE (minChange uses score as proxy here; ROE isn't in backend directly)
-    const roeMap = { '> 10%': { minScore: 50 }, '> 15%': { minScore: 60 }, '> 20%': { minScore: 70 } };
-    if (uiFilters.roe && roeMap[uiFilters.roe]) Object.assign(out, roeMap[uiFilters.roe]);
-
-    // RSI
-    const rsiMap = { 'Oversold (<30)': { maxRsi: 30 }, 'Neutral': { minRsi: 40, maxRsi: 60 }, 'Overbought (>70)': { minRsi: 70 } };
-    if (uiFilters.rsi && rsiMap[uiFilters.rsi]) Object.assign(out, rsiMap[uiFilters.rsi]);
-
-    // Strategy-level quick signals (already in numeric form)
-    if (uiFilters.minChange !== undefined) out.minChange = uiFilters.minChange;
-    if (uiFilters.maxChange !== undefined) out.maxChange = uiFilters.maxChange;
-    if (uiFilters.minRsi !== undefined) out.minRsi = uiFilters.minRsi;
-    if (uiFilters.maxRsi !== undefined) out.maxRsi = uiFilters.maxRsi;
-    if (uiFilters.minScore !== undefined) out.minScore = uiFilters.minScore;
-    if (uiFilters.volume) {
-        const volMap = { 'High': 'high', 'Very High': 'very_high', 'Extreme': 'very_high', 'Low': 'low', 'Normal': 'normal' };
-        out.volumeStatus = volMap[uiFilters.volume] || uiFilters.volume.toLowerCase();
-    }
-
-    return out;
-};
-
-
 const Screeners = ({ isHero = false, initialFilters = {} }) => {
     const [activeFilters, setActiveFilters] = useState(initialFilters);
     const [visibleFilters, setVisibleFilters] = useState(['mcap', 'price', 'change', 'sector', 'roe', 'pe']);
     const [activeStrategy, setActiveStrategy] = useState(null);
     const [openFilter, setOpenFilter] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
-    const [showSaveScreenerModal, setShowSaveScreenerModal] = useState(false);
     const [showSignalModal, setShowSignalModal] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [results, setResults] = useState(() => {
@@ -220,59 +161,93 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
     const [newFilterQuery, setNewFilterQuery] = useState('SELECT * FROM market WHERE x > y');
     const [filterSaving, setFilterSaving] = useState(false);
     const [filterError, setFilterError] = useState('');
-    const [savedScreeners, setSavedScreeners] = useState([]);
-    const [savedScreenerName, setSavedScreenerName] = useState('');
-    const [savedScreenerPurpose, setSavedScreenerPurpose] = useState('');
-    const [savedScreenerSaving, setSavedScreenerSaving] = useState(false);
-    const [savedScreenerError, setSavedScreenerError] = useState('');
 
     const [showSaveScreenerModal, setShowSaveScreenerModal] = useState(false);
     const [newScreenerName, setNewScreenerName] = useState('');
     const [newScreenerPurpose, setNewScreenerPurpose] = useState('');
+    const [saveScreenerError, setSaveScreenerError] = useState('');
     const [savedScreeners, setSavedScreeners] = useState(() => {
         const cached = localStorage.getItem('radar_saved_screeners');
         return cached ? JSON.parse(cached) : [];
     });
 
+    // Load saved screeners from DB on mount
+    useEffect(() => {
+        getSavedScreeners()
+            .then(res => {
+                const data = res?.data || [];
+                setSavedScreeners(data);
+                localStorage.setItem('radar_saved_screeners', JSON.stringify(data));
+            })
+            .catch(() => {
+                // fallback: keep localStorage cache
+            });
+    }, []);
+
     const handleSaveScreenerClick = () => {
-        if (!hasActiveFilters) {
-            alert('No filters selected. Please select at least one filter before saving.');
-            return;
-        }
+        setSaveScreenerError('');
+        setNewScreenerName('');
+        setNewScreenerPurpose('');
         setShowSaveScreenerModal(true);
     };
 
-    const handleConfirmSaveScreener = () => {
-        if (!newScreenerName.trim() || !newScreenerPurpose.trim()) {
-            alert('Please provide both name and purpose.');
+    const handleConfirmSaveScreener = async () => {
+        if (!hasActiveFilters) {
+            setSaveScreenerError('Please select at least one filter before saving.');
             return;
         }
-        const newScreener = {
-            id: Date.now().toString(),
-            name: newScreenerName.trim(),
-            purpose: newScreenerPurpose.trim(),
-            filters: { ...activeFilters }
-        };
-        const updatedScreeners = [newScreener, ...savedScreeners];
-        setSavedScreeners(updatedScreeners);
-        localStorage.setItem('radar_saved_screeners', JSON.stringify(updatedScreeners));
-        setShowSaveScreenerModal(false);
-        setNewScreenerName('');
-        setNewScreenerPurpose('');
+        if (!newScreenerName.trim()) {
+            setSaveScreenerError('Please enter a name for your screener.');
+            return;
+        }
+        if (!newScreenerPurpose.trim()) {
+            setSaveScreenerError('Please describe the purpose of this screener.');
+            return;
+        }
+        try {
+            const res = await createSavedScreener({
+                name: newScreenerName.trim(),
+                purpose: newScreenerPurpose.trim(),
+                filters: { ...activeFilters },
+            });
+            const newScreener = res?.data || {
+                id: Date.now().toString(),
+                _id: Date.now().toString(),
+                name: newScreenerName.trim(),
+                purpose: newScreenerPurpose.trim(),
+                filters: { ...activeFilters },
+            };
+            const updatedScreeners = [newScreener, ...savedScreeners];
+            setSavedScreeners(updatedScreeners);
+            localStorage.setItem('radar_saved_screeners', JSON.stringify(updatedScreeners));
+            setShowSaveScreenerModal(false);
+            setNewScreenerName('');
+            setNewScreenerPurpose('');
+            setSaveScreenerError('');
+        } catch (err) {
+            const msg = err?.response?.data?.message || 'Failed to save screener. Please try again.';
+            setSaveScreenerError(msg);
+        }
     };
 
-    const handleDeleteSavedScreener = (e, id) => {
+    const handleDeleteSavedScreener = async (e, id) => {
         e.stopPropagation();
-        const updatedScreeners = savedScreeners.filter(s => s.id !== id);
+        try {
+            await deleteSavedScreener(id);
+        } catch (_) {
+            // proceed even if network fails — remove locally
+        }
+        const updatedScreeners = savedScreeners.filter(s => (s._id || s.id) !== id);
         setSavedScreeners(updatedScreeners);
         localStorage.setItem('radar_saved_screeners', JSON.stringify(updatedScreeners));
     };
 
     const handleLoadSavedScreener = (screener) => {
-        if (activeFilters.preset === screener.id) {
+        const sid = screener._id || screener.id;
+        if (activeFilters.preset === sid) {
             setActiveFilters({});
         } else {
-            setActiveFilters({ ...screener.filters, preset: screener.id });
+            setActiveFilters({ ...screener.filters, preset: sid });
         }
     };
 
@@ -289,14 +264,6 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
     };
 
     const handleStrategySelect = (strat) => {
-<<<<<<< HEAD
-        setShowSignalModal(strat);
-        setActiveStrategy(strat.id);
-        const newFilters = { ...strat.filters };
-        setActiveFilters(newFilters);
-        // Immediately trigger a scan with the strategy filters
-        setTimeout(() => runScanWithFilters(newFilters), 0);
-=======
         if (activeStrategy === strat.id) {
             setActiveStrategy(null);
             setShowSignalModal(null);
@@ -306,7 +273,6 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
             setActiveStrategy(strat.id);
             setActiveFilters({ ...strat.filters });
         }
->>>>>>> repo2/main
     };
 
     const addMoreFilter = (id) => {
@@ -332,13 +298,7 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                     });
                 }
             });
-<<<<<<< HEAD
-        } catch {
-            // silently ignore — user might not be logged in yet
-        }
-=======
         } catch (_) {}
->>>>>>> repo2/main
     };
 
     const handleCreateFilter = async () => {
@@ -380,77 +340,7 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
             await deleteCustomFilter(id);
             setMyFilters(prev => prev.filter(f => f._id !== id));
             setVisibleFilters(prev => prev.filter(vid => vid !== id));
-        } catch {
-            setFilterError('Failed to delete filter.');
-        }
-    };
-
-    const loadSavedScreeners = async () => {
-        try {
-            const res = await getSavedScreeners();
-            setSavedScreeners(res?.data || []);
-        } catch {
-            setSavedScreeners([]);
-        }
-    };
-
-    const handleOpenSaveScreener = () => {
-        setSavedScreenerError('');
-        if (!savedScreenerName.trim()) {
-            const strategy = strategies.find(s => s.id === activeStrategy);
-            setSavedScreenerName(strategy?.label || 'My Screener');
-        }
-        setShowSaveScreenerModal(true);
-    };
-
-    const handleSaveScreener = async () => {
-        setSavedScreenerError('');
-        if (!savedScreenerName.trim()) {
-            setSavedScreenerError('Please enter a screener name.');
-            return;
-        }
-        if (!savedScreenerPurpose.trim()) {
-            setSavedScreenerError('Please describe why you are saving this screener.');
-            return;
-        }
-
-        try {
-            setSavedScreenerSaving(true);
-            const res = await createSavedScreener({
-                name: savedScreenerName.trim(),
-                purpose: savedScreenerPurpose.trim(),
-                filters: activeFilters,
-                visibleFilters,
-                strategyId: activeStrategy,
-            });
-            setSavedScreeners(prev => [res.data, ...prev.filter(s => s._id !== res.data?._id)]);
-            setSavedScreenerName('');
-            setSavedScreenerPurpose('');
-            setShowSaveScreenerModal(false);
-        } catch (err) {
-            setSavedScreenerError(err?.response?.data?.message || 'Failed to save screener.');
-        } finally {
-            setSavedScreenerSaving(false);
-        }
-    };
-
-    const handleLaunchSavedScreener = (screener) => {
-        const nextFilters = screener?.filters || {};
-        setActiveFilters(nextFilters);
-        if (Array.isArray(screener?.visibleFilters) && screener.visibleFilters.length > 0) {
-            setVisibleFilters(screener.visibleFilters);
-        }
-        setActiveStrategy(screener?.strategyId || null);
-        runScanWithFilters(nextFilters);
-    };
-
-    const handleDeleteSavedScreener = async (id) => {
-        try {
-            await deleteSavedScreener(id);
-            setSavedScreeners(prev => prev.filter(s => s._id !== id));
-        } catch {
-            setSavedScreenerError('Failed to delete saved screener.');
-        }
+        } catch (_) {}
     };
 
     const filteredResults = results.filter(stock => {
@@ -459,17 +349,9 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
         return true;
     });
 
-    const runScanWithFilters = async (filtersToUse) => {
+    const runScan = async () => {
         try {
             setIsLoading(true);
-<<<<<<< HEAD
-            const backendFilters = translateFilters(filtersToUse || activeFilters);
-            const response = await runScreenerScan({ filters: backendFilters });
-            const data = response?.data?.results || [];
-
-            if (data && Array.isArray(data)) {
-                const formatted = data.map(stock => ({
-=======
             const apiFilters = {};
             
             if (activeFilters.pe && activeFilters.pe !== 'Any') {
@@ -532,25 +414,10 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
             
             if (Array.isArray(resultsData) && resultsData.length > 0) {
                 const mappedResults = resultsData.map(stock => ({
->>>>>>> repo2/main
                     id: stock.symbol,
                     price: `₹${stock.price}`,
                     change: `${stock.change > 0 ? '+' : ''}${stock.change}%`,
                     isPositive: stock.change >= 0,
-<<<<<<< HEAD
-                    sector: stock.sector,
-                    mcap: stock.marketCap || '-',
-                    pe: stock.pe != null ? stock.pe : '-',
-                    roe: '-',
-                    yield: '-',
-                    confidence: stock.confidence,
-                    why: stock.why,
-                    tags: stock.tags,
-                    trend: [stock.price * 0.98, stock.price * 0.99, stock.price, stock.price * 1.01, stock.price]
-                }));
-                setResults(formatted);
-                localStorage.setItem('radar_screener_results', JSON.stringify(formatted));
-=======
                     sector: stock.sector || 'Unknown',
                     mcap: stock.marketCap || 'N/A',
                     pe: stock.pe || 'N/A',
@@ -565,16 +432,13 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                 localStorage.setItem('radar_screener_results', JSON.stringify(mappedResults));
             } else {
                 setResults([]);
->>>>>>> repo2/main
             }
         } catch (err) {
-            console.error('Screener scan failed:', err);
+            console.error("Screener scan failed:", err);
         } finally {
             setIsLoading(false);
         }
     };
-
-    const runScan = () => runScanWithFilters(activeFilters);
 
     const exportToExcel = () => {
         if (!filteredResults.length) return;
@@ -609,23 +473,15 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
     };
 
     React.useEffect(() => {
-<<<<<<< HEAD
-        // Auto-scan on mount to populate results
-        runScan();
-    }, []);
-
-=======
         if (Object.keys(activeFilters).length > 0) {
             runScan();
         } else if (results.length === 0 || results === MOCK_FALLBACK_RESULTS) {
             runScan();
         }
     }, [activeFilters]);
->>>>>>> repo2/main
 
     React.useEffect(() => {
         loadMyFilters();
-        loadSavedScreeners();
     }, []);
 
     React.useEffect(() => {
@@ -710,25 +566,14 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                             <h1 className="text-2xl font-black text-slate-800">Smart Market Screener</h1>
                             <p className="text-[12px] font-bold text-slate-500 flex items-center gap-1.5 uppercase tracking-wider">
                                 <ShieldCheck size={14} className="text-blue-500" />
-<<<<<<< HEAD
-                                <Zap size={13} className="text-amber-500 fill-amber-400" />
-                                Tailored for you: {userMode === 'TRADER' ? 'Active Trader' : 'Long-term Investor'}
-=======
                                 ⚡ Tailored for you: {userMode === 'TRADER' ? 'Active Trader' : 'Long-term Investor'}
->>>>>>> repo2/main
                             </p>
                         </div>
                     </div>
                     <div className="flex gap-3">
-<<<<<<< HEAD
-                        <button
-                            onClick={handleOpenSaveScreener}
-                            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-bold transition-all hover:scale-105 shadow-lg shadow-blue-200"
-=======
                         <button 
                             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-bold transition-all hover:scale-105 shadow-lg shadow-blue-200"
                             onClick={handleSaveScreenerClick}
->>>>>>> repo2/main
                         >
                             <Star size={18} strokeWidth={3} />
                             Save Screener
@@ -848,14 +693,6 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                                 );
                             })}
                         </div>
-                        <button
-                            onClick={runScan}
-                            disabled={isLoading}
-                            className="ml-auto bg-blue-600 text-white px-5 py-1.5 rounded-full text-[12px] font-black flex items-center gap-2 shadow-md hover:bg-blue-700 transition-all disabled:opacity-60"
-                        >
-                            <RefreshCw size={13} className={isLoading ? 'animate-spin' : ''} />
-                            {isLoading ? 'Scanning...' : 'Run Scan'}
-                        </button>
                     </div>
                 </div>
 
@@ -908,17 +745,8 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                                 return (
                                     <div 
                                         key={item.id} 
-<<<<<<< HEAD
-                                        onClick={() => {
-                                            const newFilters = { ...item.filters };
-                                            setActiveFilters(newFilters);
-                                            runScanWithFilters(newFilters);
-                                        }}
-                                        className="min-w-[300px] bg-white border border-slate-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all cursor-pointer group"
-=======
                                         onClick={() => activeFilters.preset === item.id ? setActiveFilters({}) : setActiveFilters({ ...item.filters, preset: item.id })}
                                         className={`w-full bg-white border p-5 rounded-2xl shadow-sm transition-all cursor-pointer group flex flex-col justify-between ${activeFilters.preset === item.id ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-md scale-[1.02]' : 'border-slate-100 hover:shadow-md'}`}
->>>>>>> repo2/main
                                     >
                                         <div>
                                             <div className="flex items-center gap-4 mb-3">
@@ -936,62 +764,6 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                         </div>
                     </div>
 
-<<<<<<< HEAD
-                    <div>
-                        <div className="flex items-center justify-between mb-4 px-2">
-                            <h2 className="text-[16px] font-black text-slate-800 flex items-center gap-2">
-                                <Star size={18} className="text-blue-500" />
-                                Your Saved Screeners
-                            </h2>
-                            <span className="text-[12px] font-black text-slate-400 uppercase tracking-widest">{savedScreeners.length} Saved</span>
-                        </div>
-                        {savedScreeners.length > 0 ? (
-                            <div className="horizontal-carousel">
-                                {savedScreeners.map(item => {
-                                    const filterCount = Object.keys(item.filters || {}).length;
-                                    return (
-                                        <div
-                                            key={item._id}
-                                            className="min-w-[320px] bg-white border border-blue-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all group"
-                                        >
-                                            <div className="flex items-start justify-between gap-3 mb-3">
-                                                <div>
-                                                    <h3 className="font-black text-[15px] text-slate-800 group-hover:text-blue-600">{item.name}</h3>
-                                                    <p className="text-[11px] font-bold text-slate-400 mt-1">{filterCount} active filters</p>
-                                                </div>
-                                                <button
-                                                    onClick={() => handleDeleteSavedScreener(item._id)}
-                                                    className="p-1.5 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
-                                                >
-                                                    <Trash2 size={14} />
-                                                </button>
-                                            </div>
-                                            <p className="text-[12px] font-bold text-slate-500 leading-relaxed mb-4 line-clamp-3">{item.purpose}</p>
-                                            <div className="flex flex-wrap gap-1.5 mb-4">
-                                                {Object.entries(item.filters || {}).slice(0, 4).map(([key, value]) => (
-                                                    <span key={key} className="text-[10px] font-black px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 uppercase">
-                                                        {key}: {String(value)}
-                                                    </span>
-                                                ))}
-                                            </div>
-                                            <button
-                                                onClick={() => handleLaunchSavedScreener(item)}
-                                                className="w-full py-2 bg-slate-50 text-slate-500 font-black text-[11px] uppercase tracking-widest rounded-lg hover:bg-blue-600 hover:text-white transition-all"
-                                            >
-                                                Launch Screener
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        ) : (
-                            <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-6 text-center">
-                                <p className="text-sm font-black text-slate-500">No saved screeners yet.</p>
-                                <p className="text-xs font-bold text-slate-400 mt-1">Save your current criteria with a name and purpose.</p>
-                            </div>
-                        )}
-                    </div>
-=======
                     {savedScreeners.length > 0 && (
                         <div className="mt-8">
                             <div className="flex items-center justify-between mb-4 px-2">
@@ -1001,11 +773,13 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                                 </h2>
                             </div>
                             <div className="horizontal-carousel">
-                                {savedScreeners.map(screener => (
+                                {savedScreeners.map(screener => {
+                                    const sid = screener._id || screener.id;
+                                    return (
                                     <div 
-                                        key={screener.id} 
+                                        key={sid} 
                                         onClick={() => handleLoadSavedScreener(screener)}
-                                        className={`min-w-[300px] bg-white border p-5 rounded-2xl shadow-sm transition-all cursor-pointer group relative ${activeFilters.preset === screener.id ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-md scale-[1.02]' : 'border-slate-100 hover:shadow-md'}`}
+                                        className={`min-w-[300px] bg-white border p-5 rounded-2xl shadow-sm transition-all cursor-pointer group relative ${activeFilters.preset === sid ? 'border-blue-500 ring-2 ring-blue-500/20 shadow-md scale-[1.02]' : 'border-slate-100 hover:shadow-md'}`}
                                     >
                                         <div className="flex items-center justify-between mb-3">
                                             <div className="flex items-center gap-3">
@@ -1015,7 +789,7 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                                                 <h3 className="font-black text-[15px] text-slate-800 line-clamp-1">{screener.name}</h3>
                                             </div>
                                             <button 
-                                                onClick={(e) => handleDeleteSavedScreener(e, screener.id)}
+                                                onClick={(e) => handleDeleteSavedScreener(e, sid)}
                                                 className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
                                             >
                                                 <Trash2 size={16} />
@@ -1036,11 +810,11 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                                         </div>
                                         <button className="w-full py-2 bg-slate-50 text-slate-400 font-black text-[11px] uppercase tracking-widest rounded-lg group-hover:bg-blue-600 group-hover:text-white transition-all">Apply Filters</button>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}
->>>>>>> repo2/main
                 </div>
 
                 {!hasActiveFilters ? (
@@ -1330,64 +1104,6 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                     </div>
                 )}
 
-                {showSaveScreenerModal && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <div className="absolute inset-0 modal-overlay" onClick={() => setShowSaveScreenerModal(false)} />
-                        <div className="bg-white rounded-3xl w-full max-w-md p-8 relative z-10 shadow-2xl fade-in-up">
-                            <div className="flex justify-between items-start mb-6">
-                                <div>
-                                    <h2 className="text-2xl font-black text-slate-800">Save Screener</h2>
-                                    <p className="text-sm font-bold text-slate-400">Name this setup and capture why it matters.</p>
-                                </div>
-                                <button onClick={() => setShowSaveScreenerModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button>
-                            </div>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Screener Name</label>
-                                    <input
-                                        type="text"
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-800 focus:bg-white focus:border-blue-500 transition-all"
-                                        placeholder="e.g. Quality Compounders"
-                                        value={savedScreenerName}
-                                        onChange={e => setSavedScreenerName(e.target.value)}
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Purpose</label>
-                                    <textarea
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-800 h-28 focus:bg-white focus:border-blue-500 transition-all resize-none"
-                                        placeholder="Why are you saving this screener?"
-                                        value={savedScreenerPurpose}
-                                        onChange={e => setSavedScreenerPurpose(e.target.value)}
-                                    />
-                                </div>
-                                <div className="p-4 bg-slate-50 rounded-2xl">
-                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Current Criteria</span>
-                                    <div className="flex flex-wrap gap-2">
-                                        {Object.entries(activeFilters).length > 0 ? Object.entries(activeFilters).map(([key, value]) => (
-                                            <span key={key} className="text-[11px] font-black px-2 py-1 bg-white border border-slate-100 rounded text-slate-600 capitalize">
-                                                {key}: <span className="text-blue-600">{String(value)}</span>
-                                            </span>
-                                        )) : (
-                                            <span className="text-[11px] font-bold text-slate-400">No filters selected.</span>
-                                        )}
-                                    </div>
-                                </div>
-                                {savedScreenerError && (
-                                    <p className="text-xs font-bold text-rose-500 pl-1">{savedScreenerError}</p>
-                                )}
-                                <button
-                                    onClick={handleSaveScreener}
-                                    disabled={savedScreenerSaving}
-                                    className="w-full py-4 bg-blue-600 text-white rounded-xl font-black text-lg shadow-xl shadow-blue-200 mt-4 active:scale-95 transition-all disabled:opacity-60"
-                                >
-                                    {savedScreenerSaving ? 'Saving...' : 'Save Screener'}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
                 {showSignalModal && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                         <div className="absolute inset-0 modal-overlay" onClick={() => setShowSignalModal(null)} />
@@ -1420,54 +1136,83 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                 {/* ── Save Screener Modal ───────────────────────────── */}
                 {showSaveScreenerModal && (
                     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                        <div className="absolute inset-0 modal-overlay" onClick={() => setShowSaveScreenerModal(false)} />
+                        <div className="absolute inset-0 modal-overlay" onClick={() => { setShowSaveScreenerModal(false); setSaveScreenerError(''); }} />
                         <div className="bg-white rounded-3xl w-full max-w-md p-8 relative z-10 shadow-2xl fade-in-up">
+                            {/* Header */}
                             <div className="flex justify-between items-start mb-6">
                                 <div>
                                     <h2 className="text-2xl font-black text-slate-800">Save Screener</h2>
-                                    <p className="text-sm font-bold text-slate-400">Save your current filters for later use.</p>
+                                    <p className="text-sm font-bold text-slate-400 mt-1">Name and describe your filter setup.</p>
                                 </div>
-                                <button onClick={() => setShowSaveScreenerModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button>
+                                <button
+                                    onClick={() => { setShowSaveScreenerModal(false); setSaveScreenerError(''); }}
+                                    className="p-2 hover:bg-slate-100 rounded-full transition-colors"
+                                >
+                                    <X size={20} />
+                                </button>
                             </div>
+
+                            {/* Inline error banner */}
+                            {saveScreenerError && (
+                                <div className="flex items-center gap-3 px-4 py-3 bg-rose-50 border border-rose-200 rounded-xl mb-5">
+                                    <span className="text-rose-500 text-lg">⚠</span>
+                                    <p className="text-sm font-bold text-rose-600">{saveScreenerError}</p>
+                                </div>
+                            )}
+
                             <div className="space-y-4">
+                                {/* Screener Name */}
                                 <div>
-                                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Screener Name</label>
+                                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Screener Name *</label>
                                     <input
                                         type="text"
                                         className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-800 focus:bg-white focus:border-blue-500 transition-all"
                                         placeholder="e.g. My High Dividend Strategy"
                                         value={newScreenerName}
-                                        onChange={e => setNewScreenerName(e.target.value)}
+                                        onChange={e => { setNewScreenerName(e.target.value); setSaveScreenerError(''); }}
                                     />
                                 </div>
+
+                                {/* Purpose */}
                                 <div>
-                                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Purpose / Why</label>
+                                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Purpose / Why *</label>
                                     <textarea
-                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-800 h-24 focus:bg-white focus:border-blue-500 transition-all"
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-800 h-24 resize-none focus:bg-white focus:border-blue-500 transition-all"
                                         placeholder="Why did you build this screener? What's its purpose?"
                                         value={newScreenerPurpose}
-                                        onChange={e => setNewScreenerPurpose(e.target.value)}
+                                        onChange={e => { setNewScreenerPurpose(e.target.value); setSaveScreenerError(''); }}
                                     />
                                 </div>
-                                <div className="p-4 bg-blue-50 rounded-xl">
-                                    <p className="text-[11px] font-black text-blue-800 uppercase tracking-widest mb-2">Filters to Save</p>
-                                    <div className="flex flex-wrap gap-1.5">
-                                        {Object.entries(activeFilters).map(([k, v]) => {
-                                            if (v && v !== 'Any' && v !== 'All') {
-                                                return (
-                                                    <span key={k} className="text-[10px] font-black px-2 py-0.5 bg-white text-slate-600 rounded border border-blue-100 capitalize">
-                                                        {k}: <span className="text-blue-600">{v}</span>
-                                                    </span>
-                                                );
-                                            }
-                                            return null;
-                                        })}
+
+                                {/* Active filters preview */}
+                                {hasActiveFilters ? (
+                                    <div className="p-4 bg-blue-50 rounded-xl">
+                                        <p className="text-[11px] font-black text-blue-800 uppercase tracking-widest mb-2">Filters to Save</p>
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {Object.entries(activeFilters).map(([k, v]) => {
+                                                if (v && v !== 'Any' && v !== 'All') {
+                                                    return (
+                                                        <span key={k} className="text-[10px] font-black px-2 py-0.5 bg-white text-slate-600 rounded border border-blue-100 capitalize">
+                                                            {k}: <span className="text-blue-600">{v}</span>
+                                                        </span>
+                                                    );
+                                                }
+                                                return null;
+                                            })}
+                                        </div>
                                     </div>
-                                </div>
+                                ) : (
+                                    <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                                        <p className="text-[11px] font-black text-amber-700 uppercase tracking-widest mb-1">No Filters Selected</p>
+                                        <p className="text-xs font-bold text-amber-600">Please go back and select at least one filter before saving.</p>
+                                    </div>
+                                )}
+
                                 <button
                                     onClick={handleConfirmSaveScreener}
-                                    className="w-full py-4 bg-blue-600 text-white rounded-xl font-black text-lg shadow-xl shadow-blue-200 mt-4 active:scale-95 transition-all"
+                                    className="w-full py-4 bg-blue-600 text-white rounded-xl font-black text-base shadow-xl shadow-blue-200 mt-2 active:scale-95 transition-all hover:bg-blue-700 flex items-center justify-center gap-2"
                                 >
+                                    <Star size={16} fill="currentColor" />
                                     Save Screener
                                 </button>
                             </div>

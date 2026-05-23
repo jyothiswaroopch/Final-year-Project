@@ -1401,6 +1401,7 @@ body {
 
 .dashboard-container.trader-theme .main-content-area {
   background: transparent;
+  padding: 0;
 }
 
 .dashboard-container.investor-theme .main-content-area {
