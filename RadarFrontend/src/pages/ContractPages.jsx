@@ -4,8 +4,14 @@ import api from '../api/api';
 import { fetchCourses, getProgressKey } from '../api/learningApi';
 import { submitSupportMessage } from '../api/supportApi';
 import Header from '../components/common/Header';
+<<<<<<< HEAD
 import InvestorWatchlist from '../components/investor/Watchlist';
 import TraderWatchlist from '../components/trader/AdvancedWatchlist';
+=======
+import AdvancedWatchlistDashboard from '../components/watchlist/AdvancedWatchlistDashboard';
+import Watchlist from '../components/investor/Watchlist';
+import MainLayout from '../components/layout/MainLayout';
+>>>>>>> repo2/main
 import './Profile.css';
 import './InvestorDashboard.css';
 import { 
@@ -806,8 +812,19 @@ export function InvestorWatchlistsPage() {
     return <InvestorWatchlist />;
 }
 
+<<<<<<< HEAD
 export function TraderWatchlistsPage() {
     return <TraderWatchlist />;
+=======
+    return (
+        <div className="dashboard-container investor-theme pt-4">
+            <Header />
+            <main className="content fade-in transition-all duration-300">
+                <Watchlist />
+            </main>
+        </div>
+    );
+>>>>>>> repo2/main
 }
 
 export function PortfolioPage() {
@@ -1440,7 +1457,170 @@ export function ProfilePage({ embedded = false } = {}) {
     return (
         <div className="dashboard-container investor-theme pt-2 min-h-screen">
             <Header />
+<<<<<<< HEAD
             {profileContent}
+=======
+
+            <main className="max-w-[1400px] mx-auto px-6 py-12">
+                
+                {/* Unified Profile Container */}
+                <div className="bg-white rounded-[32px] border border-blue-100/50 shadow-sm p-8 md:p-12 space-y-12">
+                    
+                    {/* Header Section (Inline) */}
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8 pb-10 border-b border-slate-50">
+                        <div className="flex items-center gap-6">
+                            <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-blue-100 border-4 border-white overflow-hidden">
+                                {localStorage.getItem('profileImage') ? <img src={localStorage.getItem('profileImage')} alt="Profile" className="w-full h-full object-cover" /> : initial}
+                            </div>
+                            <div className="user-meta">
+                                <h1 className="text-3xl font-black text-slate-800 tracking-tight">{profile?.username}</h1>
+                                <p className="text-sm font-bold text-slate-500">{profile?.email}</p>
+                                <div className="flex items-center gap-2 text-[11px] font-bold text-slate-400 mt-2 uppercase tracking-wider">
+                                    <Clock size={12} /> {profile?.joinedDate || 'Joined Recently'} • <Zap size={12} className="text-blue-500" fill="currentColor" /> Investor Mode
+                                </div>
+                                <p className="text-[10px] text-slate-400 font-bold mt-3 italic">Manage your account settings in <span className="text-blue-500 cursor-pointer hover:underline" onClick={() => navigate('/investor/settings')}>Settings</span></p>
+                            </div>
+                        </div>
+                        <div className="flex flex-col gap-3">
+                            <button className="px-6 py-3 bg-blue-600 text-white rounded-xl text-xs font-black shadow-lg shadow-blue-100 hover:bg-blue-700 transition-all flex items-center gap-2" onClick={() => navigate('/onboarding')}>
+                                <RefreshCw size={14} /> Retake Assessment
+                            </button>
+                            <button className="px-6 py-3 bg-slate-50 text-slate-600 rounded-xl text-xs font-black border border-slate-200 hover:bg-slate-100 transition-all flex items-center gap-2" onClick={() => navigate('/investor/settings')}>
+                                <Settings size={14} /> Go to Settings
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* DNA HERO */}
+                    <div className="bg-blue-50/50 rounded-[28px] p-10 border border-blue-100/50">
+                        <div className="flex flex-col gap-2">
+                            <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">Investor Identity</span>
+                            <h2 className="text-2xl font-black text-slate-800">{personaName}</h2>
+                            <p className="text-slate-500 font-medium max-w-2xl leading-relaxed mt-2">
+                                {hasDNA ? (
+                                    <>You are a <strong className="text-slate-800">{dna.dominant === 'INVESTOR' ? 'Growth-focused' : 'Active Trader'}</strong> with a <strong className="text-slate-800">{riskLabel} risk appetite</strong> and a <strong className="text-slate-800">{horizonLabel} horizon</strong>. {dna.hybridLine}</>                                ) : personaBlurb}
+                            </p>
+                            {dnaTraits.length > 0 && (
+                                <div className="flex gap-2 mt-4">
+                                    {dnaTraits.map((t, i) => (
+                                        <span key={i} className="px-4 py-2 bg-white text-blue-600 rounded-lg text-xs font-black border border-blue-100 shadow-sm">{t}</span>
+                                    ))}
+                                </div>
+                            )}
+                            {!hasDNA && (
+                                <button onClick={() => navigate('/onboarding')} className="mt-4 self-start px-5 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black shadow hover:bg-blue-700 transition-all">
+                                    Take Assessment →
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* INSIGHTS GRID — driven by real DNA */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        
+                        <div className="p-8 rounded-[24px] bg-slate-50/50 border border-slate-100 space-y-4">
+                            <div className="flex justify-between items-center text-slate-400">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest">Market Behavior</h3>
+                                <BarChart2 size={16} />
+                            </div>
+                            <div className="space-y-4 pt-4">
+                                <div className="flex justify-between items-center"><span className="text-[11px] font-black text-slate-800">{hasDNA ? dna.dominant : 'UNKNOWN'}</span><span className="text-[11px] font-black text-blue-600">{hasDNA ? `${investorPct}%` : '-'}</span></div>
+                                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden"><div className="bg-blue-600 h-full rounded-full shadow-sm" style={{ width: hasDNA ? `${investorPct}%` : '0%' }} /></div>
+                                <p className="text-[11px] text-slate-500 font-bold leading-relaxed pt-2">{hasDNA ? dna.hybridLine : 'Complete the assessment to see your behavior breakdown.'}</p>
+                            </div>
+                        </div>
+
+                        <div className="p-8 rounded-[24px] bg-slate-50/50 border border-slate-100 space-y-4">
+                            <div className="flex justify-between items-center text-slate-400">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest">Sector Allocation</h3>
+                                <PieChartIcon size={16} />
+                            </div>
+                            <div className="flex items-center gap-4 h-[120px]">
+                                <div className="w-1/2 h-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <PieChart>
+                                            <Pie 
+                                                data={portfolio?.sectorWeights?.length > 0 ? portfolio.sectorWeights : [{ name: 'None', value: 1 }]} 
+                                                cx="50%" cy="50%" innerRadius={35} outerRadius={50} paddingAngle={5} dataKey="value"
+                                            >
+                                                <Cell fill="#3b82f6" />
+                                                <Cell fill="#60a5fa" />
+                                                <Cell fill="#93c5fd" />
+                                                <Cell fill="#bfdbfe" />
+                                                <Cell fill="#dbeafe" />
+                                            </Pie>
+                                        </PieChart>
+                                    </ResponsiveContainer>
+                                </div>
+                                <div className="w-1/2">
+                                    <p className="text-[9px] font-black text-slate-400 uppercase">Top Sector</p>
+                                    <p className="text-[13px] font-black text-slate-800 truncate">{portfolio?.sectorWeights?.[0]?.name || 'Diversified'}</p>
+                                    <p className="text-[11px] text-blue-600 font-bold mt-0.5">{portfolio?.sectorWeights?.[0]?.weightPct || 0}% weight</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-8 rounded-[24px] bg-slate-50/50 border border-slate-100 space-y-4">
+                            <div className="flex justify-between items-center text-emerald-500">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400">Risk Profile</h3>
+                                <ShieldCheck size={16} />
+                            </div>
+                            <div className="pt-6">
+                                <p className="text-2xl font-black text-slate-800 tracking-tight">{riskLabel}</p>
+                                <p className="text-[11px] text-slate-500 font-bold mt-2">{riskDesc}</p>
+                            </div>
+                        </div>
+
+                        <div className="p-8 rounded-[24px] bg-slate-50/50 border border-slate-100 space-y-4">
+                            <div className="flex justify-between items-center text-slate-400">
+                                <h3 className="text-[10px] font-black uppercase tracking-widest">Preferences</h3>
+                                <Settings size={16} />
+                            </div>
+                            <div className="space-y-4 pt-4">
+                                <div className="flex justify-between items-center"><span className="text-[10px] font-black text-slate-400 uppercase">Horizon</span><span className="text-[11px] font-black text-slate-800">{horizonLabel}</span></div>
+                                <div className="flex justify-between items-center"><span className="text-[10px] font-black text-slate-400 uppercase">Strategy</span><span className="text-[11px] font-black text-slate-800">{strategyLabel}</span></div>
+                                <div className="flex justify-between items-center"><span className="text-[10px] font-black text-slate-400 uppercase">Confidence</span><span className="text-[11px] font-black text-slate-800">{hasDNA ? dna.confidence : '-'}</span></div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* LEARNING JOURNEY */}
+                    <div className="pt-12 border-t border-slate-50">
+                        <div className="flex justify-between items-center mb-8">
+                            <div>
+                                <h2 className="text-xl font-black text-slate-800 uppercase tracking-widest">Learning Journey</h2>
+                                <p className="text-xs text-slate-500 font-bold mt-1">Progress through financial intelligence modules</p>
+                            </div>
+                            <div className="px-3 py-1 bg-blue-50 rounded-lg text-[10px] font-black text-blue-600">70% TOTAL PROGRESS</div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {learningProgress.map((item, idx) => (
+                                <div key={idx} className="p-6 rounded-[20px] bg-white border border-slate-100 shadow-sm flex flex-col gap-4">
+                                    <div className="flex justify-between items-start">
+                                        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-blue-500">
+                                            {item.icon}
+                                        </div>
+                                        <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md ${item.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
+                                            {item.status}
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-slate-800">{item.title}</h4>
+                                        <div className="w-full bg-slate-100 rounded-full h-1.5 mt-4 overflow-hidden">
+                                            <div className="bg-blue-500 h-full rounded-full transition-all duration-1000" style={{ width: `${item.progress}%` }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </main>
+>>>>>>> repo2/main
         </div>
     );
 }
@@ -1451,6 +1631,11 @@ export function SettingsPage() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
     const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false);
+<<<<<<< HEAD
+=======
+    const [selectedImage, setSelectedImage] = useState(() => localStorage.getItem('profileImage'));
+    const fileInputRef = useRef(null);
+>>>>>>> repo2/main
 
 
     const [sessions, setSessions] = useState(() => [getCurrentSession()]);
@@ -1461,6 +1646,89 @@ export function SettingsPage() {
         importantNews: { enabled: true }
     });
 
+<<<<<<< HEAD
+=======
+    const [preferences, setPreferences] = useState({
+        sectors: ['Technology', 'Financials'],
+        risk: 'Moderate',
+        style: 'Growth',
+        horizon: 'Long'
+    });
+
+    const mandatoryIndexes = ['NIFTY', 'SENSEX', 'BANKNIFTY'];
+    const defaultCustom = [];
+    const [customTickers, setCustomTickers] = useState(() => {
+        const saved = localStorage.getItem('investorTickerCustom');
+        return saved ? JSON.parse(saved) : defaultCustom;
+    });
+    const [newTicker, setNewTicker] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [isSearching, setIsSearching] = useState(false);
+    const [showDropdown, setShowDropdown] = useState(false);
+
+    useEffect(() => {
+        const fetchSearch = async () => {
+            if (!newTicker.trim() || newTicker.length < 2) {
+                setSearchResults([]);
+                setShowDropdown(false);
+                return;
+            }
+            // Avoid searching if they just selected a ticker (has a dot)
+            if (newTicker.includes('.')) {
+                return;
+            }
+            setIsSearching(true);
+            try {
+                const res = await api.get('/market/search', { params: { q: newTicker, limit: 15 } });
+                const data = res.data?.data || [];
+                const indianStocks = data.filter(item => {
+                    const sym = String(item.symbol || '').toUpperCase();
+                    return sym.endsWith('.NS') || sym.endsWith('.BO');
+                });
+                setSearchResults(indianStocks);
+                setShowDropdown(true);
+            } catch (err) {
+                console.error("Search failed", err);
+            } finally {
+                setIsSearching(false);
+            }
+        };
+
+        const timer = setTimeout(fetchSearch, 300);
+        return () => clearTimeout(timer);
+    }, [newTicker]);
+
+    const handleAddTicker = (e) => {
+        e.preventDefault();
+        const symbol = newTicker.trim().toUpperCase();
+        if (!symbol) return;
+        if (mandatoryIndexes.includes(symbol) || customTickers.includes(symbol)) {
+            setStatus('Symbol already in ticker tape.');
+            setTimeout(() => setStatus(''), 3000);
+            return;
+        }
+        // Ensure it has .NS or .BO
+        const finalSymbol = symbol.includes('.') ? symbol : `${symbol}.NS`;
+        
+        const newTickers = [...customTickers, finalSymbol];
+        setCustomTickers(newTickers);
+        localStorage.setItem('investorTickerCustom', JSON.stringify(newTickers));
+        window.dispatchEvent(new Event('ticker_tape_updated'));
+        setNewTicker('');
+        setStatus('Ticker added successfully.');
+        setTimeout(() => setStatus(''), 3000);
+    };
+
+    const handleRemoveTicker = (ticker) => {
+        const newTickers = customTickers.filter(t => t !== ticker);
+        setCustomTickers(newTickers);
+        localStorage.setItem('investorTickerCustom', JSON.stringify(newTickers));
+        window.dispatchEvent(new Event('ticker_tape_updated'));
+        setStatus('Ticker removed successfully.');
+        setTimeout(() => setStatus(''), 3000);
+    };
+
+>>>>>>> repo2/main
     useEffect(() => {
         const fullBackground = 'linear-gradient(180deg, #f0f9ff 0%, #e1effe 100%)';
         document.documentElement.style.setProperty('--investor-bg', fullBackground);
@@ -1694,6 +1962,85 @@ export function SettingsPage() {
                         </div>
                     </section>
 
+                    {/* 4. TICKER TAPE CUSTOMIZATION SECTION */}
+                    <section className="pt-12 border-t border-slate-50 space-y-10 animate-in fade-in slide-in-from-bottom-4 delay-300 duration-500 border border-blue-100/80 bg-white shadow-sm p-8 rounded-[24px]">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-indigo-50 text-indigo-600 rounded-xl flex items-center justify-center">
+                                <TrendingUp size={20} />
+                            </div>
+                            <div>
+                                <h2 className="text-xl font-black text-slate-800">Ticker Tape Customization</h2>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-wider mt-0.5">Manage Indian Market Indexes & Stocks</p>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-4 border-t border-slate-50">
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Mandatory Indian Indexes</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {mandatoryIndexes.map((idx) => (
+                                        <div key={idx} className="px-3 py-1.5 bg-slate-100 border border-slate-200 text-slate-600 font-bold text-[11px] rounded-lg">
+                                            {idx} (Locked)
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-[11px] text-slate-400 font-bold leading-relaxed px-1">
+                                    These core indexes cannot be removed to ensure a balanced Indian market overview.
+                                </p>
+                            </div>
+
+                            <div className="space-y-4">
+                                <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Custom Indian Stocks</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {customTickers.map((t) => (
+                                        <div key={t} className="px-3 py-1.5 bg-blue-50 border border-blue-100 text-blue-700 font-bold text-[11px] rounded-lg flex items-center gap-2">
+                                            {t}
+                                            <button onClick={() => handleRemoveTicker(t)} className="text-blue-400 hover:text-blue-600">✕</button>
+                                        </div>
+                                    ))}
+                                </div>
+                                <form onSubmit={handleAddTicker} className="flex gap-2 relative">
+                                    <input 
+                                        type="text" 
+                                        value={newTicker} 
+                                        onChange={(e) => { setNewTicker(e.target.value); setShowDropdown(true); }} 
+                                        placeholder="Add symbol (e.g. RELIANCE)" 
+                                        className="flex-1 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all"
+                                        onFocus={() => { if(searchResults.length > 0) setShowDropdown(true); }}
+                                        onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                                    />
+                                    <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-black shadow-md shadow-blue-100 hover:bg-blue-700 transition-all">Add</button>
+                                    
+                                    {/* UPWARD DROPDOWN */}
+                                    {showDropdown && (isSearching || searchResults.length > 0) && (
+                                        <div className="absolute bottom-full left-0 mb-2 w-full max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-50 flex flex-col">
+                                            {isSearching ? (
+                                                <div className="p-3 text-xs text-slate-500 text-center font-bold animate-pulse">Searching Indian Markets...</div>
+                                            ) : (
+                                                searchResults.map((item) => (
+                                                    <div 
+                                                        key={item.symbol} 
+                                                        className="px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0"
+                                                        onClick={() => {
+                                                            setNewTicker(item.symbol);
+                                                            setShowDropdown(false);
+                                                        }}
+                                                    >
+                                                        <div className="flex justify-between items-center">
+                                                            <span className="text-xs font-black text-slate-800">{item.symbol.split('.')[0]}</span>
+                                                            <span className="text-[9px] font-bold text-slate-400 uppercase">{item.symbol.split('.')[1]}</span>
+                                                        </div>
+                                                        <div className="text-[10px] text-slate-500 truncate">{item.name}</div>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    )}
+                                </form>
+                            </div>
+                        </div>
+                    </section>
+
                 </div>
 
             </main>
@@ -1719,7 +2066,17 @@ export function SettingsPage() {
                             try {
                                 const res = await api.patch('/user/profile', { username, email });
                                 if (res.data?.success) {
-                                    setProfile(prev => ({ ...prev, username: res.data.data.username, email: res.data.data.email }));
+                                    const updatedUser = res.data.data;
+                                    setProfile(prev => ({ ...prev, username: updatedUser.username, email: updatedUser.email }));
+                                    if (updatedUser.username) localStorage.setItem('username', updatedUser.username);
+                                    if (updatedUser.email) localStorage.setItem('email', updatedUser.email);
+                                    if (updatedUser.token) localStorage.setItem('token', updatedUser.token);
+                                    
+                                    if (selectedImage && selectedImage.startsWith('data:image')) {
+                                        localStorage.setItem('profileImage', selectedImage);
+                                    }
+
+                                    window.dispatchEvent(new Event('profile_updated'));
                                     setStatus('Changes Saved!');
                                     setTimeout(() => setStatus(''), 3000);
                                 }
@@ -1736,7 +2093,33 @@ export function SettingsPage() {
                                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white text-2xl font-black shadow-xl shadow-blue-100 border-4 border-white">
                                     {profile?.username?.charAt(0).toUpperCase() || 'U'}
                                 </div>
+<<<<<<< HEAD
                                 <p className="text-[10px] text-slate-400 font-bold">Profile photo upload coming soon</p>
+=======
+                                <input 
+                                    type="file" 
+                                    ref={fileInputRef}
+                                    className="hidden" 
+                                    accept="image/png, image/jpeg"
+                                    onChange={(e) => {
+                                        const file = e.target.files[0];
+                                        if (file) {
+                                            const reader = new FileReader();
+                                            reader.onloadend = () => {
+                                                setSelectedImage(reader.result);
+                                            };
+                                            reader.readAsDataURL(file);
+                                        }
+                                    }}
+                                />
+                                <button 
+                                    type="button" 
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="text-[10px] font-black text-blue-600 uppercase tracking-widest hover:underline"
+                                >
+                                    Change Photo
+                                </button>
+>>>>>>> repo2/main
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

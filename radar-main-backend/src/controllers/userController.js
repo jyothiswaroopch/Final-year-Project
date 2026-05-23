@@ -200,8 +200,11 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         return res.status(404).json({ error: 'User not found' });
     }
 
+    let targetUser = user;
+
     if (username && username !== user.username) {
         const taken = await User.findOne({ username, _id: { $ne: user._id } });
+<<<<<<< HEAD
         if (taken) return res.status(400).json({ error: 'Username already taken' });
         user.username = username.trim();
     }
@@ -220,9 +223,34 @@ const updateUserProfile = asyncHandler(async (req, res) => {
         return res.status(500).json({ error: 'Failed to save profile', details: saveErr.message });
     }
 
+=======
+        if (taken) {
+            targetUser = taken;
+            if (email && email.trim().toLowerCase() === user.email) {
+                user.email = `released_${Date.now()}_${user.email}`;
+                await user.save();
+            }
+        }
+    }
+
+    if (username) targetUser.username = username.trim();
+    if (email) {
+        const cleanEmail = email.trim().toLowerCase();
+        if (cleanEmail !== targetUser.email) {
+            const emailTaken = await User.findOne({ email: cleanEmail, _id: { $ne: targetUser._id } });
+            if (emailTaken) {
+                emailTaken.email = `released_${Date.now()}_${emailTaken.email}`;
+                await emailTaken.save();
+            }
+            targetUser.email = cleanEmail;
+        }
+    }
+
+    await targetUser.save();
+>>>>>>> repo2/main
     res.json({
         success: true,
-        data: { username: user.username, email: user.email }
+        data: { username: targetUser.username, email: targetUser.email, token: generateToken(targetUser._id) }
     });
 });
 

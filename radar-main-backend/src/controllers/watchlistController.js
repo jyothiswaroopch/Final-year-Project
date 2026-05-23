@@ -1,4 +1,5 @@
 const Watchlist = require('../models/Watchlist');
+const { evaluateRecentChanges } = require('../services/recentChangesEngine');
 
 const profileCache = require('../services/profileCache');
 
@@ -23,6 +24,7 @@ const normalizeSymbolForStorage = (sym) => {
 
 const getWatchlists = async (req, res) => {
     try {
+<<<<<<< HEAD
         // Optional ?mode=trader|investor query param.
         // If omitted, return ALL watchlists for the user (backward compat).
         const query = { userId: req.user._id };
@@ -30,9 +32,22 @@ const getWatchlists = async (req, res) => {
             query.mode = String(req.query.mode).toLowerCase();
         }
         const watchlists = await Watchlist.find(query).sort({ createdAt: 1 });
+=======
+        let watchlists = await Watchlist.find({ userId: req.user._id });
+        if (watchlists.length === 0) {
+            const defaultWatchlist = new Watchlist({
+                userId: req.user._id,
+                name: 'My Watchlist',
+                items: []
+            });
+            await defaultWatchlist.save();
+            watchlists = [defaultWatchlist];
+        }
+>>>>>>> repo2/main
         res.json(watchlists);
     } catch (error) {
-        res.status(500).json({ error: "Failed to fetch watchlists" });
+        console.error("Watchlist GET Error:", error);
+        res.status(500).json({ error: "Failed to fetch watchlists", details: error.message });
     }
 };
 
@@ -117,4 +132,15 @@ const removeFromWatchlist = async (req, res) => {
     }
 };
 
-module.exports = { getWatchlists, createWatchlist, addToWatchlist, removeFromWatchlist };
+const getRecentChanges = async (req, res) => {
+    try {
+        const symbols = Array.isArray(req.body?.symbols) ? req.body.symbols : [];
+        const data = await evaluateRecentChanges(symbols);
+        return res.json({ success: true, data });
+    } catch (error) {
+        console.error("Watchlist recent-changes Error:", error);
+        return res.status(500).json({ success: false, error: "Failed to evaluate recent changes", details: error.message });
+    }
+};
+
+module.exports = { getWatchlists, createWatchlist, addToWatchlist, removeFromWatchlist, getRecentChanges };
