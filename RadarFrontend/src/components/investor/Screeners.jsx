@@ -14,7 +14,6 @@ import {
     SlidersHorizontal,
     Plus,
     X,
-    Info,
     Check,
     ArrowUpRight,
     Zap,
@@ -23,7 +22,15 @@ import {
     Download
 } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
-import { runScreenerScan, createCustomFilter, getCustomFilters, deleteCustomFilter } from '../../api/screenerApi';
+import {
+    runScreenerScan,
+    createCustomFilter,
+    getCustomFilters,
+    deleteCustomFilter,
+    createSavedScreener,
+    getSavedScreeners,
+    deleteSavedScreener
+} from '../../api/screenerApi';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 
@@ -129,6 +136,7 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
     const [activeStrategy, setActiveStrategy] = useState(null);
     const [openFilter, setOpenFilter] = useState(null);
     const [showCreateModal, setShowCreateModal] = useState(false);
+    const [showSaveScreenerModal, setShowSaveScreenerModal] = useState(false);
     const [showSignalModal, setShowSignalModal] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [results, setResults] = useState(() => {
@@ -147,6 +155,11 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
     const [newFilterQuery, setNewFilterQuery] = useState('SELECT * FROM market WHERE x > y');
     const [filterSaving, setFilterSaving] = useState(false);
     const [filterError, setFilterError] = useState('');
+    const [savedScreeners, setSavedScreeners] = useState([]);
+    const [savedScreenerName, setSavedScreenerName] = useState('');
+    const [savedScreenerPurpose, setSavedScreenerPurpose] = useState('');
+    const [savedScreenerSaving, setSavedScreenerSaving] = useState(false);
+    const [savedScreenerError, setSavedScreenerError] = useState('');
 
     const handleFilterChange = (id, value) => {
         setActiveFilters(prev => ({ ...prev, [id]: value }));
@@ -188,7 +201,7 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                     });
                 }
             });
-        } catch (_) {
+        } catch {
             // silently ignore — user might not be logged in yet
         }
     };
@@ -234,7 +247,77 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
             await deleteCustomFilter(id);
             setMyFilters(prev => prev.filter(f => f._id !== id));
             setVisibleFilters(prev => prev.filter(vid => vid !== id));
-        } catch (_) {}
+        } catch {
+            setFilterError('Failed to delete filter.');
+        }
+    };
+
+    const loadSavedScreeners = async () => {
+        try {
+            const res = await getSavedScreeners();
+            setSavedScreeners(res?.data || []);
+        } catch {
+            setSavedScreeners([]);
+        }
+    };
+
+    const handleOpenSaveScreener = () => {
+        setSavedScreenerError('');
+        if (!savedScreenerName.trim()) {
+            const strategy = strategies.find(s => s.id === activeStrategy);
+            setSavedScreenerName(strategy?.label || 'My Screener');
+        }
+        setShowSaveScreenerModal(true);
+    };
+
+    const handleSaveScreener = async () => {
+        setSavedScreenerError('');
+        if (!savedScreenerName.trim()) {
+            setSavedScreenerError('Please enter a screener name.');
+            return;
+        }
+        if (!savedScreenerPurpose.trim()) {
+            setSavedScreenerError('Please describe why you are saving this screener.');
+            return;
+        }
+
+        try {
+            setSavedScreenerSaving(true);
+            const res = await createSavedScreener({
+                name: savedScreenerName.trim(),
+                purpose: savedScreenerPurpose.trim(),
+                filters: activeFilters,
+                visibleFilters,
+                strategyId: activeStrategy,
+            });
+            setSavedScreeners(prev => [res.data, ...prev.filter(s => s._id !== res.data?._id)]);
+            setSavedScreenerName('');
+            setSavedScreenerPurpose('');
+            setShowSaveScreenerModal(false);
+        } catch (err) {
+            setSavedScreenerError(err?.response?.data?.message || 'Failed to save screener.');
+        } finally {
+            setSavedScreenerSaving(false);
+        }
+    };
+
+    const handleLaunchSavedScreener = (screener) => {
+        const nextFilters = screener?.filters || {};
+        setActiveFilters(nextFilters);
+        if (Array.isArray(screener?.visibleFilters) && screener.visibleFilters.length > 0) {
+            setVisibleFilters(screener.visibleFilters);
+        }
+        setActiveStrategy(screener?.strategyId || null);
+        runScanWithFilters(nextFilters);
+    };
+
+    const handleDeleteSavedScreener = async (id) => {
+        try {
+            await deleteSavedScreener(id);
+            setSavedScreeners(prev => prev.filter(s => s._id !== id));
+        } catch {
+            setSavedScreenerError('Failed to delete saved screener.');
+        }
     };
 
     const filteredResults = results.filter(stock => {
@@ -326,6 +409,7 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
 
     React.useEffect(() => {
         loadMyFilters();
+        loadSavedScreeners();
     }, []);
 
     React.useEffect(() => {
@@ -417,14 +501,10 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                         </div>
                     </div>
                     <div className="flex gap-3">
-                        <button 
-                            className="bg-white border border-slate-200 px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
-                            onClick={() => setShowCreateModal(true)}
+                        <button
+                            onClick={handleOpenSaveScreener}
+                            className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-bold transition-all hover:scale-105 shadow-lg shadow-blue-200"
                         >
-                            <Plus size={18} strokeWidth={3} className="text-blue-500" />
-                            Create Filter
-                        </button>
-                        <button className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-full flex items-center gap-2 text-sm font-bold transition-all hover:scale-105 shadow-lg shadow-blue-200">
                             <Star size={18} strokeWidth={3} />
                             Save Screener
                         </button>
@@ -611,6 +691,61 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                                 );
                             })}
                         </div>
+                    </div>
+
+                    <div>
+                        <div className="flex items-center justify-between mb-4 px-2">
+                            <h2 className="text-[16px] font-black text-slate-800 flex items-center gap-2">
+                                <Star size={18} className="text-blue-500" />
+                                Your Saved Screeners
+                            </h2>
+                            <span className="text-[12px] font-black text-slate-400 uppercase tracking-widest">{savedScreeners.length} Saved</span>
+                        </div>
+                        {savedScreeners.length > 0 ? (
+                            <div className="horizontal-carousel">
+                                {savedScreeners.map(item => {
+                                    const filterCount = Object.keys(item.filters || {}).length;
+                                    return (
+                                        <div
+                                            key={item._id}
+                                            className="min-w-[320px] bg-white border border-blue-100 p-5 rounded-2xl shadow-sm hover:shadow-md transition-all group"
+                                        >
+                                            <div className="flex items-start justify-between gap-3 mb-3">
+                                                <div>
+                                                    <h3 className="font-black text-[15px] text-slate-800 group-hover:text-blue-600">{item.name}</h3>
+                                                    <p className="text-[11px] font-bold text-slate-400 mt-1">{filterCount} active filters</p>
+                                                </div>
+                                                <button
+                                                    onClick={() => handleDeleteSavedScreener(item._id)}
+                                                    className="p-1.5 rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
+                                                >
+                                                    <Trash2 size={14} />
+                                                </button>
+                                            </div>
+                                            <p className="text-[12px] font-bold text-slate-500 leading-relaxed mb-4 line-clamp-3">{item.purpose}</p>
+                                            <div className="flex flex-wrap gap-1.5 mb-4">
+                                                {Object.entries(item.filters || {}).slice(0, 4).map(([key, value]) => (
+                                                    <span key={key} className="text-[10px] font-black px-2 py-1 bg-blue-50 text-blue-600 rounded border border-blue-100 uppercase">
+                                                        {key}: {String(value)}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                            <button
+                                                onClick={() => handleLaunchSavedScreener(item)}
+                                                className="w-full py-2 bg-slate-50 text-slate-500 font-black text-[11px] uppercase tracking-widest rounded-lg hover:bg-blue-600 hover:text-white transition-all"
+                                            >
+                                                Launch Screener
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div className="bg-white border border-dashed border-slate-200 rounded-2xl p-6 text-center">
+                                <p className="text-sm font-black text-slate-500">No saved screeners yet.</p>
+                                <p className="text-xs font-bold text-slate-400 mt-1">Save your current criteria with a name and purpose.</p>
+                            </div>
+                        )}
                     </div>
                 </div>
 
@@ -849,6 +984,64 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                                     </div>
                                 </div>
                             )}
+                        </div>
+                    </div>
+                )}
+
+                {showSaveScreenerModal && (
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                        <div className="absolute inset-0 modal-overlay" onClick={() => setShowSaveScreenerModal(false)} />
+                        <div className="bg-white rounded-3xl w-full max-w-md p-8 relative z-10 shadow-2xl fade-in-up">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <h2 className="text-2xl font-black text-slate-800">Save Screener</h2>
+                                    <p className="text-sm font-bold text-slate-400">Name this setup and capture why it matters.</p>
+                                </div>
+                                <button onClick={() => setShowSaveScreenerModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition-colors"><X size={20} /></button>
+                            </div>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Screener Name</label>
+                                    <input
+                                        type="text"
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-800 focus:bg-white focus:border-blue-500 transition-all"
+                                        placeholder="e.g. Quality Compounders"
+                                        value={savedScreenerName}
+                                        onChange={e => setSavedScreenerName(e.target.value)}
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-[11px] font-black text-slate-400 uppercase tracking-widest mb-1.5 ml-1">Purpose</label>
+                                    <textarea
+                                        className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none font-bold text-slate-800 h-28 focus:bg-white focus:border-blue-500 transition-all resize-none"
+                                        placeholder="Why are you saving this screener?"
+                                        value={savedScreenerPurpose}
+                                        onChange={e => setSavedScreenerPurpose(e.target.value)}
+                                    />
+                                </div>
+                                <div className="p-4 bg-slate-50 rounded-2xl">
+                                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-2">Current Criteria</span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {Object.entries(activeFilters).length > 0 ? Object.entries(activeFilters).map(([key, value]) => (
+                                            <span key={key} className="text-[11px] font-black px-2 py-1 bg-white border border-slate-100 rounded text-slate-600 capitalize">
+                                                {key}: <span className="text-blue-600">{String(value)}</span>
+                                            </span>
+                                        )) : (
+                                            <span className="text-[11px] font-bold text-slate-400">No filters selected.</span>
+                                        )}
+                                    </div>
+                                </div>
+                                {savedScreenerError && (
+                                    <p className="text-xs font-bold text-rose-500 pl-1">{savedScreenerError}</p>
+                                )}
+                                <button
+                                    onClick={handleSaveScreener}
+                                    disabled={savedScreenerSaving}
+                                    className="w-full py-4 bg-blue-600 text-white rounded-xl font-black text-lg shadow-xl shadow-blue-200 mt-4 active:scale-95 transition-all disabled:opacity-60"
+                                >
+                                    {savedScreenerSaving ? 'Saving...' : 'Save Screener'}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

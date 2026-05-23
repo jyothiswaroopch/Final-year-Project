@@ -91,8 +91,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
             initial={false}
             animate={{ height: expandedSections.basic ? 'auto' : 0 }}
             transition={{ duration: 0.2 }}
-            overflow="hidden"
-            className="px-4 pb-4 space-y-4"
+            className="px-4 pb-4 space-y-4 overflow-hidden"
           >
             {}
             <div>
@@ -165,8 +164,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
             initial={false}
             animate={{ height: expandedSections.technical ? 'auto' : 0 }}
             transition={{ duration: 0.2 }}
-            overflow="hidden"
-            className="px-4 pb-4 space-y-4"
+            className="px-4 pb-4 space-y-4 overflow-hidden"
           >
             {}
             <div>
@@ -231,8 +229,7 @@ const ScreenerFilterPanel = ({ sectors, filters, onFilterChange, onActivateScan,
             initial={false}
             animate={{ height: expandedSections.advanced ? 'auto' : 0 }}
             transition={{ duration: 0.2 }}
-            overflow="hidden"
-            className="px-4 pb-4 space-y-4"
+            className="px-4 pb-4 space-y-4 overflow-hidden"
           >
             {}
             <div>

@@ -1,7 +1,9 @@
-import { Suspense, lazy, useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { AssetProvider } from './context/AssetContext';
 import { fetchUniverse } from './services/universeService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 import {
   VerifyEmailPage,
   ResetPasswordPage,
@@ -47,6 +49,16 @@ const AppLoader = () => (
     </div>
   </div>
 );
+
+const ScrollToTop = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.pathname, location.search, location.hash]);
+
+  return null;
+};
 
 const RouteStatusPage = ({ title, message, actionTo = '/', actionLabel = 'Go Home' }) => (
   <div className="min-h-screen flex items-center justify-center bg-[#020617] text-[#E2E8F0] px-4">
@@ -146,6 +158,40 @@ const DashboardRedirect = () => {
   return <Navigate to={mode === 'TRADER' ? '/trader/dashboard' : '/investor/dashboard'} replace />;
 };
 
+class GlobalErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+  componentDidCatch(error, errorInfo) {
+    console.error('Global Error Boundary caught:', error, errorInfo);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-[#020617] text-white p-4">
+          <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-xl max-w-xl text-center">
+            <h2 className="text-2xl font-bold text-red-400 mb-4">Something went wrong</h2>
+            <p className="text-gray-300 text-sm mb-4">
+              {this.state.error && this.state.error.toString()}
+            </p>
+            <pre className="text-left text-xs text-red-300 bg-black/50 p-4 rounded overflow-auto mb-4 max-h-40">
+              {this.state.error && this.state.error.stack}
+            </pre>
+            <button onClick={() => window.location.reload()} className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-bold">
+              Hard Refresh Page
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 function App() {
   // Initialize market universe on app startup
   useEffect(() => {
@@ -154,8 +200,10 @@ function App() {
 
   return (
     <AssetProvider>
-      <Router>
-        <Suspense fallback={<AppLoader />}>
+      <GlobalErrorBoundary>
+        <Router>
+          <ScrollToTop />
+          <Suspense fallback={<AppLoader />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<DashboardRedirect />} />
@@ -163,6 +211,8 @@ function App() {
             <Route path="/dashboard/investor" element={<Navigate to="/investor/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/terms" element={<TermsOfService />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password/:token" element={<ResetPassword />} />
@@ -233,6 +283,7 @@ function App() {
           </Routes>
         </Suspense>
       </Router>
+      </GlobalErrorBoundary>
     </AssetProvider>
   );
 }

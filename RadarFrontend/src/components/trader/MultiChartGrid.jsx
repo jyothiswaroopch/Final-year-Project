@@ -13,6 +13,12 @@ const BACKEND_SYMBOL_MAP = {
   BANKNIFTY: "^NSEBANK",
   SENSEX: "^BSESN",
   "NIFTY IT": "^CNXIT",
+  "S&P 500": "^GSPC",
+  "NASDAQ 100": "^NDX",
+  "DOW JONES": "^DJI",
+  "S&P 500 CFD": "OANDA:SPX500USD",
+  "NASDAQ CFD": "OANDA:NAS100USD",
+  "BTC/USDT": "BTC-USD",
 };
 
 const BACKEND_INTERVAL_MAP = {
@@ -29,13 +35,19 @@ const FALLBACK_BASE_PRICE = {
   BANKNIFTY: 48500,
   SENSEX: 74000,
   "NIFTY IT": 38000,
+  "S&P 500": 5300,
+  "NASDAQ 100": 18500,
+  "DOW JONES": 39000,
+  "S&P 500 CFD": 5300,
+  "NASDAQ CFD": 18500,
+  "BTC/USDT": 105000,
   RELIANCE: 2950,
   HDFCBANK: 1660,
   TCS: 4030,
   INFY: 1580,
 };
 
-const FALLBACK_POINTS_BY_TIMEFRAME = {
+  const FALLBACK_POINTS_BY_TIMEFRAME = {
   "1m": 40,
   "5m": 40,
   "15m": 36,
@@ -170,14 +182,19 @@ const generateFallbackHistory = (symbol, timeframe) => {
   });
 };
 
-const MultiChartGrid = ({ className, onOpenChart, timeframe = "15m", activeIndicators = new Set(), showGridLines = true, layout = "4-grid" }) => {
+import TradingViewPanel from './TradingViewPanel';
+
+const MultiChartGrid = ({ className, onOpenChart, timeframe = "15m", activeIndicators = new Set(), showGridLines = true, layout = "4-grid", useTradingView = false }) => {
 
   const [histories, setHistories] = useState({});
   const [isLoading, setIsLoading] = useState(true);
+  const [tvStatus, setTvStatus] = useState({});
+  const [localOpenChart, setLocalOpenChart] = useState(null);
+  const [localOpenSettings, setLocalOpenSettings] = useState(null);
   const { activeSymbol } = useAsset();
 
-  // This pack is indices-only — always show the fixed 4 regardless of activeSymbol
-  const INDEX_CHARTS = ["NIFTY 50", "BANKNIFTY", "SENSEX", "NIFTY IT"];
+  // This pack uses TradingView symbols that are allowed inside embedded widgets.
+  const INDEX_CHARTS = ["SENSEX", "S&P 500 CFD", "NASDAQ CFD", "BTC/USDT"];
 
   const getChartsToShow = () => {
     switch (layout) {
@@ -190,6 +207,17 @@ const MultiChartGrid = ({ className, onOpenChart, timeframe = "15m", activeIndic
 
   const chartsToShow = getChartsToShow();
   const chartsToShowKey = chartsToShow.join(",");
+
+  // Calculate grid rows and columns based on chart count
+  const getGridDimensions = (count) => {
+    if (count <= 1) return { rows: 1, cols: 1 };
+    if (count === 2) return { rows: 1, cols: 2 };
+    if (count === 3) return { rows: 1, cols: 3 };
+    if (count === 4) return { rows: 2, cols: 2 };
+    return { rows: Math.ceil(Math.sqrt(count)), cols: Math.ceil(count / Math.ceil(Math.sqrt(count))) };
+  };
+
+  const gridDims = getGridDimensions(chartsToShow.length);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -257,7 +285,15 @@ const MultiChartGrid = ({ className, onOpenChart, timeframe = "15m", activeIndic
             )}
           </div>
         </div>
-        <div className={`multi-chart-grid ${getLayoutClass()} flex-1 min-h-0 mb-1`}>
+        <div 
+          className={`multi-chart-grid ${getLayoutClass()} flex-1 min-h-0 mb-1`}
+          style={{
+            display: 'grid',
+            gridTemplateRows: `repeat(${gridDims.rows}, 1fr)`,
+            gridTemplateColumns: `repeat(${gridDims.cols}, 1fr)`,
+            gap: '1rem',
+          }}
+        >
           {chartsToShow.map((title, i) => {
             const chartData = histories[title] || [];
             const isFallback = chartData[0]?.__source === "fallback";
@@ -273,130 +309,100 @@ const MultiChartGrid = ({ className, onOpenChart, timeframe = "15m", activeIndic
             const isPos = parseFloat(pctChange) >= 0;
 
             return (
-              <div
-                key={i}
-                className="chart-card bg-white/5 border border-white/5 hover:border-white/10 transition-colors rounded-xl relative group flex flex-col overflow-hidden"
-              >
-                <div className="flex justify-between text-xs px-2.5 py-1.5 border-b border-white/5 bg-white/5">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white font-bold text-sm tracking-wide">
-                        {title}
-                      </span>
-                      {isFallback && (
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-amber-300 bg-amber-400/10 border border-amber-300/30 rounded px-1.5 py-0.5">
-                          Reference
-                        </span>
-                      )}
-                      <span className={`${isPos ? 'text-[#42C0A5]' : 'text-red-400'} text-xs font-mono font-bold`}>
-                        {(latest.close || 0).toLocaleString()} ({isPos ? '+' : ''}{pctChange}%)
-                      </span>
-                      {latestRsi !== null && (
-                        <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${
-                          latestRsi < 30 ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' :
-                          latestRsi > 70 ? 'text-red-300 bg-red-500/10 border-red-500/30' :
-                          'text-slate-300 bg-white/5 border-white/10'
-                        }`}>RSI {latestRsi.toFixed(0)}</span>
-                      )}
+              <div key={i} className="chart-wrapper relative h-full min-h-0">
+                <div className="chart-card bg-white/5 border border-white/5 hover:border-white/10 transition-colors rounded-xl relative group flex flex-col overflow-hidden h-full">
+                  <div className="flex justify-between text-xs px-2.5 py-1.5 border-b border-white/5 bg-white/5">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-white font-bold text-sm tracking-wide">{title}</span>
+                        {useTradingView ? (
+                          tvStatus[title] === 'live' ? (
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-300 bg-emerald-400/10 border border-emerald-300/30 rounded px-1.5 py-0.5">Live</span>
+                          ) : tvStatus[title] === 'trying' ? (
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-slate-300 bg-white/5 border border-white/6 rounded px-1.5 py-0.5">Probing</span>
+                          ) : (
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-amber-300 bg-amber-400/10 border border-amber-300/30 rounded px-1.5 py-0.5">Fallback</span>
+                          )
+                        ) : (
+                          isFallback && (<span className="text-[9px] font-bold uppercase tracking-wider text-amber-300 bg-amber-400/10 border border-amber-300/30 rounded px-1.5 py-0.5">Reference</span>)
+                        )}
+                        <span className={`${isPos ? 'text-[#42C0A5]' : 'text-red-400'} text-xs font-mono font-bold`}>{(latest.close || 0).toLocaleString()} ({isPos ? '+' : ''}{pctChange}%)</span>
+                        {latestRsi !== null && (
+                          <span className={`text-[9px] font-mono font-bold px-1.5 py-0.5 rounded border ${latestRsi < 30 ? 'text-emerald-300 bg-emerald-500/10 border-emerald-500/30' : latestRsi > 70 ? 'text-red-300 bg-red-500/10 border-red-500/30' : 'text-slate-300 bg-white/5 border-white/10'}`}>RSI {latestRsi.toFixed(0)}</span>
+                        )}
+                      </div>
+                      <div className="flex gap-2 text-[10px] text-white/40 font-mono mt-0.5 font-medium tracking-wider scale-90 origin-left">
+                        <span>O:<span className="text-white/80 ml-1">{(latest.open || 0).toFixed(1)}</span></span>
+                        <span>H:<span className="text-white/80 ml-1">{(latest.high || 0).toFixed(1)}</span></span>
+                        <span>L:<span className="text-white/80 ml-1">{(latest.low || 0).toFixed(1)}</span></span>
+                        <span>C:<span className="text-white/80 ml-1">{(latest.close || 0).toFixed(1)}</span></span>
+                      </div>
                     </div>
-                    <div className="flex gap-2 text-[10px] text-white/40 font-mono mt-0.5 font-medium tracking-wider scale-90 origin-left">
-                      <span>
-                        O:<span className="text-white/80 ml-1">{(latest.open || 0).toFixed(1)}</span>
-                      </span>
-                      <span>
-                        H:<span className="text-white/80 ml-1">{(latest.high || 0).toFixed(1)}</span>
-                      </span>
-                      <span>
-                        L:<span className="text-white/80 ml-1">{(latest.low || 0).toFixed(1)}</span>
-                      </span>
-                      <span>
-                        C:<span className="text-white/80 ml-1">{(latest.close || 0).toFixed(1)}</span>
-                      </span>
+                    <div className="flex gap-2.5 opacity-0 group-hover:opacity-100 transition-opacity items-start pt-1">
+                      <Maximize2 size={14} className="cursor-pointer text-white/50 hover:text-white transition-colors" onClick={(e)=>{ e.stopPropagation(); if (typeof onOpenChart === 'function') onOpenChart(title); else setLocalOpenChart(title); }} />
                     </div>
                   </div>
-                  <div className="flex gap-2.5 opacity-0 group-hover:opacity-100 transition-opacity items-start pt-1">
-                    <Settings size={14} className="cursor-pointer text-white/50 hover:text-white transition-colors" />
-                    <Maximize2
-                      size={14}
-                      className="cursor-pointer text-white/50 hover:text-white transition-colors"
-                      onClick={() => onOpenChart?.(title)}
-                    />
+
+                  <div className="flex-1 min-h-0 w-full relative p-1 cursor-pointer" onClick={() => onOpenChart?.(title)}>
+                    {isLoading ? (
+                      <div className="h-full w-full flex items-center justify-center text-[10px] text-[#5d606b] font-mono uppercase tracking-wider">Loading backend history...</div>
+                    ) : (function(){
+                      const fallbackChart = (
+                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
+                          <AreaChart data={chartData}>
+                            <defs>
+                              <linearGradient id={`grad${i}`} x1="0" y1="0" x2="0" y2="1">
+                                <stop offset="5%" stopColor="#3db26b" stopOpacity={0.2} />
+                                <stop offset="95%" stopColor="#3db26b" stopOpacity={0} />
+                              </linearGradient>
+                            </defs>
+                            <Tooltip contentStyle={{ backgroundColor: "#161c27", border: "1px solid #293839", fontSize: "10px", color: "#fff" }} itemStyle={{ color: "#fff" }} labelStyle={{ display: "none" }} />
+                            <XAxis dataKey="time" hide />
+                            <YAxis hide domain={["auto", "auto"]} />
+                            <Area type="monotone" dataKey="price" stroke="#3db26b" fill={`url(#grad${i})`} strokeWidth={1.5} isAnimationActive={false} />
+                            {activeIndicators.has('ma7') && (<Line type="monotone" data={chartData.map((d, idx) => ({ ...d, ma7: ma7[idx] }))} dataKey="ma7" stroke="#FFA500" strokeWidth={1} dot={false} isAnimationActive={false} />)}
+                            {activeIndicators.has('ma25') && (<Line type="monotone" data={chartData.map((d, idx) => ({ ...d, ma25: ma25[idx] }))} dataKey="ma25" stroke="#FF1493" strokeWidth={1} dot={false} isAnimationActive={false} />)}
+                            {activeIndicators.has('vwap') && (<Line type="monotone" data={chartData.map((d, idx) => ({ ...d, vwap: vwap[idx] }))} dataKey="vwap" stroke="#60a5fa" strokeWidth={1.2} dot={false} strokeDasharray="4 2" isAnimationActive={false} />)}
+                            {activeIndicators.has('bb') && (<>
+                              <Line type="monotone" data={chartData.map((d, idx) => ({ ...d, bbUpper: bb[idx]?.upper }))} dataKey="bbUpper" stroke="#a78bfa" strokeWidth={0.8} dot={false} strokeDasharray="2 3" isAnimationActive={false} />
+                              <Line type="monotone" data={chartData.map((d, idx) => ({ ...d, bbLower: bb[idx]?.lower }))} dataKey="bbLower" stroke="#a78bfa" strokeWidth={0.8} dot={false} strokeDasharray="2 3" isAnimationActive={false} />
+                            </>)}
+                            {showGridLines && (<CartesianGrid stroke="#293839" strokeDasharray="3 3" vertical={false} />)}
+                          </AreaChart>
+                        </ResponsiveContainer>
+                      );
+
+                      if (useTradingView) {
+                        return (<TradingViewPanel symbol={title} fallback={fallbackChart} candidateTimeout={12000} onStatusChange={(s) => setTvStatus(prev => ({ ...prev, [title]: s }))} />);
+                      }
+
+                      return fallbackChart;
+                    })()}
                   </div>
                 </div>
 
-                <div
-                  className="flex-1 min-h-0 w-full relative p-1 cursor-pointer"
-                  onClick={() => onOpenChart?.(title)}
-                >
-                  {isLoading ? (
-                    <div className="h-full w-full flex items-center justify-center text-[10px] text-[#5d606b] font-mono uppercase tracking-wider">
-                      Loading backend history...
+                {localOpenChart === title && (
+                  <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 md:p-8 pointer-events-auto">
+                    <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setLocalOpenChart(null)} />
+                    <div className="relative w-full h-full max-w-[95vw] max-h-[90vh] bg-[#0d131f] border border-white/10 rounded-xl flex flex-col overflow-hidden shadow-2xl">
+                      <div className="flex justify-between items-center px-4 py-3 border-b border-white/10 bg-white/5">
+                        <div className="text-white font-bold tracking-wide">{title} — Expanded</div>
+                        <button className="text-white/50 hover:text-white transition-colors" onClick={() => setLocalOpenChart(null)}>
+                          Close
+                        </button>
+                      </div>
+                      <div className="flex-1 min-h-0 bg-[#0B0E14] relative">
+                        {useTradingView ? (
+                          <TradingViewPanel symbol={title} fallback={null} onStatusChange={(s)=>setTvStatus(prev=>({...prev,[title]:s}))} />
+                        ) : (
+                          <div className="h-full w-full p-4 flex items-center justify-center text-white/50">Chart not available</div>
+                        )}
+                      </div>
                     </div>
-                  ) : (
-                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
-                      <AreaChart data={chartData}>
-                        <defs>
-                          <linearGradient id={`grad${i}`} x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#3db26b" stopOpacity={0.2} />
-                            <stop offset="95%" stopColor="#3db26b" stopOpacity={0} />
-                          </linearGradient>
-                        </defs>
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "#161c27",
-                            border: "1px solid #293839",
-                            fontSize: "10px",
-                            color: "#fff",
-                          }}
-                          itemStyle={{ color: "#fff" }}
-                          labelStyle={{ display: "none" }}
-                        />
-                        <XAxis dataKey="time" hide />
-                        <YAxis hide domain={["auto", "auto"]} />
-                        <Area
-                          type="monotone"
-                          dataKey="price"
-                          stroke="#3db26b"
-                          fill={`url(#grad${i})`}
-                          strokeWidth={1.5}
-                          isAnimationActive={false}
-                        />
-                        {activeIndicators.has('ma7') && (
-                          <Line type="monotone"
-                            data={chartData.map((d, idx) => ({ ...d, ma7: ma7[idx] }))}
-                            dataKey="ma7" stroke="#FFA500" strokeWidth={1} dot={false} isAnimationActive={false} />
-                        )}
-                        {activeIndicators.has('ma25') && (
-                          <Line type="monotone"
-                            data={chartData.map((d, idx) => ({ ...d, ma25: ma25[idx] }))}
-                            dataKey="ma25" stroke="#FF1493" strokeWidth={1} dot={false} isAnimationActive={false} />
-                        )}
-                        {activeIndicators.has('vwap') && (
-                          <Line type="monotone"
-                            data={chartData.map((d, idx) => ({ ...d, vwap: vwap[idx] }))}
-                            dataKey="vwap" stroke="#60a5fa" strokeWidth={1.2} dot={false} strokeDasharray="4 2" isAnimationActive={false} />
-                        )}
-                        {activeIndicators.has('bb') && (
-                          <>
-                            <Line type="monotone"
-                              data={chartData.map((d, idx) => ({ ...d, bbUpper: bb[idx]?.upper }))}
-                              dataKey="bbUpper" stroke="#a78bfa" strokeWidth={0.8} dot={false} strokeDasharray="2 3" isAnimationActive={false} />
-                            <Line type="monotone"
-                              data={chartData.map((d, idx) => ({ ...d, bbLower: bb[idx]?.lower }))}
-                              dataKey="bbLower" stroke="#a78bfa" strokeWidth={0.8} dot={false} strokeDasharray="2 3" isAnimationActive={false} />
-                          </>
-                        )}
-                        {showGridLines && (
-                          <CartesianGrid
-                            stroke="#293839"
-                            strokeDasharray="3 3"
-                            vertical={false}
-                          />
-                        )}
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  )}
-                </div>
+                  </div>
+                )}
+
+
               </div>
             )
           })}

@@ -25,3 +25,23 @@ export const deleteCustomFilter = async (id) => {
     return response.data;
 };
 
+export const createSavedScreener = async ({ name, purpose, filters, visibleFilters, strategyId }) => {
+    const response = await api.post('/screener/saved', {
+        name,
+        purpose,
+        filters,
+        visibleFilters,
+        strategyId,
+    });
+    return response.data;
+};
+
+export const getSavedScreeners = async () => {
+    const response = await api.get('/screener/saved');
+    return response.data;
+};
+
+export const deleteSavedScreener = async (id) => {
+    const response = await api.delete(`/screener/saved/${id}`);
+    return response.data;
+};

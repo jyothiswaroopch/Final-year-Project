@@ -72,12 +72,14 @@ api.interceptors.response.use(
     (error) => {
         const status = error.response?.status;
         const msg = error.response?.data?.error || '';
-        const hasToken = typeof window !== 'undefined' && Boolean(localStorage.getItem('token'));
+        const requestAuthHeader = error.config?.headers?.Authorization || error.config?.headers?.authorization || error.config?.headers?.['x-auth-token'];
 
-        // If there is a 401, clear the stale token and force a re-login.
-        // Even if there isn't a token, if a 401 is hit, they should be redirected to login unless they are already on a public route.
+        // Only force a re-login when the failing request actually carried auth credentials.
+        // This avoids bouncing public route navigation back to /login because of optional background fetches.
         if (status === 401) {
-            clearAuthAndRedirect();
+            if (requestAuthHeader) {
+                clearAuthAndRedirect();
+            }
             return Promise.reject(error);
         }
 

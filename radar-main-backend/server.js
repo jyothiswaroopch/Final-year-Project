@@ -191,6 +191,8 @@ app.use('/api/user',          require('./src/routes/userRoutes'));
 app.use('/api/user/settings', require('./src/routes/userSettingsRoutes'));
 app.use('/api/market',        require('./src/routes/marketRoutes'));
 app.use('/api/news',          require('./src/routes/newsRoutes'));
+app.use('/api/search',        require('./src/routes/searchStatsRoutes'));
+app.use('/api',               require('./src/routes/searchStatsRoutes'));
 
 app.use('/api/market/universe', require('./src/routes/marketUniverseRoutes'));
 app.use('/api/watchlist',     require('./src/routes/watchlistRoutes'));
@@ -204,6 +206,7 @@ app.use('/api/calendar',      require('./src/routes/calendarRoutes'));
 app.use('/api/earnings',      require('./src/routes/earningsRoutes'));
 app.use('/api/notifications', require('./src/routes/notificationRoutes'));
 app.use('/api/ticker',        require('./src/routes/tickerRoutes'));
+app.use('/api/catalysts',     require('./src/routes/catalystRoutes'));
 app.use('/api/sectors',       require('./src/routes/sectorRoutes'));
 app.use('/api/learning',      require('./src/routes/learningRoutes'));
 app.use('/api/ohlc',          require('./src/routes/ohlcRoutes'));

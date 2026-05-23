@@ -157,6 +157,8 @@ const getIndicatorSignals = async (req, res) => {
                     const cleanSym = sym.replace('.NS', '');
                     const rsi      = Number(ind?.rsi ?? 0);
                     const macd     = ind?.macd || {};
+                    const macdDiff = Number(macd?.value) - Number(macd?.signal);
+                    const percentB = Number(ind?.bollinger?.percentB);
                     const ema20    = Number(ind?.ema20 ?? 0);
                     const ema50    = Number(ind?.ema50 ?? 0);
 
@@ -166,10 +168,18 @@ const getIndicatorSignals = async (req, res) => {
                         signals.push({ symbol: cleanSym, value: `RSI Overbought (${rsi.toFixed(1)})`, stocks: [cleanSym], signal: 'BEARISH', strength: rsi > 75 ? 'High' : 'Medium' });
                     }
 
-                    if (macd?.histogram > 0 && macd?.signal < 0) {
-                        signals.push({ symbol: cleanSym, value: 'MACD Bullish Cross', stocks: [cleanSym], signal: 'BULLISH', strength: 'Medium' });
-                    } else if (macd?.histogram < 0 && macd?.signal > 0) {
-                        signals.push({ symbol: cleanSym, value: 'MACD Bearish Cross', stocks: [cleanSym], signal: 'BEARISH', strength: 'Medium' });
+                    if (Number.isFinite(macdDiff) && macdDiff > 0) {
+                        signals.push({ symbol: cleanSym, value: 'Positive MACD Shift', stocks: [cleanSym], signal: 'BULLISH', strength: macdDiff > 1 ? 'High' : 'Medium' });
+                    } else if (Number.isFinite(macdDiff) && macdDiff < 0) {
+                        signals.push({ symbol: cleanSym, value: 'Negative MACD Shift', stocks: [cleanSym], signal: 'BEARISH', strength: macdDiff < -1 ? 'High' : 'Medium' });
+                    }
+
+                    if (Number.isFinite(percentB)) {
+                        if (percentB < 0.15) {
+                            signals.push({ symbol: cleanSym, value: `Low Bollinger %B (${percentB.toFixed(2)})`, stocks: [cleanSym], signal: 'BULLISH', strength: percentB < 0.05 ? 'High' : 'Medium' });
+                        } else if (percentB > 0.85) {
+                            signals.push({ symbol: cleanSym, value: `High Bollinger %B (${percentB.toFixed(2)})`, stocks: [cleanSym], signal: 'BEARISH', strength: percentB > 0.95 ? 'High' : 'Medium' });
+                        }
                     }
 
                     if (ema20 > 0 && ema50 > 0) {

@@ -2,12 +2,8 @@ import HeroSection from '../components/landing/HeroSection';
 import GlobalAssetSection from '../components/landing/GlobalAssetSection';
 import TraderModeSection from '../components/landing/TraderModeSection';
 import FeaturesSection from '../components/landing/FeaturesSection';
-import MarketTable from '../components/landing/MarketTable';
-import NewsFeed from '../components/landing/NewsFeed';
-import NewsSentiment from '../components/landing/NewsSentiment';
-import WatchlistHub from '../components/landing/WatchlistHub';
-
 import Preloader from '../components/common/Preloader';
+import { Link } from 'react-router-dom';
 
 
 const Navbar = () => (
@@ -44,53 +40,12 @@ const Navbar = () => (
 
 
 const Footer = () => (
-    <footer className="relative z-10 pt-20 pb-10 border-t border-[#6FFFE9]/10 bg-[#348E87]">
-        <div className="max-w-[95vw] mx-auto px-6 grid md:grid-cols-4 gap-12 mb-16">
-            <div className="col-span-1">
-                <div className="flex items-center gap-2 mb-6">
-                    <img src="/radar-logo-final.jpg" alt="Radar Logo" className="h-8 w-auto rounded-full object-contain" />
-                    <span className="text-xl font-bold text-white tracking-widest">RADAR</span>
-                </div>
-                <p className="text-white/50 text-sm leading-relaxed">
-                    Radar is a real-time market research platform for observing and analyzing global markets in one structured interface.
-                </p>
-            </div>
-
-            <div>
-                <h4 className="text-white font-bold mb-6">Product</h4>
-                <ul className="space-y-4 text-sm text-white/50">
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Trade Center</a></li>
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Pro Mode</a></li>
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Live Pulse</a></li>
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">APIs</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h4 className="text-white font-bold mb-6">Resources</h4>
-                <ul className="space-y-4 text-sm text-white/50">
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Learning Lab</a></li>
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Market Circle</a></li>
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Documentation</a></li>
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Ask Pulse AI</a></li>
-                </ul>
-            </div>
-
-            <div>
-                <h4 className="text-white font-bold mb-6">Support</h4>
-                <ul className="space-y-4 text-sm text-white/50">
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Help Center</a></li>
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Security</a></li>
-                    <li><a href="#" className="hover:text-[#6FFFE9] transition-colors">Contact Us</a></li>
-                </ul>
-            </div>
-        </div>
-
-        <div className="max-w-[95vw] mx-auto px-6 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/30">
-            <p>Â© 2026 Radar Financial Analytics. All rights reserved.</p>
+    <footer className="relative z-10 py-6 border-t border-white/5 bg-[#0f1520]">
+        <div className="max-w-[95vw] mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-white/50">
+            <p>© 2026 Radar Financial Analytics. All rights reserved.</p>
             <div className="flex gap-6">
-                <a href="#" className="hover:text-white">Privacy Policy</a>
-                <a href="#" className="hover:text-white">Terms of Service</a>
+                <Link to="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                <Link to="/terms" className="hover:text-white transition-colors">Terms of Service</Link>
             </div>
         </div>
     </footer>
@@ -110,36 +65,6 @@ export default function Home() {
                     <TraderModeSection />
                     <FeaturesSection />
 
-                    <section id="live-pulse" className="relative py-24">
-                        <div className="absolute inset-0 pointer-events-none">
-                            <div className="absolute -top-20 left-1/4 w-64 h-64 rounded-full bg-[#42C0A5]/10 blur-3xl" />
-                            <div className="absolute bottom-0 right-1/4 w-72 h-72 rounded-full bg-[#289dbc]/10 blur-3xl" />
-                        </div>
-
-                        <div className="relative z-10 max-w-[95vw] mx-auto px-6">
-                            <div className="max-w-3xl mb-10">
-                                <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-3">Live Pulse Terminal</h2>
-                                <p className="text-white/70 text-base md:text-lg leading-relaxed">
-                                    Unified live snapshot of movers, headlines, sentiment, and watchlist activity, refreshed continuously from backend feeds.
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-                                <div className="xl:col-span-7">
-                                    <MarketTable />
-                                </div>
-                                <div className="xl:col-span-5">
-                                    <WatchlistHub />
-                                </div>
-                                <div className="xl:col-span-7">
-                                    <NewsFeed />
-                                </div>
-                                <div className="xl:col-span-5">
-                                    <NewsSentiment className="bg-[#0b1d21] rounded-3xl border border-white/10 p-6 h-full flex flex-col" />
-                                </div>
-                            </div>
-                        </div>
-                    </section>
                 </main>
 
                 <Footer />

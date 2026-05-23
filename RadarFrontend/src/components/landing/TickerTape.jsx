@@ -27,7 +27,7 @@ const fallbackTickers = [
 ];
 
 const investorClasses = {
-    container: "w-full relative overflow-hidden py-4 select-none bg-transparent",
+    container: "w-full relative overflow-hidden py-2.5 select-none bg-transparent",
     symbol:    "text-[10px] font-black text-slate-400 tracking-[0.15em] uppercase mb-1 block",
     value:     "text-sm font-black text-slate-800 font-mono",
     positive:  "text-emerald-500 bg-emerald-50 border-emerald-100",
@@ -45,7 +45,7 @@ const investorClasses = {
 };
 
 const darkClasses = {
-    container: "w-full bg-[#0a2a30]/90 backdrop-blur-md border-b border-white/5 overflow-hidden py-3 flex relative z-50",
+    container: "w-full bg-[#0a2a30]/90 backdrop-blur-md border-b border-white/5 overflow-hidden py-2 flex relative z-50",
     symbol:    "font-bold text-white/80",
     value:     "text-white font-mono",
     positive:  "text-[#42C0A5] bg-[#42C0A5]/10",

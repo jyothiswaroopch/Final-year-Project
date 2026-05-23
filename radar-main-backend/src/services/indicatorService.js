@@ -1,4 +1,4 @@
-const { calculateRSI, calculateMACD, calculateEMA, getVolumeStatus } = require('../utils/indicators');
+const { calculateRSI, calculateMACD, calculateEMA, calculateBollinger, getVolumeStatus } = require('../utils/indicators');
 const { fetchStockHistory } = require('./stockService');
 const { fetchCryptoHistory } = require('./cryptoService');
 const { fetchForexHistory } = require('./forexService');
@@ -22,6 +22,7 @@ const getTechnicalIndicators = async (assetType, symbol, interval = '1D', option
         return {
             rsi: null,
             macd: null,
+            bollinger: null,
             ema20: null,
             volumeStatus: 'average',
             lastPrice: history?.length ? history[history.length - 1].price : null,
@@ -42,6 +43,15 @@ const getTechnicalIndicators = async (assetType, symbol, interval = '1D', option
     } : null;
 
     const prices = history.map(h => h.price);
+    const bollingerRaw = calculateBollinger(history, 20);
+    const latestBollinger = bollingerRaw.length > 0 ? bollingerRaw[bollingerRaw.length - 1] : null;
+    const latestPriceForBollinger = prices[prices.length - 1];
+    const bollingerRange = latestBollinger ? latestBollinger.upper - latestBollinger.lower : 0;
+    const bollinger = latestBollinger && bollingerRange > 0 ? {
+        ...latestBollinger,
+        percentB: parseFloat(((latestPriceForBollinger - latestBollinger.lower) / bollingerRange).toFixed(3))
+    } : null;
+
     const emaRaw = calculateEMA(prices, 20);
     const ema20 = emaRaw.length > 0 ? parseFloat(emaRaw[emaRaw.length - 1].toFixed(2)) : null;
 
@@ -81,6 +91,7 @@ const getTechnicalIndicators = async (assetType, symbol, interval = '1D', option
     return {
         rsi,
         macd,
+        bollinger,
         ema20,
         support,
         resistance,
@@ -138,6 +149,7 @@ const getTechnicalIndicatorsFromOHLC = async (symbol, exchange = 'NSE', timefram
             return {
                 rsi: null,
                 macd: null,
+                bollinger: null,
                 ema20: null,
                 support: null,
                 resistance: null,
@@ -174,6 +186,15 @@ const getTechnicalIndicatorsFromOHLC = async (symbol, exchange = 'NSE', timefram
         } : null;
 
         const prices = history.map(h => h.price);
+        const bollingerRaw = calculateBollinger(history, 20);
+        const latestBollinger = bollingerRaw.length > 0 ? bollingerRaw[bollingerRaw.length - 1] : null;
+        const latestPriceForBollinger = prices[prices.length - 1];
+        const bollingerRange = latestBollinger ? latestBollinger.upper - latestBollinger.lower : 0;
+        const bollinger = latestBollinger && bollingerRange > 0 ? {
+            ...latestBollinger,
+            percentB: parseFloat(((latestPriceForBollinger - latestBollinger.lower) / bollingerRange).toFixed(3))
+        } : null;
+
         const emaRaw = calculateEMA(prices, 20);
         const ema20 = emaRaw.length > 0 ? parseFloat(emaRaw[emaRaw.length - 1].toFixed(2)) : null;
 
@@ -216,6 +237,7 @@ const getTechnicalIndicatorsFromOHLC = async (symbol, exchange = 'NSE', timefram
         return {
             rsi,
             macd,
+            bollinger,
             ema20,
             support,
             resistance,
@@ -234,6 +256,7 @@ const getTechnicalIndicatorsFromOHLC = async (symbol, exchange = 'NSE', timefram
         return {
             rsi: null,
             macd: null,
+            bollinger: null,
             ema20: null,
             support: null,
             resistance: null,

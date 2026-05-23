@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Search, ChevronDown, CheckCircle, AlertTriangle, Eye, ShieldAlert, Plus, Bell, Activity, TrendingUp, TrendingDown, Info, ArrowRight, CornerRightDown, AlignLeft, Filter, BookOpen, Bookmark, SlidersHorizontal, Trash2, PieChart, BarChart3 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, ChevronDown, CheckCircle, AlertTriangle, ShieldAlert, Plus, Bell, Activity, TrendingUp, TrendingDown, Info, ArrowRight, Filter, BookOpen, Bookmark, SlidersHorizontal, Trash2, PieChart, BarChart3 } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, CartesianGrid } from 'recharts';
 import api from '../../api/api';
 import { createWatchlist as createBackendWatchlist } from '../../api/watchlistApi';
@@ -22,6 +22,7 @@ const mockWatchlistGrid = [];
 
 const mockWhyThisMatters = [];
 const mockCompareAndReflect = [];
+const ALERT_PROXIMITY_PERCENT = 5;
 
 const TooltipInfo = ({ text }) => (
     <div className="relative group/tooltip inline-flex items-center ml-2 align-middle">
@@ -678,6 +679,8 @@ const Watchlist = () => {
     const [watchlist, setWatchlist] = useState([]);
     const [isLoadingLive, setIsLoadingLive] = useState(true);
     const [watchlistId, setWatchlistId] = useState(null);
+    const [priceAlerts, setPriceAlerts] = useState([]);
+    const [indicatorSignals, setIndicatorSignals] = useState([]);
 
     const { on } = useSocket(['ticker']);
 
@@ -712,6 +715,34 @@ const Watchlist = () => {
         };
     };
 
+    const getCleanSymbol = (value) => String(value || '')
+        .trim()
+        .toUpperCase()
+        .replace(/\.(NS|BO)$/i, '');
+
+    const parseDisplayPrice = (value) => Number(String(value || '').replace(/[^0-9.-]/g, '')) || 0;
+
+    const normalizeAlert = (alert, quoteMap, watchlistSymbols) => {
+        const symbol = getCleanSymbol(alert.symbol);
+        const quote = quoteMap[symbol] || {};
+        const currentPrice = Number(quote.price ?? quote.ltp ?? quote.lastPrice ?? 0);
+        const targetPrice = Number(alert.targetPrice ?? alert.threshold ?? 0);
+        const distancePercent = currentPrice > 0 && targetPrice > 0
+            ? Math.abs(((targetPrice - currentPrice) / currentPrice) * 100)
+            : null;
+        const changePercent = Number(quote.changePercent ?? quote.change ?? 0);
+
+        return {
+            ...alert,
+            symbol,
+            currentPrice,
+            targetPrice,
+            distancePercent,
+            isInWatchlist: watchlistSymbols.has(symbol),
+            changePercent,
+        };
+    };
+
     useEffect(() => {
         let active = true;
         const load = async () => {
@@ -743,18 +774,42 @@ const Watchlist = () => {
                     }
                 }
 
-                if (!symbols.length || !active) { setIsLoadingLive(false); return; }
+                const alertsRes = await api.get('/alerts').catch(() => ({ data: [] }));
+                const activeAlerts = (Array.isArray(alertsRes.data) ? alertsRes.data : [])
+                    .filter(alert => alert.isActive !== false && Number(alert.targetPrice ?? alert.threshold ?? 0) > 0);
+                const alertSymbols = activeAlerts.map(alert => alert.symbol).filter(Boolean);
 
-                // 2. Fetch live quotes for all symbols
-                const symbolStr = symbols.join(',');
+                if (!symbols.length && !alertSymbols.length) {
+                    if (active) setIsLoadingLive(false);
+                    return;
+                }
+
+                // 2. Fetch live quotes for watchlist and alert-only symbols
+                const quoteSymbols = [...new Set([...symbols, ...alertSymbols])];
+                const symbolStr = quoteSymbols.join(',');
                 const mktRes = await api.get(`/market/quotes?symbols=${encodeURIComponent(symbolStr)}`);
                 const quotes = mktRes.data?.data ?? mktRes.data;
+                const quoteMap = {};
+                (Array.isArray(quotes) ? quotes : []).forEach(quote => {
+                    quoteMap[getCleanSymbol(quote.symbol)] = quote;
+                });
 
                 if (Array.isArray(quotes) && quotes.length && active) {
-                    setWatchlist(quotes.map(normalizeToGridCard));
+                    const watchlistSymbolSet = new Set(symbols.map(getCleanSymbol));
+                    setWatchlist(
+                        quotes
+                            .filter(quote => watchlistSymbolSet.has(getCleanSymbol(quote.symbol)))
+                            .map(normalizeToGridCard)
+                    );
+                    setPriceAlerts(activeAlerts.map(alert => normalizeAlert(alert, quoteMap, watchlistSymbolSet)));
                 } else if (active && (!symbols.length || !quotes.length)) {
                     // Keep the default mocks if no symbols found in backend
                     console.log("No symbols in backend, keeping mocks.");
+                }
+
+                const signalsRes = await api.get('/technical/signals').catch(() => ({ data: [] }));
+                if (active) {
+                    setIndicatorSignals(Array.isArray(signalsRes.data) ? signalsRes.data : []);
                 }
             } catch (err) {
                 console.warn('Investor Watchlist live load failed, keeping mock data:', err.message);
@@ -916,44 +971,53 @@ const Watchlist = () => {
     }, [watchlist]);
 
     const dynamicAttentionStocks = React.useMemo(() => {
-        if (!watchlist.length) return [];
-        return [...watchlist]
-            .filter(s => !s.isPositive || (s.beta > 1.2) || parseFloat(s.pe?.value || '0') > 30)
-            .sort((a, b) => {
-                const aChange = parseFloat(a.changeToday?.replace(/[^0-9.-]/g, '') || 0);
-                const bChange = parseFloat(b.changeToday?.replace(/[^0-9.-]/g, '') || 0);
-                return aChange - bChange;
-            })
-            .slice(0, 3)
-            .map(s => ({
-                id: s.id,
-                name: s.name,
-                price: s.price,
-                change: s.changeToday,
-                isPositive: s.isPositive,
-                tagTop: !s.isPositive ? 'Price Drop' : (s.beta > 1.2 ? 'High Volatility' : 'Valuation Alert'),
-                tagTopColor: !s.isPositive ? 'rose' : (s.beta > 1.2 ? 'amber' : 'amber'),
-                insight: !s.isPositive ? `Stock has dropped ${s.changeToday} today, breaking recent support levels.` : `Trading at elevated risk metrics compared to historical averages.`
-            }));
-    }, [watchlist]);
+        const watchlistMap = new Map(watchlist.map(stock => [getCleanSymbol(stock.name || stock.sym), stock]));
+
+        return priceAlerts
+            .filter(alert => alert.distancePercent !== null && alert.distancePercent <= ALERT_PROXIMITY_PERCENT)
+            .sort((a, b) => a.distancePercent - b.distancePercent)
+            .slice(0, 6)
+            .map(alert => {
+                const watched = watchlistMap.get(alert.symbol);
+                const currentPrice = alert.currentPrice || parseDisplayPrice(watched?.price);
+                const change = watched?.changeToday || `${alert.changePercent >= 0 ? '+' : ''}${alert.changePercent.toFixed(2)}%`;
+                const direction = currentPrice <= alert.targetPrice ? 'below' : 'above';
+                const distance = alert.distancePercent?.toFixed(2);
+
+                return {
+                    id: alert._id || alert.id || alert.symbol,
+                    name: alert.symbol,
+                    price: currentPrice
+                        ? `₹${currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                        : watched?.price || '-',
+                    change,
+                    isPositive: !String(change).startsWith('-'),
+                    tagTop: alert.isInWatchlist ? 'Watchlist Alert' : 'Alert Only',
+                    tagTopColor: distance <= 1 ? 'rose' : 'amber',
+                    insight: `${alert.symbol} is ${distance}% ${direction} your alert target of ₹${alert.targetPrice.toLocaleString('en-IN')}.`
+                };
+            });
+    }, [priceAlerts, watchlist]);
 
     const dynamicRecentChanges = React.useMemo(() => {
-        if (!watchlist.length) return [];
-        return [...watchlist]
-            .sort((a, b) => {
-                const aChange = Math.abs(parseFloat(a.changeToday?.replace(/[^0-9.-]/g, '') || 0));
-                const bChange = Math.abs(parseFloat(b.changeToday?.replace(/[^0-9.-]/g, '') || 0));
-                return bChange - aChange;
-            })
-            .slice(0, 2)
-            .map(s => ({
-                title: `${s.name} ${s.isPositive ? 'Momentum Shift' : 'Volume Breakout'}`,
-                desc: s.isPositive ? `Strong upward movement of ${s.changeToday} observed in recent sessions.` : `Significant downward pressure of ${s.changeToday} triggering volume alerts.`,
-                type: s.isPositive ? 'positive' : 'negative',
-                date: 'Today',
-                time: 'Live'
-            }));
-    }, [watchlist]);
+        const signalRank = { High: 0, Medium: 1, Low: 2 };
+
+        return indicatorSignals
+            .sort((a, b) => (signalRank[a.strength] ?? 3) - (signalRank[b.strength] ?? 3))
+            .slice(0, 5)
+            .map(signal => {
+                const signalType = String(signal.signal || '').toUpperCase();
+                const isBullish = signalType === 'BULLISH';
+                const isBearish = signalType === 'BEARISH';
+                return {
+                    title: `${signal.symbol} ${signal.value}`,
+                    desc: `${signal.value} detected with ${String(signal.strength || 'watchlist').toLowerCase()} sensitivity.`,
+                    type: isBullish ? 'positive' : isBearish ? 'negative' : 'neutral',
+                    date: 'Today',
+                    time: 'Live'
+                };
+            });
+    }, [indicatorSignals]);
 
     const holdingsGridClass = watchlist.length <= 1
         ? 'grid grid-cols-1 gap-6'
@@ -1058,12 +1122,12 @@ const Watchlist = () => {
                 )}
 
                 {/* Empty state — no stocks tracked */}
-                {!isLoadingLive && watchlist.length === 0 && (
+                {!isLoadingLive && watchlist.length === 0 && dynamicAttentionStocks.length === 0 && (
                     <EmptyState onAdd={handleAddToWatchlist} />
                 )}
 
                 {/* Full dashboard — only shown when stocks exist */}
-                {!isLoadingLive && watchlist.length > 0 && (
+                {!isLoadingLive && (watchlist.length > 0 || dynamicAttentionStocks.length > 0) && (
                     <>
                     {/* Watchlist Overview */}
                     <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6">
@@ -1160,7 +1224,7 @@ const Watchlist = () => {
                                 <TooltipInfo text="A chronological activity log of objective, factual events affecting the stocks on your watchlist." />
                             </h3>
                             <div className="flex-grow space-y-6">
-                                {dynamicRecentChanges.map((change, i) => (
+                                {dynamicRecentChanges.length > 0 ? dynamicRecentChanges.map((change, i) => (
                                     <div key={i} className="flex gap-4 relative">
                                         <div className="mt-1.5 flex flex-col items-center">
                                             {change.type === 'positive' ? <div className="w-3 h-3 rounded-full bg-blue-500 ring-4 ring-blue-50 relative z-10"></div> :
@@ -1176,7 +1240,11 @@ const Watchlist = () => {
                                             <div className="text-[12px] font-medium text-slate-500 leading-relaxed mt-1.5 pr-2">{change.desc}</div>
                                         </div>
                                     </div>
-                                ))}
+                                )) : (
+                                    <div className="py-8 text-center text-slate-500 text-[13px] font-medium border border-dashed border-slate-200 rounded-xl">
+                                        No sensitive technical changes detected right now.
+                                    </div>
+                                )}
                             </div>
                             <div className="mt-auto pt-6">
                                 <button className="w-full text-[12px] font-bold text-blue-700 bg-blue-50/50 border border-blue-100/60 py-3 rounded-[12px] hover:bg-blue-50 hover:border-blue-200 transition-colors">

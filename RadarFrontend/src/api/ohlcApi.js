@@ -2,6 +2,19 @@ import api from './api';
 
 
 
+const INDEX_SYMBOL_MAP = {
+    'NIFTY 50': '^NSEI',
+    NIFTY: '^NSEI',
+    NIFTY50: '^NSEI',
+    BANKNIFTY: '^NSEBANK',
+    SENSEX: '^BSESN',
+    'NIFTY IT': '^CNXIT',
+    'NIFTY AUTO': '^CNXAUTO',
+    'NIFTY INFRA': '^CNXINFRA',
+    FINNIFTY: '^CNXFIN',
+    MIDCPNIFTY: '^NSMIDCP50',
+};
+
 
 export const fetchOHLCData = async (symbol, options = {}) => {
     try {
@@ -14,6 +27,7 @@ export const fetchOHLCData = async (symbol, options = {}) => {
         } = options;
 
         const cleanSymbol = symbol.replace(/\.(NS|BO)$/i, '');
+        const requestSymbol = INDEX_SYMBOL_MAP[cleanSymbol.toUpperCase()] || cleanSymbol;
 
         const params = {
             exchange,
@@ -24,7 +38,7 @@ export const fetchOHLCData = async (symbol, options = {}) => {
         if (startDate) params.startDate = startDate;
         if (endDate) params.endDate = endDate;
 
-        const response = await api.get(`/ohlc/${cleanSymbol}`, { params });
+        const response = await api.get(`/ohlc/${requestSymbol}`, { params });
 
         if (!response.data?.success) {
             throw new Error(response.data?.message || 'Failed to fetch OHLC data');
@@ -60,8 +74,9 @@ export const fetchLatestOHLC = async (symbol, options = {}) => {
         } = options;
 
         const cleanSymbol = symbol.replace(/\.(NS|BO)$/i, '');
+        const requestSymbol = INDEX_SYMBOL_MAP[cleanSymbol.toUpperCase()] || cleanSymbol;
 
-        const response = await api.get(`/ohlc/${cleanSymbol}/latest`, {
+        const response = await api.get(`/ohlc/${requestSymbol}/latest`, {
             params: { exchange, timeframe },
         });
 

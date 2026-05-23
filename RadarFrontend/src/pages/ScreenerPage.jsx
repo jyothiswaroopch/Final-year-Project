@@ -59,6 +59,8 @@ const ScreenerPage = () => {
       signal: 'BREAKOUT',
       signalStrength: 'Strong',
       signalType: 'SMA, EMA, GO',
+      reasons: ['Breakout above 20 EMA', 'Momentum building with MACD crossover', 'Volume spike (2.1x RVOL)'],
+      catalyst: 'Q4 Earnings Beat Expected',
       rsi: 55,
       pe: 25.3,
       trend: 'bullish',
@@ -83,6 +85,8 @@ const ScreenerPage = () => {
       signal: 'MOMENTUM',
       signalStrength: 'Strong',
       signalType: 'MACD bullish crossover',
+      reasons: ['MACD Bullish Crossover', 'Trend continuation'],
+      catalyst: '',
       rsi: 65,
       pe: 22.1,
       trend: 'bullish',
@@ -107,6 +111,8 @@ const ScreenerPage = () => {
       signal: 'MOMENTUM',
       signalStrength: 'Strong',
       signalType: 'Momentum building with MACD crossover',
+      reasons: ['Momentum acceleration', 'Strong IT sector breadth'],
+      catalyst: '',
       rsi: 68,
       pe: 28.5,
       trend: 'bullish',
@@ -131,6 +137,8 @@ const ScreenerPage = () => {
       signal: 'BREAKOUT',
       signalStrength: 'Strong',
       signalType: 'Range breakout, +2% volume',
+      reasons: ['Multi-week range breakout', 'Strong institutional buying'],
+      catalyst: 'AGM Meeting Tomorrow',
       rsi: 58,
       pe: 20.2,
       trend: 'bullish',
@@ -155,7 +163,9 @@ const ScreenerPage = () => {
       signal: 'PULLBACK',
       signalStrength: 'Medium',
       signalType: 'Pullback rebounding with strong volume shock',
-      rsi: 42,
+      reasons: ['Sharp pullback to support', 'Oversold RSI condition'],
+      catalyst: 'Management Transition Details',
+      rsi: 28,
       pe: 19.8,
       trend: 'bearish',
       sentiment: -35,
@@ -179,6 +189,8 @@ const ScreenerPage = () => {
       signal: 'MOMENTUM',
       signalStrength: 'Medium',
       signalType: 'MACD showing weakness',
+      reasons: ['Bearish MACD cross', 'High relative volume distribution'],
+      catalyst: '',
       rsi: 35,
       pe: 18.4,
       trend: 'bearish',
@@ -203,7 +215,9 @@ const ScreenerPage = () => {
       signal: 'BREAKOUT',
       signalStrength: 'Strong',
       signalType: 'Range Breakout',
-      rsi: 72,
+      reasons: ['All-time high breakout', 'Sector outperformance'],
+      catalyst: '',
+      rsi: 78,
       pe: 24.6,
       trend: 'bullish',
       sentiment: 82,
@@ -227,6 +241,8 @@ const ScreenerPage = () => {
       signal: 'MOMENTUM',
       signalStrength: 'Low',
       signalType: 'Consolidation zone',
+      reasons: ['Flat consolidation', 'Defensive sector flow'],
+      catalyst: '',
       rsi: 48,
       pe: 21.3,
       trend: 'neutral',
@@ -235,7 +251,7 @@ const ScreenerPage = () => {
       entry: 465.8,
       target: 478.4,
       stopLoss: 458.3,
-      rvol: 1.2,
+      rvol: 0.6,
       timeframe: '1D',
       chart: [460, 462, 464, 466, 467, 467, 468, 468],
     },
@@ -250,32 +266,54 @@ const ScreenerPage = () => {
       const inner = res?.data ?? res;
       const raw = inner?.results ?? inner?.stocks ?? (Array.isArray(inner) ? inner : []);
       
-      const normalized = raw.map((s, i) => ({
-        id: s._id || s.id || s.displaySymbol || s.symbol || i,
-        symbol: String(s.displaySymbol || s.symbol || '').replace(/\.(NS|BO)$/i, ''),
-        name: s.name || s.displaySymbol || s.symbol || '',
-        price: Number(s.price ?? 0),
-        change: Number(s.changePercent ?? s.change ?? 0),
-        changePercent: Number(s.changePercent ?? s.change ?? 0),
-        volume: Number(s.volume ?? 0),
-        sector: s.sector || 'Equity',
-        signal: s.signal || (Number(s.changePercent ?? s.change ?? 0) > 1.5
-          ? 'BREAKOUT'
-          : s.bias === 'bearish' ? 'PULLBACK' : 'MOMENTUM'),
-        signalStrength: s.signalStrength || (Number(s.confidence ?? s.score ?? 70) > 80 ? 'Strong' : 'Medium'),
-        signalType: s.signalType || s.why || '',
-        rsi: Number(s.rsi ?? 50),
-        pe: Number(s.pe ?? 0),
-        trend: s.trend || s.bias || (Number(s.changePercent ?? s.change ?? 0) >= 0 ? 'bullish' : 'bearish'),
-        sentiment: Number(s.sentiment ?? (Number(s.changePercent ?? s.change ?? 0) * 10)),
-        strength: s.strength || `Confidence ${Number(s.confidence ?? s.score ?? 72)}%`,
-        entry: Number(s.entry ?? s.price ?? 0),
-        target: Number(s.target ?? (s.price ?? 0) * 1.04),
-        stopLoss: Number(s.stopLoss ?? s.sl ?? (s.price ?? 0) * 0.985),
-        rvol: Number(s.volumeRatio ?? s.rvol ?? 1.2),
-        timeframe: s.timeframe || '1D',
-        chart: s.chart || s.history || [],
-      }));
+      const normalized = raw.map((s, i) => {
+        const changePercent = Number(s.changePercent ?? s.change ?? 0);
+        const rsiVal = Number(s.rsi ?? 50);
+        const rvolVal = Number(s.volumeRatio ?? s.rvol ?? 1.2);
+        
+        let derivedReasons = s.reasons || [];
+        if (derivedReasons.length === 0) {
+          if (changePercent > 1.5) derivedReasons.push(`Strong price momentum (${changePercent.toFixed(1)}%)`);
+          if (rvolVal > 1.5) derivedReasons.push(`Volume surge (${rvolVal.toFixed(1)}x RVOL)`);
+          if (rsiVal > 60 && rsiVal < 70) derivedReasons.push('Entering bullish RSI zone');
+          if (derivedReasons.length === 0) derivedReasons.push('Standard technical continuation');
+        }
+
+        let flags = s.riskFlags || [];
+        if (rsiVal > 70) flags.push('⚠️ Overbought (RSI > 70)');
+        if (rsiVal < 30) flags.push('⚠️ Oversold (RSI < 30)');
+        if (rvolVal < 0.8) flags.push('⚠️ Low Volume');
+
+        return {
+          id: s._id || s.id || s.displaySymbol || s.symbol || i,
+          symbol: String(s.displaySymbol || s.symbol || '').replace(/\.(NS|BO)$/i, ''),
+          name: s.name || s.displaySymbol || s.symbol || '',
+          price: Number(s.price ?? 0),
+          change: changePercent,
+          changePercent: changePercent,
+          volume: Number(s.volume ?? 0),
+          sector: s.sector || 'Equity',
+          signal: s.signal || (changePercent > 1.5
+            ? 'BREAKOUT'
+            : s.bias === 'bearish' ? 'PULLBACK' : 'MOMENTUM'),
+          signalStrength: s.signalStrength || (Number(s.confidence ?? s.score ?? 70) > 80 ? 'Strong' : 'Medium'),
+          signalType: s.signalType || s.why || '',
+          reasons: derivedReasons,
+          catalyst: s.catalyst || '',
+          riskFlags: flags,
+          rsi: rsiVal,
+          pe: Number(s.pe ?? 0),
+          trend: s.trend || s.bias || (changePercent >= 0 ? 'bullish' : 'bearish'),
+          sentiment: Number(s.sentiment ?? (changePercent * 10)),
+          strength: s.strength || `Confidence ${Number(s.confidence ?? s.score ?? 72)}%`,
+          entry: Number(s.entry ?? s.price ?? 0),
+          target: Number(s.target ?? (s.price ?? 0) * 1.04),
+          stopLoss: Number(s.stopLoss ?? s.sl ?? (s.price ?? 0) * 0.985),
+          rvol: rvolVal,
+          timeframe: s.timeframe || '1D',
+          chart: s.chart || s.history || [],
+        };
+      });
 
       // If API returned stocks, use them — otherwise fall back to demo data
       if (normalized.length > 0) {

@@ -102,63 +102,90 @@ const AdvancedTradingChart = ({
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
-    const chart = createChart(chartContainerRef.current, {
-      width: chartContainerRef.current.clientWidth,
-      height: showHeader ? height : height + 80,
-      layout: {
-        background: { color: '#0f172a' },
-        textColor: '#94a3b8',
-      },
-      grid: {
-        vertLines: { color: '#1e293b', style: LineStyle.Dashed },
-        horzLines: { color: '#1e293b', style: LineStyle.Dashed },
-      },
-      crosshair: {
-        mode: CrosshairMode.Normal,
-        vertLine: {
-          color: '#06b6d4',
-          width: 1,
-          style: LineStyle.Dashed,
-          labelBackgroundColor: '#06b6d4',
+    const containerWidth = chartContainerRef.current.clientWidth;
+    const containerHeight = chartContainerRef.current.clientHeight || height;
+
+    // Ensure container has valid dimensions
+    if (containerWidth <= 0 || containerHeight <= 0) {
+      console.warn('Chart container has invalid dimensions', { containerWidth, containerHeight });
+      return;
+    }
+
+    let chart;
+    try {
+      chart = createChart(chartContainerRef.current, {
+        width: containerWidth,
+        height: containerHeight,
+        layout: {
+          background: { color: '#0f172a' },
+          textColor: '#94a3b8',
         },
-        horzLine: {
-          color: '#06b6d4',
-          width: 1,
-          style: LineStyle.Dashed,
-          labelBackgroundColor: '#06b6d4',
+        grid: {
+          vertLines: { color: '#1e293b', style: LineStyle.Dashed },
+          horzLines: { color: '#1e293b', style: LineStyle.Dashed },
         },
-      },
-      timeScale: {
-        borderColor: '#1e293b',
-        timeVisible: true,
-        secondsVisible: false,
-      },
-      rightPriceScale: {
-        borderColor: '#1e293b',
-        scaleMargins: {
-          top: 0.1,
-          bottom: 0.2,
+        crosshair: {
+          mode: CrosshairMode.Normal,
+          vertLine: {
+            color: '#06b6d4',
+            width: 1,
+            style: LineStyle.Dashed,
+            labelBackgroundColor: '#06b6d4',
+          },
+          horzLine: {
+            color: '#06b6d4',
+            width: 1,
+            style: LineStyle.Dashed,
+            labelBackgroundColor: '#06b6d4',
+          },
         },
-      },
-    });
+        timeScale: {
+          borderColor: '#1e293b',
+          timeVisible: true,
+          secondsVisible: false,
+        },
+        rightPriceScale: {
+          borderColor: '#1e293b',
+          scaleMargins: {
+            top: 0.1,
+            bottom: 0.2,
+          },
+        },
+      });
+    } catch (error) {
+      console.error('Error creating chart:', error);
+      return;
+    }
+
+    // Validate chart object
+    if (!chart || typeof chart.addCandlestickSeries !== 'function') {
+      console.error('Invalid chart object returned from createChart');
+      return;
+    }
 
     chartRef.current = chart;
 
-    const candleSeries = chart.addCandlestickSeries({
-      upColor: '#10b981',
-      downColor: '#ef4444',
-      borderVisible: false,
-      wickUpColor: '#10b981',
-      wickDownColor: '#ef4444',
-    });
+    try {
+      const candleSeries = chart.addCandlestickSeries({
+        upColor: '#10b981',
+        downColor: '#ef4444',
+        borderVisible: false,
+        wickUpColor: '#10b981',
+        wickDownColor: '#ef4444',
+      });
 
-    candleSeriesRef.current = candleSeries;
-
-    loadChartData();
+      candleSeriesRef.current = candleSeries;
+      loadChartData();
+    } catch (error) {
+      console.error('Error setting up chart series:', error);
+    }
 
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
-        chart.applyOptions({ width: chartContainerRef.current.clientWidth });
+        chart.applyOptions({
+          width: chartContainerRef.current.clientWidth,
+          height: chartContainerRef.current.clientHeight || height,
+        });
       }
     };
 
@@ -166,7 +193,13 @@ const AdvancedTradingChart = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      chart.remove();
+      if (chart) {
+        try {
+          chart.remove();
+        } catch (error) {
+          console.error('Error removing chart:', error);
+        }
+      }
     };
   }, []);
 
@@ -387,7 +420,7 @@ const AdvancedTradingChart = ({
       )}
 
       {}
-      <div ref={chartContainerRef} className="w-full h-full" />
+      <div ref={chartContainerRef} className="w-full h-full min-h-0" />
 
       {}
       {isLoading && (

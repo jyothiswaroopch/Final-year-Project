@@ -460,5 +460,79 @@
                      }
                  ],
         "audience":  "investor"
+    },
+    {
+        "id": "day-trading-101",
+        "title": "Day Trading 101: Price Action Basics",
+        "category": "Price Action",
+        "difficulty": "Beginner",
+        "icon": "PlayCircle",
+        "color": "emerald",
+        "description": "Learn the fundamentals of day trading, reading candlesticks, and identifying simple market structures.",
+        "duration": "45 min",
+        "chapters": [
+            {
+                "id": "dt-1",
+                "title": "Candlestick Anatomy",
+                "content": "Candlesticks are the foundation of price action trading.\n\n**Body vs Wick:**\n- The body shows the open and close.\n- Wicks (shadows) show the highest and lowest prices of that period.\n\n**Bullish vs Bearish:**\n- Green (Bullish): Close > Open\n- Red (Bearish): Close < Open\n\n**Key Patterns:**\n- Doji: Open and close are almost equal, indicating indecision.\n- Hammer / Pin Bar: Long lower wick, small body at the top. Shows rejection of lower prices."
+            },
+            {
+                "id": "dt-2",
+                "title": "Support and Resistance",
+                "content": "Support and resistance are key levels where price has historically reacted.\n\n**Support:** A floor where buying interest is strong enough to overcome selling pressure.\n**Resistance:** A ceiling where selling pressure overcomes buying interest.\n\n**How to use them:**\n- Buy near support, sell near resistance.\n- Wait for confirmation (like a bullish candlestick pattern) before entering a trade at these levels.\n- Breakouts: When price breaks through resistance, that resistance often becomes new support."
+            }
+        ],
+        "quiz": [
+            {
+                "id": "q-dt-1",
+                "question": "What does a long lower wick on a candlestick indicate?",
+                "options": [
+                    "Strong selling pressure",
+                    "Rejection of lower prices (buying pressure)",
+                    "Indecision",
+                    "A market top"
+                ],
+                "answer": 1,
+                "explanation": "A long lower wick shows that sellers pushed the price down, but buyers stepped in and pushed it back up, indicating rejection of lower prices."
+            }
+        ],
+        "audience": "trader"
+    },
+    {
+        "id": "advanced-order-flow",
+        "title": "Advanced Order Flow & Liquidity",
+        "category": "Order Flow",
+        "difficulty": "Advanced",
+        "icon": "Zap",
+        "color": "blue",
+        "description": "Master institutional order flow, volume delta, and liquidity grabs to trade alongside smart money.",
+        "duration": "75 min",
+        "chapters": [
+            {
+                "id": "aof-1",
+                "title": "Understanding the DOM & Tape",
+                "content": "The DOM (Depth of Market) and the Tape (Time & Sales) are tools for reading live order flow.\n\n**DOM (Level 2):** Shows resting limit orders at various price levels.\n- Spoofing: Large fake orders placed to manipulate retail traders.\n- Absorption: When a large resting order absorbs aggressive market orders without the price moving.\n\n**The Tape:** Shows actual executed trades.\n- Focus on speed and size. A sudden flurry of large prints indicates institutional participation.\n- Delta: The difference between aggressive buying (hitting the ask) and aggressive selling (hitting the bid)."
+            },
+            {
+                "id": "aof-2",
+                "title": "Liquidity Grabs & Stop Hunts",
+                "content": "Institutions need liquidity (other people's orders) to enter or exit their massive positions.\n\n**Stop Hunts:**\n- Retail traders place stop losses predictably (e.g., just below a support level).\n- Institutions drive the price through support to trigger these stop losses (which are sell orders).\n- They then buy into this sudden influx of sell orders, securing a great price for their long position.\n\n**How to trade it:**\n- Wait for the fake breakout (liquidity grab).\n- Enter when price quickly reclaims the support level."
+            }
+        ],
+        "quiz": [
+            {
+                "id": "q-aof-1",
+                "question": "What does it mean when aggressive market sell orders are absorbed without the price dropping?",
+                "options": [
+                    "Sellers are taking control",
+                    "A large passive buyer is absorbing the selling pressure",
+                    "The market is about to crash",
+                    "Liquidity is drying up"
+                ],
+                "answer": 1,
+                "explanation": "Absorption occurs when a large limit buy order on the DOM absorbs all aggressive market sell orders, preventing the price from falling."
+            }
+        ],
+        "audience": "trader"
     }
 ]

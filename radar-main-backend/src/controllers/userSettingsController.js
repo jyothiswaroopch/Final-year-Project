@@ -64,6 +64,25 @@ const validateSettings = (payload) => {
         }
     }
 
+    // Validate ticker settings
+    if (payload.ticker) {
+        if (payload.ticker.customSymbols) {
+            if (!Array.isArray(payload.ticker.customSymbols)) {
+                errors.push('ticker.customSymbols must be an array');
+            } else if (payload.ticker.customSymbols.length > 50) {
+                errors.push('Too many custom symbols');
+            } else {
+                const symRegex = /^[A-Z0-9\.\-_]{1,30}$/;
+                for (const s of payload.ticker.customSymbols) {
+                    if (typeof s !== 'string' || !symRegex.test(s)) {
+                        errors.push(`Invalid ticker symbol: ${s}`);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     return errors;
 };
 
@@ -100,6 +119,7 @@ const updateUserSettings = async (req, res) => {
         if (payload.alerts) allowedUpdates.alerts = payload.alerts;
         if (payload.risk) allowedUpdates.risk = payload.risk;
         if (payload.data) allowedUpdates.data = payload.data;
+        if (payload.ticker) allowedUpdates.ticker = payload.ticker;
 
         const updated = await UserSettings.findOneAndUpdate(
             { user: userId },

@@ -28,6 +28,13 @@ const UserSettingsSchema = new mongoose.Schema({
         autoRefreshWatchlist: { type: Boolean, default: true },
         refreshInterval: { type: String, default: '1m' }
     }
+    ,
+    ticker: {
+        // core indices that are always present for the Indian market overview
+        mandatoryIndices: { type: [String], default: ['NIFTY','SENSEX','BANKNIFTY'] },
+        // user-added custom symbols shown on the ticker tape (e.g. RELIANCE.NS)
+        customSymbols: { type: [String], default: [] }
+    }
 }, { timestamps: true });
 
 module.exports = mongoose.model('UserSettings', UserSettingsSchema);

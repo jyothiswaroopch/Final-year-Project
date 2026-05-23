@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { Activity, Maximize2, TrendingDown, TrendingUp, Search, Newspaper, Globe, Zap, ExternalLink, Monitor } from "lucide-react";
 import { motion } from "framer-motion";
@@ -22,16 +22,11 @@ import { fetchPortfolio } from "../api/portfolioApi";
 import { fetchFnoDashboard } from "../api/fnoApi";
 import { fetchMarketHistory, fetchMarketNews } from "../api/marketApi";
 import { useAsset } from "../context/AssetContext";
-import { SettingsContext } from "../context/SettingsContext";
-import SharedMultiChartGrid from "../components/trader/MultiChartGrid";
-import AdvancedTradingChart from "../components/trader/AdvancedTradingChart";
 import SharedAdvancedWatchlist from "../components/trader/AdvancedWatchlist";
-import EnhancedStockScreener from "../components/trader/EnhancedStockScreener";
-import MultiChartWorkspace from "../components/trader/MultiChartWorkspace"; // TRADINGVIEW MULTI-CHART
 import RealTimeScanner from "../components/trader/RealTimeScanner"; // TRADINGVIEW SCANNER
+import MultiChartGrid from "../components/trader/MultiChartGrid";
 import MainLayout from "../components/layout/MainLayout";
 import MarketTicker from "../components/dashboard/MarketTicker";
-import TraderStockPage from "./TraderStockPage"; 
 import TraderProfilePage from "./traderProfile/TraderProfilePage";
 import SettingsPage from "./settings/SettingsPage";
 import TraderHelpSupportPage from "./support/HelpSupportPage";
@@ -142,6 +137,13 @@ const formatCalendarDate = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
+};
+
+const getCalendarDateKey = (value) => {
+  if (!value) return "unknown";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  return date.toISOString().slice(0, 10);
 };
 
 const formatNewsTime = (value) => {
@@ -1560,6 +1562,28 @@ const CatalystPanel = () => {
   const [eventsSource, setEventsSource] = useState("none");
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
+  const groupedEvents = useMemo(() => {
+    const groups = [];
+    const groupMap = new Map();
+
+    for (const event of events) {
+      const dateKey = getCalendarDateKey(event?.date);
+      if (!groupMap.has(dateKey)) {
+        const nextGroup = {
+          key: dateKey,
+          label: formatCalendarDate(event?.date),
+          items: [],
+        };
+        groupMap.set(dateKey, nextGroup);
+        groups.push(nextGroup);
+      }
+
+      groupMap.get(dateKey).items.push(event);
+    }
+
+    return groups;
+  }, [events]);
+  const trustedCount = events.filter((event) => event?.verificationLevel && event.verificationLevel !== "none").length;
 
   useEffect(() => {
     let isMounted = true;
@@ -1575,10 +1599,11 @@ const CatalystPanel = () => {
           const sourceEvents = Array.isArray(response) ? response : [];
           const validEvents = sourceEvents.filter((item) => item?.event && item?.date);
           const verifiedEvents = validEvents.filter((item) => item?.factual === true || String(item?.source || "").toLowerCase().includes("tradingeconomics"));
+          const nextEvents = verifiedEvents.length > 0 ? verifiedEvents : validEvents;
 
-          if (verifiedEvents.length > 0) {
-            setEvents(verifiedEvents.slice(0, 6));
-            setEventsSource("verified");
+          if (nextEvents.length > 0) {
+            setEvents(nextEvents.slice(0, 6));
+            setEventsSource(verifiedEvents.length > 0 ? "verified" : "fallback");
           } else {
             setEvents([]);
             setEventsSource("none");
@@ -1623,7 +1648,7 @@ const CatalystPanel = () => {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <span className="tr-pill text-[#f0b429] bg-[#f0b429]/10">{events.length ? formatCalendarDate(events[0]?.date) : "NO FEED"}</span>
+        <span className="tr-pill text-[#f0b429] bg-[#f0b429]/10">{groupedEvents.length ? `${groupedEvents.length} DATE${groupedEvents.length === 1 ? "" : "S"}` : "NO FEED"}</span>
       </div>
     </div>
 
@@ -1635,64 +1660,97 @@ const CatalystPanel = () => {
       {!isLoading && !hasError && events.length === 0 && (
         <div className="text-[12px] text-[#5d606b] font-mono uppercase tracking-wider">No verified catalyst events available.</div>
       )}
-      {events.map((item, idx) => {
-        const impactColor = getImpactColor(item.impact);
-        const metadata = [
-          item?.country ? String(item.country).toUpperCase() : null,
-          item?.actual && item.actual !== "-" ? `Actual ${item.actual}` : null,
-          item?.forecast && item.forecast !== "-" ? `Forecast ${item.forecast}` : null,
-          item?.previous && item.previous !== "-" ? `Prev ${item.previous}` : null,
-        ].filter(Boolean).join(" | ");
-        return (
-        <div
-          key={idx}
-          className="rounded-lg p-2.5 transition-all cursor-pointer"
-          style={{
-            background: '#131722',
-            borderTop: `1px solid ${impactColor}30`,
-            borderRight: `1px solid ${impactColor}30`,
-            borderBottom: `1px solid ${impactColor}30`,
-            borderLeft: `3px solid ${impactColor}`,
-          }}
-        >
-          <div className="flex items-start gap-2">
-            <span className="text-base mt-0.5 flex-shrink-0">{String(item.impact).toLowerCase().includes("high") ? "[!]" : String(item.impact).toLowerCase().includes("med") ? "[~]" : "[i]"}</span>
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-start gap-1">
-                <span className="text-[15px] text-white font-semibold leading-tight">{item.event}</span>
-                <span
-                  className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
-                  style={{ color: impactColor, background: `${impactColor}18` }}
-                >
-                  {item.impact}
-                </span>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 text-[#42C0A5] bg-[#42C0A5]/15">
-                  VERIFIED
-                </span>
-              </div>
-              <div className="flex items-center gap-2 mt-1 flex-wrap">
-                <span className="text-[11px] font-mono text-[#7b8190]">{formatCalendarDate(item.date)}</span>
-                {metadata ? (
-                  <>
-                    <span className="text-[#2a2e39]">|</span>
-                    <span className="text-[11px] text-[#7b8190]">{metadata}</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-[#2a2e39]">|</span>
-                    <span className="text-[11px] text-[#7b8190]">Verified event schedule</span>
-                  </>
-                )}
-              </div>
-            </div>
+      {groupedEvents.map((group) => (
+        <div key={group.key} className="space-y-1.5">
+          <div className="flex items-center justify-between px-1 pt-1">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-[#5d606b]">{group.label}</span>
+            <span className="text-[10px] text-[#5d606b]">{group.items.filter((event) => event?.verificationLevel && event.verificationLevel !== "none").length}/{group.items.length} trusted</span>
           </div>
+          {group.items.map((item, idx) => {
+            const impactColor = getImpactColor(item.impact);
+            const isHighImpact = String(item.impact).toLowerCase().includes("high");
+            const verificationLevel = item?.verificationLevel || (item?.verified ? "strong" : "none");
+            const verificationLabel = verificationLevel === "strong" ? "VERIFIED" : verificationLevel === "source" ? "SOURCE" : null;
+            const verificationColor = verificationLevel === "strong" ? "#42C0A5" : verificationLevel === "source" ? "#5ca7ff" : null;
+            const metadata = [
+              item?.country ? String(item.country).toUpperCase() : null,
+              item?.source ? String(item.source) : null,
+              item?.actual && item.actual !== "-" ? `Actual ${item.actual}` : null,
+              item?.forecast && item.forecast !== "-" ? `Forecast ${item.forecast}` : null,
+              item?.previous && item.previous !== "-" ? `Prev ${item.previous}` : null,
+            ].filter(Boolean).join(" | ");
+            const relatedSymbols = isHighImpact && item?.influencesTrending && Array.isArray(item?.relatedSymbols)
+              ? item.relatedSymbols.slice(0, 2)
+              : [];
+
+            return (
+              <div
+                key={`${group.key}-${idx}`}
+                className="rounded-lg p-2.5 transition-all cursor-pointer"
+                style={{
+                  background: '#131722',
+                  borderTop: `1px solid ${impactColor}30`,
+                  borderRight: `1px solid ${impactColor}30`,
+                  borderBottom: `1px solid ${impactColor}30`,
+                  borderLeft: `3px solid ${impactColor}`,
+                }}
+              >
+                <div className="flex items-start gap-2">
+                  <span className="text-base mt-0.5 flex-shrink-0">{String(item.impact).toLowerCase().includes("high") ? "[!]" : String(item.impact).toLowerCase().includes("med") ? "[~]" : "[i]"}</span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex justify-between items-start gap-1">
+                      <span className="text-[15px] text-white font-semibold leading-tight">{item.event}</span>
+                      <span
+                        className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                        style={{ color: impactColor, background: `${impactColor}18` }}
+                      >
+                        {item.impact}
+                      </span>
+                      {verificationLabel ? (
+                        <span
+                          className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                          style={{ color: verificationColor, background: `${verificationColor}18` }}
+                        >
+                          {verificationLabel}
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="flex items-center gap-2 mt-1 flex-wrap">
+                      <span className="text-[11px] font-mono text-[#7b8190]">{formatCalendarDate(item.date)}</span>
+                      {metadata ? (
+                        <>
+                          <span className="text-[#2a2e39]">|</span>
+                          <span className="text-[11px] text-[#7b8190]">{metadata}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-[#2a2e39]">|</span>
+                          <span className="text-[11px] text-[#7b8190]">Event schedule</span>
+                        </>
+                      )}
+                    </div>
+                    {relatedSymbols.length > 0 ? (
+                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                        <span className="text-[10px] uppercase tracking-wider text-[#5d606b]">Influences market</span>
+                        {relatedSymbols.map((symbol) => (
+                          <span key={symbol} className="text-[10px] font-bold px-1.5 py-0.5 rounded text-[#c2c8d7] bg-white/5 border border-white/10">
+                            {symbol}
+                          </span>
+                        ))}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
         </div>
-      )})}
+      ))}
     </div>
 
     {}
     <div className="px-2.5 py-1.5 border-t border-white/10 flex justify-between items-center" style={{ background: 'rgba(255,255,255,0.04)' }}>
-      <span className="text-[11px] text-[#5d606b]">{events.length} {eventsSource === "verified" ? "verified" : "loaded"} events</span>
+      <span className="text-[11px] text-[#5d606b]">{events.length} events • {trustedCount} trusted</span>
       <div className="flex items-center gap-2 text-[11px]">
         <span className="text-[#ed5750] font-bold">{events.filter((event) => String(event.impact).toLowerCase().includes("high")).length} HIGH</span>
         <span className="text-[#f0b429] font-bold">{events.filter((event) => String(event.impact).toLowerCase().includes("med")).length} MED</span>
@@ -1867,11 +1925,12 @@ const TechnicalScreeners = () => {
       <div className="flex-1 overflow-y-auto custom-scrollbar p-1">
         {activeTab === "BREAKOUT" ? (
           <div className="space-y-1">
+            <div className="px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-500">Watchlist-driven breakout scan</div>
             {isLoading && (
               <div className="text-[#9194a2] text-sm text-center py-4">Loading live breakout alerts...</div>
             )}
             {!isLoading && breakoutAlerts.length === 0 && (
-              <div className="text-[#9194a2] text-sm text-center py-4">{hasBreakoutError ? "Unable to load breakout alerts." : "No breakout alerts from backend."}</div>
+              <div className="text-[#9194a2] text-sm text-center py-4">{hasBreakoutError ? "Unable to load breakout alerts." : "No breakout alerts yet. Add symbols to your watchlist or wait for the next scan."}</div>
             )}
             {breakoutAlerts.map((item, k) => (
               <div
@@ -1904,7 +1963,7 @@ const TechnicalScreeners = () => {
               </div>
             ) : (
               indicatorSignals.length === 0 ? (
-                <div className="text-[#9194a2] text-sm text-center py-4">{hasSignalsError ? "Unable to load indicator signals." : "No indicator signals from backend."}</div>
+                <div className="text-[#9194a2] text-sm text-center py-4">{hasSignalsError ? "Unable to load indicator signals." : "No indicator signals yet. Add symbols to your watchlist or wait for the next scan."}</div>
               ) : (
               <>
               {indicatorSignals.map((item, index) => (
@@ -2793,8 +2852,9 @@ const ResearchToolPanel = ({ symbol: symbolProp } = {}) => {
       </div>
 
       {/* ── Footer ── */}
-      <div className="px-4 py-2 border-t border-white/5">
+      <div className="px-4 py-2 border-t border-white/5 space-y-1">
         <p className="text-[9px] text-slate-600 italic">Research only. No trade execution.</p>
+        <p className="text-[9px] text-slate-500">Usage: pick a symbol from the dashboard or watchlist, then switch between Signals, Research, and Levels.</p>
       </div>
     </div>
   );
@@ -2802,30 +2862,9 @@ const ResearchToolPanel = ({ symbol: symbolProp } = {}) => {
 
 function ResearchView({ activeModule, onRequestModuleChange }) {
   const navigate = useNavigate();
-  const { settings: savedSettings } = useContext(SettingsContext);
+  const [niftyQuote, setNiftyQuote] = useState(null);
 
-  const [expandedChart, setExpandedChart] = useState(null);
-  const [timeframe, setTimeframe]         = useState("15m");
-  const [showIndicators, setShowIndicators] = useState(false);
-  const [activeIndicators, setActiveIndicators] = useState(new Set(['ma7', 'ma25']));
-  const [showIndicatorMenu, setShowIndicatorMenu] = useState(false);
-  const [layout, setLayout]               = useState("4-grid");
-  const [niftyQuote, setNiftyQuote]       = useState(null);
-
-  // Apply saved display settings once context loads
-  useEffect(() => {
-    if (!savedSettings?.display) return;
-    const d = savedSettings.display;
-    if (d.defaultTimeframe) setTimeframe(d.defaultTimeframe);
-    if (d.defaultLayout)    setLayout(d.defaultLayout);
-    if (typeof d.showIndicators === 'boolean') setShowIndicators(d.showIndicators);
-  }, [savedSettings]);
-
-  const [analysisSymbol, setAnalysisSymbol] = useState(null);
-  const [focusedSymbol, setFocusedSymbol]   = useState('RELIANCE');
-  const { setAsset } = useAsset();
-
-  // Fetch live NIFTY 50 quote (same API as the chart)
+  // Fetch live NIFTY 50 quote for the workspace header.
   useEffect(() => {
     let alive = true;
     const load = async () => {
@@ -2896,21 +2935,6 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
     );
   }
 
-  if (analysisSymbol) {
-    return (
-        <div className="dashboard-layout flex flex-col w-full">
-            <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0 }}>
-                {}
-                <TraderStockPage 
-                    overrideSymbol={analysisSymbol} 
-                    onBack={() => setAnalysisSymbol(null)} 
-                    isInDashboard={true}
-                />
-            </div>
-        </div>
-    )
-  }
-
   if (activeModule === "SCREENERS") {
     return (
       <MainLayout>
@@ -2946,8 +2970,8 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
   if (activeModule === "MULTI-CHART") {
     return (
       <div className="dashboard-layout flex flex-col w-full">
-        <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0, height: 'calc(100vh - 64px)' }}>
-          <MultiChartWorkspace />
+          <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0, height: 'calc(100vh - 64px)' }}>
+          <MultiChartGrid useTradingView={true} />
         </div>
       </div>
     );
@@ -2980,100 +3004,27 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
                   </p>
                 </section>
 
-                <section className="tr-surface-card tr-panel-shell tr-panel-shell--chart">
-                  <div className="workspace-header">
-                    <div className="workspace-title">
-                      <span className="workspace-label">Multi-Chart Workspace</span>
-                      <span className="workspace-symbol">
-                        NIFTY 50{' '}
-                        {niftyQuote ? (
-                          <span className={niftyQuote.pos ? 'text-[#42C0A5]' : 'text-red-400'}>
-                            {niftyQuote.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}{' '}
-                            {niftyQuote.pos ? '+' : ''}{niftyQuote.pct}%
-                          </span>
-                        ) : (
-                          <span className="text-white/30 text-xs">Loading…</span>
-                        )}
-                      </span>
+                <section className="tr-surface-card tr-panel-shell tr-panel-shell--chart overflow-hidden">
+                  <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
+                    <div>
+                      <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">TradingView Workspace</div>
+                      <h2 className="mt-1 text-lg font-black tracking-tight text-white">Multi-chart market view</h2>
                     </div>
-                    <div className="workspace-controls">
-                      {["1m", "5m", "15m", "1h", "4h", "1D"].map((tf) => (
-                        <button
-                          key={tf}
-                          onClick={() => setTimeframe(tf)}
-                          className={`workspace-chip ${tf === timeframe ? "active" : ""}`}
-                        >
-                          {tf.toUpperCase()}
-                        </button>
-                      ))}
-                      <div className="relative">
-                        <button
-                          onClick={() => setShowIndicatorMenu(v => !v)}
-                          className={`workspace-chip ${activeIndicators.size > 0 ? "active" : ""}`}
-                        >
-                          Indicators {activeIndicators.size > 0 && `(${activeIndicators.size})`}
-                        </button>
-                        {showIndicatorMenu && (
-                          <div
-                            className="absolute top-full right-0 mt-1 z-50 bg-[#0f1520] border border-white/10 rounded-xl shadow-2xl p-2 min-w-[160px]"
-                            onMouseLeave={() => setShowIndicatorMenu(false)}
-                          >
-                            {[
-                              { id: 'ma7',  label: 'MA 7',      color: '#FFA500' },
-                              { id: 'ma25', label: 'MA 25',     color: '#FF1493' },
-                              { id: 'vwap', label: 'VWAP',      color: '#60a5fa' },
-                              { id: 'bb',   label: 'Bollinger', color: '#a78bfa' },
-                              { id: 'rsi',  label: 'RSI (14)',  color: '#34d399' },
-                            ].map(ind => (
-                              <button
-                                key={ind.id}
-                                onClick={() => setActiveIndicators(prev => {
-                                  const next = new Set(prev);
-                                  next.has(ind.id) ? next.delete(ind.id) : next.add(ind.id);
-                                  return next;
-                                })}
-                                className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors text-left"
-                              >
-                                <div className="w-2.5 h-2.5 rounded-full border-2 flex items-center justify-center"
-                                  style={{ borderColor: ind.color, backgroundColor: activeIndicators.has(ind.id) ? ind.color : 'transparent' }}
-                                >
-                                  {activeIndicators.has(ind.id) && <div className="w-1 h-1 rounded-full bg-[#0f1520]" />}
-                                </div>
-                                <span className="text-xs font-mono" style={{ color: activeIndicators.has(ind.id) ? ind.color : '#9ca3af' }}>
-                                  {ind.label}
-                                </span>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => {
-                          const layouts = ["1-grid", "2-grid", "4-grid"];
-                          const currentIndex = layouts.indexOf(layout);
-                          const nextIndex = (currentIndex + 1) % layouts.length;
-                          setLayout(layouts[nextIndex]);
-                        }}
-                        className="workspace-chip"
-                      >
-                        Layouts
-                      </button>
+                    <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-[11px] font-semibold text-cyan-100">
+                      NIFTY 50{' '}
+                      {niftyQuote ? (
+                        <span className={niftyQuote.pos ? 'text-[#42C0A5]' : 'text-red-400'}>
+                          {niftyQuote.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}{' '}
+                          {niftyQuote.pos ? '+' : ''}{niftyQuote.pct}%
+                        </span>
+                      ) : (
+                        <span className="text-white/30 text-xs">Loading…</span>
+                      )}
                     </div>
                   </div>
-                  <SharedMultiChartGrid
-                    className="workspace-body"
-                    onOpenChart={(title) => {
-                      setExpandedChart(title);
-                      if (title) {
-                        setFocusedSymbol(title);
-                        setAsset(title, 'stock');
-                      }
-                    }}
-                    timeframe={timeframe}
-                    activeIndicators={activeIndicators}
-                    showGridLines={savedSettings?.display?.showGridLines ?? true}
-                    layout={layout}
-                  />
+                  <div className="min-h-[760px]">
+                    <MultiChartGrid useTradingView={true} />
+                  </div>
                 </section>
 
                 <section className="tr-surface-card tr-panel-shell tr-panel-shell--auto">
@@ -3128,7 +3079,7 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
                 </div>
 
                 <div className="tr-surface-card tr-panel-shell tr-panel-shell--sidebar">
-                  <ResearchToolPanel symbol={focusedSymbol || analysisSymbol || undefined} />
+                  <ResearchToolPanel />
                 </div>
 
                 <div className="tr-surface-card tr-panel-shell tr-panel-shell--sidebar">
@@ -3145,45 +3096,6 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
       </div>
       </div>
 
-
-      {expandedChart && (
-        <>
-          {/* Backdrop — fixed, full viewport, click to close */}
-          <div
-            className="chart-modal-backdrop"
-            onClick={() => setExpandedChart(null)}
-          />
-          {/* Centering shell */}
-          <div className="chart-modal">
-            <div
-              className="chart-modal-panel"
-              role="dialog"
-              aria-modal="true"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="chart-modal-header">
-                <div className="chart-modal-title">
-                  {expandedChart} — Full Screen
-                </div>
-                <button
-                  className="chart-modal-close"
-                  onClick={() => setExpandedChart(null)}
-                >
-                  Close
-                </button>
-              </div>
-              <div className="chart-modal-body" style={{ padding: 0 }}>
-                <AdvancedTradingChart
-                  symbol={resolveBackendSymbol(expandedChart)}
-                  initialTimeframe="D"
-                  height={680}
-                  showHeader={false}
-                />
-              </div>
-            </div>
-          </div>
-        </>
-      )}
 
     </MainLayout>
   );

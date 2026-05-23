@@ -1,4 +1,4 @@
-﻿import React, { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import {
   TrendingUp,
@@ -82,6 +82,13 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
     [stock.chart]
   );
 
+  const rrValue = useMemo(() => {
+    if (stock.entry && stock.target && stock.stopLoss && Math.abs(stock.entry - stock.stopLoss) > 0) {
+      return Math.abs((stock.target - stock.entry) / (stock.entry - stock.stopLoss)).toFixed(1);
+    }
+    return '-';
+  }, [stock.entry, stock.target, stock.stopLoss]);
+
   const getSignalIcon = () => {
     switch (stock.signal) {
       case 'BREAKOUT':
@@ -139,6 +146,9 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-bold text-white">{stock.symbol}</h3>
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                {stock.timeframe || '1D'}
+              </span>
               <span
                 className={`px-2 py-1 rounded text-xs font-semibold flex items-center gap-1 ${signalClasses.badge}`}
               >
@@ -149,6 +159,25 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
             <p className="text-xs text-slate-400 mt-0.5">{stock.name}</p>
           </div>
         </div>
+
+        {stock.riskFlags?.length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {stock.riskFlags.map((flag, i) => (
+              <div key={i} className="px-2 py-1 bg-rose-500/10 border border-rose-500/20 text-rose-300 text-[9px] uppercase font-bold rounded flex items-center gap-1">
+                {flag}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {stock.catalyst && (
+          <div className="mb-3">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[10px] uppercase font-bold w-full">
+              <Flame className="w-3 h-3" />
+              Catalyst: {stock.catalyst}
+            </span>
+          </div>
+        )}
 
         {}
         <div className="mb-4 pb-4 border-b border-slate-700/50">
@@ -188,26 +217,37 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
 
         {}
         <div className="mb-4 pb-4 border-b border-slate-700/50">
-          <div className="grid grid-cols-3 gap-2 text-xs">
+          <div className="grid grid-cols-4 gap-2 text-xs">
             <div>
-              <p className="text-slate-500 uppercase tracking-wide">Entry</p>
+              <p className="text-slate-500 uppercase tracking-wide text-[10px]">Entry</p>
               <p className="text-slate-100 font-semibold">₹{Number(stock.entry || stock.price).toFixed(2)}</p>
             </div>
             <div>
-              <p className="text-slate-500 uppercase tracking-wide">Target</p>
+              <p className="text-slate-500 uppercase tracking-wide text-[10px]">Target</p>
               <p className="text-slate-100 font-semibold">₹{Number(stock.target || stock.price).toFixed(2)}</p>
             </div>
             <div>
-              <p className="text-slate-500 uppercase tracking-wide">Stop Loss</p>
+              <p className="text-slate-500 uppercase tracking-wide text-[10px]">Stop Loss</p>
               <p className="text-slate-100 font-semibold">₹{Number(stock.stopLoss || stock.price).toFixed(2)}</p>
+            </div>
+            <div>
+              <p className="text-slate-500 uppercase tracking-wide text-[10px]">R:R</p>
+              <p className="text-cyan-300 font-semibold">{rrValue !== '-' ? `1 : ${rrValue}` : '-'}</p>
             </div>
           </div>
         </div>
 
-        {}
+        {/* Why this trade? */}
         <div className="mb-4 pb-4 border-b border-slate-700/50">
-          <p className="text-xs text-slate-400 mb-1">Research Signal</p>
-          <p className="text-xs text-slate-200">{stock.signalType}</p>
+          <p className="text-[10px] text-slate-400 mb-2 uppercase tracking-widest font-bold">Why this trade?</p>
+          <ul className="space-y-1.5 mb-3">
+            {stock.reasons?.map((reason, i) => (
+              <li key={i} className="flex items-start gap-2 text-xs text-slate-200">
+                <span className={`text-[10px] mt-0.5 ${signalClasses.signalText}`}>✓</span> 
+                <span className="leading-tight">{reason}</span>
+              </li>
+            ))}
+          </ul>
           <div className="mt-2 flex items-center gap-2">
             <div className="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
               <div
