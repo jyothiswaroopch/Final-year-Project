@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useContext, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Activity, Maximize2, TrendingDown, TrendingUp, Search, Newspaper, Globe, Zap, ExternalLink, Monitor } from "lucide-react";
 import { motion } from "framer-motion";
@@ -17,16 +17,23 @@ import {
 
 import { fetchPulse, fetchHeatmap } from "../api/analyticsApi";
 import { fetchTechnicalSummary, fetchBreakoutAlerts, fetchIndicatorSignals, fetchQuickOrderData, fetchWatchlistTechnicals } from "../api/technicalApi";
+import { useWatchlist } from "../context/WatchlistContext";
+import { fetchStockFundamentals } from "../api/fundamentalApi";
 import { fetchEconomicCalendar } from "../api/calendarApi";
 import { fetchPortfolio } from "../api/portfolioApi";
 import { fetchFnoDashboard } from "../api/fnoApi";
 import { fetchMarketHistory, fetchMarketNews } from "../api/marketApi";
 import { useAsset } from "../context/AssetContext";
+import { SettingsContext } from "../context/SettingsContext";
+import SharedMultiChartGrid from "../components/trader/MultiChartGrid";
+import AdvancedTradingChart from "../components/trader/AdvancedTradingChart";
 import SharedAdvancedWatchlist from "../components/trader/AdvancedWatchlist";
+import EnhancedStockScreener from "../components/trader/EnhancedStockScreener";
+import MultiChartWorkspace from "../components/trader/MultiChartWorkspace"; // TRADINGVIEW MULTI-CHART
 import RealTimeScanner from "../components/trader/RealTimeScanner"; // TRADINGVIEW SCANNER
-import MultiChartGrid from "../components/trader/MultiChartGrid";
 import MainLayout from "../components/layout/MainLayout";
 import MarketTicker from "../components/dashboard/MarketTicker";
+import TraderStockPage from "./TraderStockPage"; 
 import TraderProfilePage from "./traderProfile/TraderProfilePage";
 import SettingsPage from "./settings/SettingsPage";
 import TraderHelpSupportPage from "./support/HelpSupportPage";
@@ -137,13 +144,6 @@ const formatCalendarDate = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
-};
-
-const getCalendarDateKey = (value) => {
-  if (!value) return "unknown";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return String(value);
-  return date.toISOString().slice(0, 10);
 };
 
 const formatNewsTime = (value) => {
@@ -1562,28 +1562,6 @@ const CatalystPanel = () => {
   const [eventsSource, setEventsSource] = useState("none");
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
-  const groupedEvents = useMemo(() => {
-    const groups = [];
-    const groupMap = new Map();
-
-    for (const event of events) {
-      const dateKey = getCalendarDateKey(event?.date);
-      if (!groupMap.has(dateKey)) {
-        const nextGroup = {
-          key: dateKey,
-          label: formatCalendarDate(event?.date),
-          items: [],
-        };
-        groupMap.set(dateKey, nextGroup);
-        groups.push(nextGroup);
-      }
-
-      groupMap.get(dateKey).items.push(event);
-    }
-
-    return groups;
-  }, [events]);
-  const trustedCount = events.filter((event) => event?.verificationLevel && event.verificationLevel !== "none").length;
 
   useEffect(() => {
     let isMounted = true;
@@ -1599,11 +1577,10 @@ const CatalystPanel = () => {
           const sourceEvents = Array.isArray(response) ? response : [];
           const validEvents = sourceEvents.filter((item) => item?.event && item?.date);
           const verifiedEvents = validEvents.filter((item) => item?.factual === true || String(item?.source || "").toLowerCase().includes("tradingeconomics"));
-          const nextEvents = verifiedEvents.length > 0 ? verifiedEvents : validEvents;
 
-          if (nextEvents.length > 0) {
-            setEvents(nextEvents.slice(0, 6));
-            setEventsSource(verifiedEvents.length > 0 ? "verified" : "fallback");
+          if (verifiedEvents.length > 0) {
+            setEvents(verifiedEvents.slice(0, 6));
+            setEventsSource("verified");
           } else {
             setEvents([]);
             setEventsSource("none");
@@ -1648,7 +1625,7 @@ const CatalystPanel = () => {
         </div>
       </div>
       <div className="flex items-center gap-2">
-        <span className="tr-pill text-[#f0b429] bg-[#f0b429]/10">{groupedEvents.length ? `${groupedEvents.length} DATE${groupedEvents.length === 1 ? "" : "S"}` : "NO FEED"}</span>
+        <span className="tr-pill text-[#f0b429] bg-[#f0b429]/10">{events.length ? formatCalendarDate(events[0]?.date) : "NO FEED"}</span>
       </div>
     </div>
 
@@ -1660,97 +1637,64 @@ const CatalystPanel = () => {
       {!isLoading && !hasError && events.length === 0 && (
         <div className="text-[12px] text-[#5d606b] font-mono uppercase tracking-wider">No verified catalyst events available.</div>
       )}
-      {groupedEvents.map((group) => (
-        <div key={group.key} className="space-y-1.5">
-          <div className="flex items-center justify-between px-1 pt-1">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-[#5d606b]">{group.label}</span>
-            <span className="text-[10px] text-[#5d606b]">{group.items.filter((event) => event?.verificationLevel && event.verificationLevel !== "none").length}/{group.items.length} trusted</span>
-          </div>
-          {group.items.map((item, idx) => {
-            const impactColor = getImpactColor(item.impact);
-            const isHighImpact = String(item.impact).toLowerCase().includes("high");
-            const verificationLevel = item?.verificationLevel || (item?.verified ? "strong" : "none");
-            const verificationLabel = verificationLevel === "strong" ? "VERIFIED" : verificationLevel === "source" ? "SOURCE" : null;
-            const verificationColor = verificationLevel === "strong" ? "#42C0A5" : verificationLevel === "source" ? "#5ca7ff" : null;
-            const metadata = [
-              item?.country ? String(item.country).toUpperCase() : null,
-              item?.source ? String(item.source) : null,
-              item?.actual && item.actual !== "-" ? `Actual ${item.actual}` : null,
-              item?.forecast && item.forecast !== "-" ? `Forecast ${item.forecast}` : null,
-              item?.previous && item.previous !== "-" ? `Prev ${item.previous}` : null,
-            ].filter(Boolean).join(" | ");
-            const relatedSymbols = isHighImpact && item?.influencesTrending && Array.isArray(item?.relatedSymbols)
-              ? item.relatedSymbols.slice(0, 2)
-              : [];
-
-            return (
-              <div
-                key={`${group.key}-${idx}`}
-                className="rounded-lg p-2.5 transition-all cursor-pointer"
-                style={{
-                  background: '#131722',
-                  borderTop: `1px solid ${impactColor}30`,
-                  borderRight: `1px solid ${impactColor}30`,
-                  borderBottom: `1px solid ${impactColor}30`,
-                  borderLeft: `3px solid ${impactColor}`,
-                }}
-              >
-                <div className="flex items-start gap-2">
-                  <span className="text-base mt-0.5 flex-shrink-0">{String(item.impact).toLowerCase().includes("high") ? "[!]" : String(item.impact).toLowerCase().includes("med") ? "[~]" : "[i]"}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start gap-1">
-                      <span className="text-[15px] text-white font-semibold leading-tight">{item.event}</span>
-                      <span
-                        className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
-                        style={{ color: impactColor, background: `${impactColor}18` }}
-                      >
-                        {item.impact}
-                      </span>
-                      {verificationLabel ? (
-                        <span
-                          className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
-                          style={{ color: verificationColor, background: `${verificationColor}18` }}
-                        >
-                          {verificationLabel}
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className="text-[11px] font-mono text-[#7b8190]">{formatCalendarDate(item.date)}</span>
-                      {metadata ? (
-                        <>
-                          <span className="text-[#2a2e39]">|</span>
-                          <span className="text-[11px] text-[#7b8190]">{metadata}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-[#2a2e39]">|</span>
-                          <span className="text-[11px] text-[#7b8190]">Event schedule</span>
-                        </>
-                      )}
-                    </div>
-                    {relatedSymbols.length > 0 ? (
-                      <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
-                        <span className="text-[10px] uppercase tracking-wider text-[#5d606b]">Influences market</span>
-                        {relatedSymbols.map((symbol) => (
-                          <span key={symbol} className="text-[10px] font-bold px-1.5 py-0.5 rounded text-[#c2c8d7] bg-white/5 border border-white/10">
-                            {symbol}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
+      {events.map((item, idx) => {
+        const impactColor = getImpactColor(item.impact);
+        const metadata = [
+          item?.country ? String(item.country).toUpperCase() : null,
+          item?.actual && item.actual !== "-" ? `Actual ${item.actual}` : null,
+          item?.forecast && item.forecast !== "-" ? `Forecast ${item.forecast}` : null,
+          item?.previous && item.previous !== "-" ? `Prev ${item.previous}` : null,
+        ].filter(Boolean).join(" | ");
+        return (
+        <div
+          key={idx}
+          className="rounded-lg p-2.5 transition-all cursor-pointer"
+          style={{
+            background: '#131722',
+            borderTop: `1px solid ${impactColor}30`,
+            borderRight: `1px solid ${impactColor}30`,
+            borderBottom: `1px solid ${impactColor}30`,
+            borderLeft: `3px solid ${impactColor}`,
+          }}
+        >
+          <div className="flex items-start gap-2">
+            <span className="text-base mt-0.5 flex-shrink-0">{String(item.impact).toLowerCase().includes("high") ? "[!]" : String(item.impact).toLowerCase().includes("med") ? "[~]" : "[i]"}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex justify-between items-start gap-1">
+                <span className="text-[15px] text-white font-semibold leading-tight">{item.event}</span>
+                <span
+                  className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0"
+                  style={{ color: impactColor, background: `${impactColor}18` }}
+                >
+                  {item.impact}
+                </span>
+                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 text-[#42C0A5] bg-[#42C0A5]/15">
+                  VERIFIED
+                </span>
               </div>
-            );
-          })}
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+                <span className="text-[11px] font-mono text-[#7b8190]">{formatCalendarDate(item.date)}</span>
+                {metadata ? (
+                  <>
+                    <span className="text-[#2a2e39]">|</span>
+                    <span className="text-[11px] text-[#7b8190]">{metadata}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-[#2a2e39]">|</span>
+                    <span className="text-[11px] text-[#7b8190]">Verified event schedule</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      ))}
+      )})}
     </div>
 
     {}
     <div className="px-2.5 py-1.5 border-t border-white/10 flex justify-between items-center" style={{ background: 'rgba(255,255,255,0.04)' }}>
-      <span className="text-[11px] text-[#5d606b]">{events.length} events • {trustedCount} trusted</span>
+      <span className="text-[11px] text-[#5d606b]">{events.length} {eventsSource === "verified" ? "verified" : "loaded"} events</span>
       <div className="flex items-center gap-2 text-[11px]">
         <span className="text-[#ed5750] font-bold">{events.filter((event) => String(event.impact).toLowerCase().includes("high")).length} HIGH</span>
         <span className="text-[#f0b429] font-bold">{events.filter((event) => String(event.impact).toLowerCase().includes("med")).length} MED</span>
@@ -1764,140 +1708,41 @@ const CatalystPanel = () => {
 
 const TechnicalScreeners = () => {
   const [activeTab, setActiveTab] = useState("BREAKOUT");
-  const [breakoutAlerts, setBreakoutAlerts] = useState([]);
-  const [indicatorSignals, setIndicatorSignals] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasBreakoutError, setHasBreakoutError] = useState(false);
-  const [hasSignalsError, setHasSignalsError] = useState(false);
+  const { rows, loading } = useWatchlist();
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    let isMounted = true;
+  // Filter watchlist rows for breakout signals
+  const watchlistBreakouts = rows.filter(row => {
+    return row.signals?.includes('Breakout Ready') || row.signals?.includes('Volume Spike') || row.signals?.includes('Intraday Strength') || row.changePercent > 1.5;
+  });
 
-    const loadScreeners = async (silent = false) => {
-      try {
-        if (ENABLE_SIMULATION_MODE) {
-           if (!silent) setIsLoading(true);
-           setTimeout(() => {
-             if (isMounted) {
-               setBreakoutAlerts([
-                 { symbol: "RELIANCE", type: "Channel Breakout", price: 2845, time: "11:20" },
-                 { symbol: "TCS", type: "Moving Average Cross", price: 3910, time: "10:45" },
-               ]);
-               setIndicatorSignals([
-                 { symbol: "RSI Bullish", value: "Oversold", stocks: ["HDFCBANK", "SBIN"] },
-                 { symbol: "Golden Cross", value: "EMA 50/200", stocks: ["INFY", "LT"] },
-               ]);
-               setHasBreakoutError(false);
-               setHasSignalsError(false);
-               if (!silent) setIsLoading(false);
-             }
-           }, 700);
-           return;
-        }
+  const displayBreakouts = watchlistBreakouts.length > 0 ? watchlistBreakouts : rows;
 
-        if (!silent) {
-          setIsLoading(true);
-        }
-        setHasBreakoutError(false);
-        setHasSignalsError(false);
-        const [alertsResponse, signalsResponse] = await Promise.allSettled([
-          fetchBreakoutAlerts(),
-          fetchIndicatorSignals(),
-        ]);
-
-        const normalizeBreakouts = (payload) => {
-          const source = Array.isArray(payload)
-            ? payload
-            : Array.isArray(payload?.data)
-              ? payload.data
-              : Array.isArray(payload?.alerts)
-                ? payload.alerts
-                : [];
-
-          return source
-            .map((item) => {
-              const symbol = normalizeDisplaySymbol(item?.symbol || item?.ticker || item?.name);
-              if (!symbol) return null;
-
-              const rawPrice = Number(item?.price ?? item?.ltp ?? item?.value);
-
-              return {
-                symbol,
-                type: String(item?.type || item?.signal || item?.pattern || "Signal"),
-                price: Number.isFinite(rawPrice) && rawPrice > 0 ? rawPrice : null,
-                time: item?.time || item?.timestamp || item?.date || null,
-              };
-            })
-            .filter(Boolean);
-        };
-
-        const normalizeSignals = (payload) => {
-          const source = Array.isArray(payload)
-            ? payload
-            : Array.isArray(payload?.data)
-              ? payload.data
-              : Array.isArray(payload?.signals)
-                ? payload.signals
-                : [];
-
-          return source
-            .map((item) => {
-              const label = String(item?.symbol || item?.name || item?.signal || "").trim();
-              if (!label) return null;
-
-              const stocks = Array.isArray(item?.stocks)
-                ? item.stocks.map((stock) => normalizeDisplaySymbol(stock)).filter(Boolean)
-                : item?.stock
-                  ? [normalizeDisplaySymbol(item.stock)].filter(Boolean)
-                  : [];
-
-              return {
-                symbol: label,
-                value: String(item?.value || item?.type || item?.description || "Signal"),
-                stocks,
-              };
-            })
-            .filter(Boolean);
-        };
-
-        if (isMounted) {
-          const nextBreakouts = alertsResponse.status === "fulfilled"
-            ? normalizeBreakouts(alertsResponse.value)
-            : [];
-          const nextSignals = signalsResponse.status === "fulfilled"
-            ? normalizeSignals(signalsResponse.value)
-            : [];
-
-          setBreakoutAlerts(nextBreakouts);
-          setIndicatorSignals(nextSignals);
-          setHasBreakoutError(alertsResponse.status === "rejected");
-          setHasSignalsError(signalsResponse.status === "rejected");
-        }
-      } catch (error) {
-        console.error("Failed to load technical screeners:", error);
-        if (isMounted) {
-          setBreakoutAlerts([]);
-          setIndicatorSignals([]);
-          setHasBreakoutError(true);
-          setHasSignalsError(true);
-        }
-      } finally {
-        if (isMounted && !silent) {
-          setIsLoading(false);
+  const watchlistIndicators = [];
+  rows.forEach(row => {
+    const signals = row.signals && row.signals.length > 0 ? row.signals : [row.technicalSignal || 'Neutral Trend'];
+    signals.forEach(sig => {
+      let confidence = 75;
+      if (row.rsi) {
+        if (sig.includes('RSI')) {
+          confidence = row.rsi > 50 ? Math.round(row.rsi) : Math.round(100 - row.rsi);
+        } else if (sig.includes('Breakout')) {
+          confidence = 85;
+        } else if (sig.includes('Volume')) {
+          confidence = 80;
         }
       }
-    };
+      watchlistIndicators.push({
+        symbol: row.symbol,
+        signalType: sig,
+        confidence: Math.max(50, Math.min(99, confidence)),
+        timestamp: row.lastUpdated ? new Date(row.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+    });
+  });
 
-    loadScreeners(false);
-    const intervalId = setInterval(() => {
-      loadScreeners(true);
-    }, 30000);
-
-    return () => {
-      isMounted = false;
-      clearInterval(intervalId);
-    };
-  }, []);
+  // Sort indicators by confidence descending
+  watchlistIndicators.sort((a, b) => b.confidence - a.confidence);
 
   return (
     <div className="tr-card flex flex-col h-full overflow-hidden">
@@ -1925,72 +1770,78 @@ const TechnicalScreeners = () => {
       <div className="flex-1 overflow-y-auto custom-scrollbar p-1">
         {activeTab === "BREAKOUT" ? (
           <div className="space-y-1">
-            <div className="px-2 py-1 text-[10px] uppercase tracking-[0.18em] text-slate-500">Watchlist-driven breakout scan</div>
-            {isLoading && (
-              <div className="text-[#9194a2] text-sm text-center py-4">Loading live breakout alerts...</div>
+            {loading && rows.length === 0 && (
+              <div className="text-[#9194a2] text-sm text-center py-4">Scanning watchlist breakouts...</div>
             )}
-            {!isLoading && breakoutAlerts.length === 0 && (
-              <div className="text-[#9194a2] text-sm text-center py-4">{hasBreakoutError ? "Unable to load breakout alerts." : "No breakout alerts yet. Add symbols to your watchlist or wait for the next scan."}</div>
+            {!loading && rows.length === 0 && (
+              <div className="text-[#9194a2] text-sm text-center py-4">No stocks tracked in your watchlist.</div>
             )}
-            {breakoutAlerts.map((item, k) => (
+            {displayBreakouts.map((item, k) => (
               <div
                 key={k}
-                className="flex justify-between items-center p-2.5 rounded hover:bg-white/10/50 text-xs border-b border-white/10/30 cursor-pointer"
-                onClick={() => navigate(`/stocks/${item.symbol}`)}
+                className="flex justify-between items-center p-2.5 rounded hover:bg-white/5 text-xs border-b border-white/5 cursor-pointer transition-all"
+                onClick={() => navigate(`/stocks/${encodeURIComponent(item.symbol)}`)}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-[#5d606b] font-mono text-xs">
-                    {item.time || "--"}
+                  <span className="text-[#5d606b] font-mono text-[10px]">
+                    {item.lastUpdated ? new Date(item.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "--"}
                   </span>
                   <span className="font-bold text-[#e2e8f0] text-sm w-24">
                     {item.symbol}
                   </span>
-                  <span className="text-[#9194a2] text-xs bg-white/10 px-2 py-0.5 rounded">
-                    {item.type}
+                  <span className="text-cyan-300 text-[10px] bg-cyan-950/40 border border-cyan-800/30 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+                    {item.signals?.find(s => s.includes('Breakout') || s.includes('Spike')) || item.technicalSignal || 'Bullish'}
                   </span>
                 </div>
-                <span className={`font-mono font-bold text-sm ${(item.type || "").toLowerCase().includes("support") ? "text-[#ed5750]" : "text-[#42C0A5]"}`}>
-                  {Number.isFinite(item.price) ? `₹${Number(item.price).toLocaleString()}` : "--"}
-                </span>
+                <div className="text-right">
+                  <span className={`font-mono font-bold text-sm ${item.changePercent >= 0 ? "text-[#42C0A5]" : "text-rose-400"}`}>
+                    {Number.isFinite(item.price) ? `₹${Number(item.price).toLocaleString('en-IN', { minimumFractionDigits: 2 })}` : "--"}
+                  </span>
+                  <span className={`text-[9px] font-bold block ${item.changePercent >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                    {item.changePercent >= 0 ? '+' : ''}{item.changePercent?.toFixed(2)}%
+                  </span>
+                </div>
               </div>
             ))}
           </div>
         ) : (
           <div className="space-y-1">
-            {isLoading ? (
-              <div className="text-[#9194a2] text-sm text-center py-4">
-                Scanning active markets...
-              </div>
-            ) : (
-              indicatorSignals.length === 0 ? (
-                <div className="text-[#9194a2] text-sm text-center py-4">{hasSignalsError ? "Unable to load indicator signals." : "No indicator signals yet. Add symbols to your watchlist or wait for the next scan."}</div>
-              ) : (
-              <>
-              {indicatorSignals.map((item, index) => (
-                <div
-                  key={`${item.symbol}-${index}`}
-                  className="flex justify-between items-center p-2.5 rounded hover:bg-white/10/50 text-xs border-b border-white/10/30"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-[#e2e8f0] text-sm w-24">
-                      {item.symbol}
-                    </span>
-                    <span className="text-[#9194a2] text-xs bg-white/10 px-2 py-0.5 rounded">
-                      {item.value}
-                    </span>
-                  </div>
-                  <div className="text-[#42C0A5] font-mono font-bold text-xs text-right flex flex-wrap gap-1">
-                    {(item.stocks || []).length ? (item.stocks || []).map(s => (
-                      <span key={s} onClick={(e) => { e.stopPropagation(); navigate(`/stocks/${s}`); }} className="hover:underline cursor-pointer">
-                        {s}
-                      </span>
-                    )) : "--"}
+            {loading && rows.length === 0 && (
+              <div className="text-[#9194a2] text-sm text-center py-4">Scanning active markets...</div>
+            )}
+            {!loading && rows.length === 0 && (
+              <div className="text-[#9194a2] text-sm text-center py-4">No active signals. Add stocks to watchlist.</div>
+            )}
+            {watchlistIndicators.map((item, index) => (
+              <div
+                key={`${item.symbol}-${index}`}
+                className="flex justify-between items-center p-2.5 rounded hover:bg-white/5 text-xs border-b border-white/5 cursor-pointer transition-all"
+                onClick={() => navigate(`/stocks/${encodeURIComponent(item.symbol)}`)}
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[#5d606b] font-mono text-[10px]">
+                    {item.timestamp}
+                  </span>
+                  <span className="font-bold text-[#e2e8f0] text-sm w-24">
+                    {item.symbol}
+                  </span>
+                  <span className="text-amber-300 text-[10px] bg-amber-950/40 border border-amber-800/30 px-2 py-0.5 rounded font-bold uppercase tracking-wider">
+                    {item.signalType}
+                  </span>
+                </div>
+                <div className="text-right flex flex-col items-end">
+                  <span className="text-slate-300 font-mono font-bold text-[11px]">
+                    Conf: {item.confidence}%
+                  </span>
+                  <div className="w-16 bg-white/5 h-1 rounded-full overflow-hidden mt-1">
+                    <div 
+                      className={`h-full ${item.confidence > 80 ? 'bg-emerald-400' : 'bg-cyan-400'}`} 
+                      style={{ width: `${item.confidence}%` }} 
+                    />
                   </div>
                 </div>
-              ))}
-              </>
-              )
-            )}
+              </div>
+            ))}
           </div>
         )}
       </div>
@@ -2294,45 +2145,43 @@ const NewsFlash = ({ variant = "full" }) => {
   const [search, setSearch] = useState("");
   const [activeFeed, setActiveFeed] = useState("All");
   const [activeNewsMode, setActiveNewsMode] = useState("Headline Stream");
+  const [region, setRegion] = useState(() => localStorage.getItem('trader_news_region') || 'IN');
+
+  const loadNews = useCallback(async (silent = false) => {
+    try {
+      if (!silent) {
+        setIsLoading(true);
+      }
+      const response = await fetchMarketNews({ region });
+      setNewsItems(
+        Array.isArray(response) && response.length
+          ? response
+          : NEWS_FALLBACK_ITEMS
+      );
+    } catch (error) {
+      console.error("Failed to load market news:", error);
+      setNewsItems(NEWS_FALLBACK_ITEMS);
+    } finally {
+      if (!silent) {
+        setIsLoading(false);
+      }
+    }
+  }, [region]);
 
   useEffect(() => {
     let isMounted = true;
-
-    const loadNews = async (silent = false) => {
-      try {
-        if (!silent) {
-          setIsLoading(true);
-        }
-        const response = await fetchMarketNews();
-        if (isMounted) {
-          setNewsItems(
-            Array.isArray(response) && response.length
-              ? response
-              : NEWS_FALLBACK_ITEMS
-          );
-        }
-      } catch (error) {
-        console.error("Failed to load market news:", error);
-        if (isMounted) {
-          setNewsItems(NEWS_FALLBACK_ITEMS);
-        }
-      } finally {
-        if (isMounted && !silent) {
-          setIsLoading(false);
-        }
-      }
-    };
-
     loadNews(false);
     const intervalId = setInterval(() => {
-      loadNews(true);
+      if (isMounted) {
+        loadNews(true);
+      }
     }, 60000);
 
     return () => {
       isMounted = false;
       clearInterval(intervalId);
     };
-  }, []);
+  }, [loadNews]);
 
   const sourceStatsMap = {};
   (newsItems || []).forEach((item) => {
@@ -2378,7 +2227,14 @@ const NewsFlash = ({ variant = "full" }) => {
     ? (sourceStats.reduce((acc, item) => acc + item.value, 0) / sourceStats.length).toFixed(1)
     : "0.0";
   const handleNewsClick = (newsItem) => {
-    navigate("/news", { state: { selectedNews: newsItem } });
+    const url = String(newsItem?.url || '').trim();
+    if (!url || url === '#') return;
+    window.open(url, '_blank', 'noopener');
+  };
+
+  const handleRegionChange = (nextRegion) => {
+    setRegion(nextRegion);
+    localStorage.setItem('trader_news_region', nextRegion);
   };
 
   if (variant === "compact") {
@@ -2396,16 +2252,9 @@ const NewsFlash = ({ variant = "full" }) => {
                 <div className="mt-0.5 text-[10px] uppercase tracking-[0.22em] text-slate-400">Desk feed</div>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => navigate("/news")}
-              className="inline-flex items-center gap-1.5 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-cyan-100 transition-all hover:border-cyan-300/40 hover:bg-cyan-300/15 hover:text-white"
-            >
-              View All <ExternalLink size={12} />
-            </button>
           </div>
 
-          <div className="mt-3 flex items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
             <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-slate-200">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.7)]" />
               Live
@@ -2413,6 +2262,26 @@ const NewsFlash = ({ variant = "full" }) => {
             <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-slate-300">{filtered.length} stories</span>
             <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-slate-300">{sourceStats.length} sources</span>
             <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-slate-300">{headline ? formatNewsTime(headline.publishedAt) : "--:--"}</span>
+            <div className="ml-auto inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
+              <button
+                type="button"
+                onClick={() => handleRegionChange('IN')}
+                className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-all ${region === 'IN'
+                  ? "bg-amber-400/20 text-amber-100"
+                  : "text-slate-300 hover:text-slate-100"}`}
+              >
+                India
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRegionChange('GLOBAL')}
+                className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-all ${region === 'GLOBAL'
+                  ? "bg-cyan-400/20 text-cyan-100"
+                  : "text-slate-300 hover:text-slate-100"}`}
+              >
+                Global
+              </button>
+            </div>
           </div>
 
           <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-2.5">
@@ -2497,35 +2366,7 @@ const NewsFlash = ({ variant = "full" }) => {
   return (
     <div className="w-full min-h-screen px-6 py-6 text-[#dce9ff]">
       <div className="space-y-6">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-200">
-              <Newspaper size={12} /> News Research Feed
-            </div>
-            <h3 className="mt-3 text-[30px] font-black tracking-tight text-white md:text-[34px]">Research News Terminal</h3>
-            <p className="mt-1 text-sm text-slate-300">High-signal headlines and catalyst-aware monitoring for deep market research.</p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 text-[11px] uppercase tracking-[0.18em] text-slate-300">
-            {NEWS_VIEW_MODES.map((mode) => (
-              <button
-                key={mode}
-                type="button"
-                onClick={() => setActiveNewsMode(mode)}
-                className={`rounded-full border px-3 py-1.5 transition-all ${activeNewsMode === mode
-                  ? mode === "Source Radar"
-                    ? "border-cyan-400/30 bg-cyan-400/10 text-cyan-100"
-                    : mode === "Catalyst Watch"
-                      ? "border-violet-400/30 bg-violet-400/12 text-violet-100"
-                      : "border-white/20 bg-white/10 text-slate-100"
-                  : "border-white/10 bg-white/5 text-slate-300 hover:border-cyan-300/25 hover:bg-cyan-400/8"
-                  }`}
-              >
-                {mode}
-              </button>
-            ))}
-          </div>
-        </div>
+        <div className="flex items-start justify-between gap-4 flex-wrap"></div>
 
         <div className="grid gap-3 xl:grid-cols-[minmax(0,1fr)_auto] xl:items-center border-b border-white/5 pb-4">
           <div className="flex items-center gap-2 overflow-x-auto pb-1">
@@ -2542,13 +2383,26 @@ const NewsFlash = ({ variant = "full" }) => {
           </div>
 
           <div className="flex items-center gap-2 flex-wrap xl:justify-end">
-            <button
-              type="button"
-              onClick={() => navigate("/news")}
-              className="inline-flex h-9 items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 text-[11px] font-semibold text-slate-100 hover:border-sky-300/30 hover:bg-sky-400/10"
-            >
-              <ExternalLink size={12} /> Open Full News
-            </button>
+            <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1">
+              <button
+                type="button"
+                onClick={() => handleRegionChange('IN')}
+                className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-all ${region === 'IN'
+                  ? "bg-amber-400/20 text-amber-100"
+                  : "text-slate-300 hover:text-slate-100"}`}
+              >
+                India
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRegionChange('GLOBAL')}
+                className={`rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] transition-all ${region === 'GLOBAL'
+                  ? "bg-cyan-400/20 text-cyan-100"
+                  : "text-slate-300 hover:text-slate-100"}`}
+              >
+                Global
+              </button>
+            </div>
             <div className="relative">
               <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[#7f95b8]" />
               <input
@@ -2561,28 +2415,11 @@ const NewsFlash = ({ variant = "full" }) => {
           </div>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-          <div className="rounded-2xl border border-white/5 bg-[linear-gradient(145deg,rgba(5,150,105,0.24),rgba(3,105,161,0.14))] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.25)]">
-            <div className="text-[10px] uppercase tracking-[0.22em] text-emerald-200/75">Top Source</div>
-            <div className="mt-2 text-2xl font-black text-white">{sourceStats[0]?.name || "--"}</div>
-            <div className="mt-1 text-sm text-emerald-100/90">{sourceStats[0]?.value || 0} stories</div>
-          </div>
-          <div className="rounded-2xl border border-white/5 bg-[linear-gradient(145deg,rgba(29,78,216,0.24),rgba(15,118,110,0.12))] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.25)]">
-            <div className="text-[10px] uppercase tracking-[0.22em] text-sky-200/75">Headline Pool</div>
-            <div className="mt-2 text-2xl font-black text-white">{filtered.length}</div>
-            <div className="mt-1 text-sm text-sky-100/90">active filtered rows</div>
-          </div>
-          <div className="rounded-2xl border border-white/5 bg-[linear-gradient(145deg,rgba(185,28,28,0.24),rgba(88,28,135,0.12))] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.25)]">
-            <div className="text-[10px] uppercase tracking-[0.22em] text-rose-200/75">Source Breadth</div>
-            <div className="mt-2 text-2xl font-black text-white">{sourceStats.length}</div>
-            <div className="mt-1 text-sm text-rose-100/90">unique sources</div>
-          </div>
-          <div className="rounded-2xl border border-white/5 bg-white/[0.03] p-4 shadow-[0_16px_40px_rgba(0,0,0,0.25)]">
-            <div className="text-[10px] uppercase tracking-[0.22em] text-slate-300">Avg / Source</div>
-            <div className="mt-2 text-2xl font-black text-white">{avgPerSource}</div>
-            <div className="mt-1 text-sm text-slate-400">story concentration</div>
-          </div>
-        </div>
+        <p className="mt-2 inline-flex items-center rounded-full bg-amber-100/15 text-amber-200 border border-amber-300/30 px-3 py-1 text-[11px] font-bold shadow-sm">
+          Note: free sources prioritized; extended coverage available via paid APIs.
+        </p>
+
+        {/* Top Source / Source Breadth / Avg per Source cards removed */}
 
         <div className="grid grid-cols-12 gap-6 mt-6">
           <div className="col-span-12 xl:col-span-8 min-h-0">
@@ -2631,28 +2468,7 @@ const NewsFlash = ({ variant = "full" }) => {
                 <p className="mt-2 text-sm leading-relaxed text-[#9fb2cf]">{headline ? `${headline.source || "Radar"} at ${formatNewsTime(headline.publishedAt)}` : "Use the feed to inspect the strongest market stories."}</p>
               </div>
 
-              <div className="rounded-xl border border-white/5 bg-white/[0.03] p-3">
-                <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Source Breakdown</div>
-                <div className="mt-2 space-y-2">
-                  {sourceStats.length > 0 ? sourceStats.map((item) => (
-                    <button
-                      key={item.name}
-                      type="button"
-                      onClick={() => {
-                        setActiveFeed(item.name);
-                        setActiveNewsMode("Source Radar");
-                      }}
-                      className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-[12px] transition-all ${activeFeed === item.name
-                        ? "bg-cyan-400/12 text-cyan-100"
-                        : "text-[#9fb2cf] hover:bg-white/5"
-                        }`}
-                    >
-                      <span>{item.name}</span>
-                      <span className="font-semibold text-[#dbeafe]">{item.value}</span>
-                    </button>
-                  )) : <div className="text-[11px] text-[#7f95b8]">No source stats yet.</div>}
-                </div>
-              </div>
+              {/* Source Breakdown removed */}
 
               <div className="rounded-xl border border-white/5 bg-white/[0.03] p-3">
                 <div className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">Research Cue</div>
@@ -2674,52 +2490,59 @@ const SIGNAL_COLOR = { BUY: 'text-emerald-400', SELL: 'text-rose-400', NEUTRAL: 
 const SIGNAL_BG   = { BUY: 'bg-emerald-500/10 border-emerald-500/30', SELL: 'bg-rose-500/10 border-rose-500/30', NEUTRAL: 'bg-amber-500/10 border-amber-500/30', HOLD: 'bg-amber-500/10 border-amber-500/30' };
 
 const ResearchToolPanel = ({ symbol: symbolProp } = {}) => {
-  const { activeSymbol, setAsset } = useAsset();
-  // Prefer the explicit prop (set by parent when a stock is clicked/selected);
-  // fall back to the context value which is updated by other parts of the app.
-  const raw = symbolProp || activeSymbol || '';
+  const { activeSymbol } = useAsset();
+  const { rows, selectedSymbol } = useWatchlist();
+  
+  // Prefer selected symbol from watchlist, then prop, then context asset
+  const raw = selectedSymbol || symbolProp || activeSymbol || '';
   const sym = raw.replace(/\.(NS|BO)$/i, '');
 
   const [tech, setTech]         = useState(null);
+  const [fundamentals, setFundamentals] = useState(null);
   const [techLoading, setTL]    = useState(false);
+  const [fundLoading, setFL]    = useState(false);
   const [activeTab, setActiveTab] = useState('signals'); // 'signals' | 'links' | 'ratios'
 
-  // Load technical summary whenever symbol changes
+  // Load technical summary and fundamentals whenever symbol changes
   useEffect(() => {
     if (!sym) return;
     let alive = true;
     setTL(true);
+    setFL(true);
+
     fetchTechnicalSummary('STOCK', sym)
       .then(d => { if (alive) setTech(d); })
       .catch(() => {})
       .finally(() => { if (alive) setTL(false); });
+
+    fetchStockFundamentals(sym)
+      .then(d => { if (alive) setFundamentals(d); })
+      .catch(() => {})
+      .finally(() => { if (alive) setFL(false); });
+
     return () => { alive = false; };
   }, [sym]);
 
-  const overall   = tech?.overall  || tech?.recommendation || '—';
-  const rsi       = Number(tech?.rsi ?? tech?.indicators?.rsi ?? 0);
-  const macd      = tech?.macd     || tech?.indicators?.macd || null;
-  const trend     = tech?.trend    || tech?.indicators?.trend || '—';
-  const support   = Number(tech?.support  ?? tech?.levels?.support  ?? 0);
+  // Try to find the symbol in watchlist rows first for real-time sync
+  const watchlistRow = rows.find(r => r.symbol.toUpperCase() === sym.toUpperCase() || r.symbol.toUpperCase().replace(/\.(NS|BO)$/i, '') === sym.toUpperCase());
+
+  const overall   = watchlistRow?.technicalSignal || tech?.overall || tech?.recommendation || '—';
+  const rsi       = Number(watchlistRow?.rsi ?? tech?.rsi ?? tech?.indicators?.rsi ?? 0);
+  const macdVal   = watchlistRow?.macd ?? tech?.macd ?? tech?.indicators?.macd;
+  const trend     = watchlistRow?.trend ?? tech?.trend ?? tech?.indicators?.trend ?? '—';
+  const rvol      = Number(watchlistRow?.rvol ?? tech?.rvol ?? tech?.indicators?.rvol ?? 1.0);
+  const vwap      = Number(watchlistRow?.vwap ?? tech?.vwap ?? tech?.indicators?.vwap ?? 0);
+  const price     = Number(watchlistRow?.price ?? tech?.price ?? tech?.indicators?.price ?? 0);
+
+  const support   = Number(tech?.support ?? tech?.levels?.support ?? 0);
   const resist    = Number(tech?.resistance ?? tech?.levels?.resistance ?? 0);
-  const momentum  = tech?.momentum || tech?.indicators?.momentum || '—';
+  const momentum  = watchlistRow?.momentum ?? tech?.momentum ?? tech?.indicators?.momentum ?? '—';
 
   const overallKey = String(overall).toUpperCase();
   const sigColor   = SIGNAL_COLOR[overallKey] || 'text-slate-300';
   const sigBg      = SIGNAL_BG[overallKey]    || 'bg-white/5 border-white/10';
 
-  // External links
-  const nseBase   = `https://www.nseindia.com/get-quotes/equity?symbol=${encodeURIComponent(sym)}`;
-  const tvBase    = `https://www.tradingview.com/chart/?symbol=NSE%3A${encodeURIComponent(sym)}`;
-  const scBase    = `https://www.screener.in/company/${encodeURIComponent(sym)}/`;
-  const moneyBase = `https://www.moneycontrol.com/india/stockpricequote//${encodeURIComponent(sym.toLowerCase())}`;
-
-  const externalLinks = [
-    { label: 'NSE India',      href: nseBase,   color: 'text-sky-300',    bg: 'bg-sky-500/10 border-sky-500/20' },
-    { label: 'TradingView',    href: tvBase,     color: 'text-blue-300',   bg: 'bg-blue-500/10 border-blue-500/20' },
-    { label: 'Screener.in',    href: scBase,     color: 'text-violet-300', bg: 'bg-violet-500/10 border-violet-500/20' },
-    { label: 'MoneyControl',   href: moneyBase,  color: 'text-emerald-300',bg: 'bg-emerald-500/10 border-emerald-500/20' },
-  ];
+  const vwapPos = watchlistRow?.vwapPos || (vwap > 0 && price > 0 ? (price > vwap ? 'Above' : 'Below') : 'Unknown');
 
   return (
     <div className="tr-card flex flex-col h-full">
@@ -2776,12 +2599,14 @@ const ResearchToolPanel = ({ symbol: symbolProp } = {}) => {
             {[
               { label: 'RSI (14)',   value: rsi ? rsi.toFixed(1) : '—', sub: rsi > 70 ? 'Overbought' : rsi < 30 ? 'Oversold' : 'Neutral',
                 color: rsi > 70 ? 'text-rose-400' : rsi < 30 ? 'text-emerald-400' : 'text-amber-400' },
-              { label: 'Trend',      value: trend,    sub: 'Price direction', color: String(trend).toUpperCase().includes('UP') || String(trend).toUpperCase() === 'BULLISH' ? 'text-emerald-400' : 'text-rose-400' },
-              { label: 'MACD',       value: macd ? (Number(macd) > 0 ? 'Bullish' : 'Bearish') : '—',
-                sub: 'Signal crossover', color: macd && Number(macd) > 0 ? 'text-emerald-400' : 'text-rose-400' },
-              { label: 'Momentum',   value: momentum, sub: 'Price velocity', color: String(momentum).toUpperCase() === 'STRONG' ? 'text-emerald-400' : 'text-slate-400' },
+              { label: 'Trend',      value: trend,    sub: 'Price direction', color: String(trend).toUpperCase().includes('UP') || String(trend).toUpperCase() === 'BULLISH' ? 'text-emerald-400' : String(trend).toUpperCase().includes('DOWN') || String(trend).toUpperCase() === 'BEARISH' ? 'text-rose-400' : 'text-slate-400' },
+              { label: 'MACD',       value: macdVal ? (Number(macdVal.macd) > Number(macdVal.signal) ? 'Bullish' : 'Bearish') : '—',
+                sub: 'Signal crossover', color: macdVal && Number(macdVal.macd) > Number(macdVal.signal) ? 'text-emerald-400' : 'text-rose-400' },
+              { label: 'Momentum',   value: momentum, sub: 'Price velocity', color: String(momentum).toUpperCase() === 'STRONG' || String(momentum).toUpperCase().includes('BULL') ? 'text-emerald-400' : 'text-slate-400' },
+              { label: 'VWAP Position', value: vwapPos, sub: vwap > 0 ? `VWAP: ₹${Math.round(vwap)}` : 'Intraday VWAP', color: vwapPos === 'Above' ? 'text-emerald-400' : 'text-rose-400' },
+              { label: 'Relative Vol', value: rvol ? `${rvol.toFixed(2)}x` : '—', sub: rvol > 1.5 ? 'Unusual Volume' : 'Normal Volume', color: rvol > 1.5 ? 'text-emerald-400' : 'text-slate-400' },
             ].map(row => (
-              <div key={row.label} className="flex items-center justify-between rounded-lg bg-white/[0.03] border border-white/5 px-3 py-2.5">
+              <div key={row.label} className="flex items-center justify-between rounded-lg bg-white/[0.03] border border-white/5 px-3 py-2">
                 <div>
                   <div className="text-[10px] font-black text-slate-300">{row.label}</div>
                   <div className="text-[9px] text-slate-500 mt-0.5">{row.sub}</div>
@@ -2789,37 +2614,30 @@ const ResearchToolPanel = ({ symbol: symbolProp } = {}) => {
                 <span className={`text-[11px] font-black ${row.color}`}>{row.value || '—'}</span>
               </div>
             ))}
-            {!tech && !techLoading && (
-              <p className="text-center text-[10px] text-slate-600 py-3">Select a symbol to load signals</p>
-            )}
           </div>
         )}
 
-        {/* ── EXTERNAL LINKS TAB ── */}
+        {/* ── RESEARCH TAB ── */}
         {activeTab === 'links' && (
           <div className="space-y-2">
-            {externalLinks.map(link => (
-              <a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg border text-[11px] font-bold hover:opacity-80 transition-all ${link.bg} ${link.color}`}
-              >
-                <span>{link.label}</span>
-                <ExternalLink size={11} />
-              </a>
-            ))}
-            <div className="rounded-lg border border-white/5 bg-white/[0.03] px-3 py-2.5">
-              <div className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Quick Copy</div>
-              <div
-                onClick={() => navigator.clipboard?.writeText(sym)}
-                className="text-[11px] font-black text-slate-200 cursor-pointer hover:text-white transition-colors flex items-center gap-2"
-              >
-                <Monitor size={11} className="text-slate-500" />
-                {sym || '—'} <span className="text-[9px] text-slate-500 font-normal">(click to copy)</span>
-              </div>
-            </div>
+            {fundLoading ? (
+              <div className="text-center text-[10px] text-slate-500 py-6">Loading research stats...</div>
+            ) : (
+              [
+                { label: 'Market Cap', value: fundamentals?.snapshot?.marketCap ? `₹${(fundamentals.snapshot.marketCap / 10000000).toFixed(1)} Cr` : '—' },
+                { label: 'Sector', value: fundamentals?.snapshot?.sector ?? watchlistRow?.sector ?? '—' },
+                { label: '52W High', value: fundamentals?.snapshot?.fiftyTwoWeekHigh ? `₹${fundamentals.snapshot.fiftyTwoWeekHigh.toLocaleString('en-IN')}` : '—' },
+                { label: '52W Low', value: fundamentals?.snapshot?.fiftyTwoWeekLow ? `₹${fundamentals.snapshot.fiftyTwoWeekLow.toLocaleString('en-IN')}` : '—' },
+                { label: 'Avg Volume', value: fundamentals?.snapshot?.averageVolume ? `${(fundamentals.snapshot.averageVolume / 100000).toFixed(1)} L` : '—' },
+                { label: 'Volatility', value: fundamentals?.snapshot?.beta ? `${(fundamentals.snapshot.beta * 22.4).toFixed(1)}%` : '—' },
+                { label: 'Beta', value: fundamentals?.snapshot?.beta ? fundamentals.snapshot.beta.toFixed(2) : '—' },
+              ].map(row => (
+                <div key={row.label} className="flex items-center justify-between rounded-lg bg-white/[0.03] border border-white/5 px-3 py-2">
+                  <span className="text-[10px] font-black text-slate-300">{row.label}</span>
+                  <span className="text-[11px] font-black text-slate-100">{row.value}</span>
+                </div>
+              ))
+            )}
           </div>
         )}
 
@@ -2829,8 +2647,11 @@ const ResearchToolPanel = ({ symbol: symbolProp } = {}) => {
             {[
               { label: 'Support',    value: support  ? `₹${support.toLocaleString('en-IN', { maximumFractionDigits: 2 })}` : '—', color: 'text-emerald-400' },
               { label: 'Resistance', value: resist   ? `₹${resist.toLocaleString('en-IN',  { maximumFractionDigits: 2 })}` : '—', color: 'text-rose-400' },
+              { label: 'Breakout Lvl', value: resist ? `₹${(resist * 1.005).toLocaleString('en-IN', { maximumFractionDigits: 2 })}` : '—', color: 'text-cyan-400' },
+              { label: 'Stop Loss Zone', value: support ? `₹${(support * 0.985).toFixed(1)} - ₹${(support * 0.995).toFixed(1)}` : '—', color: 'text-rose-400/80' },
+              { label: 'Target Zone', value: resist ? `₹${(resist * 1.03).toFixed(1)} - ₹${(resist * 1.05).toFixed(1)}` : '—', color: 'text-emerald-400/80' },
             ].map(row => (
-              <div key={row.label} className="flex items-center justify-between rounded-lg bg-white/[0.03] border border-white/5 px-3 py-2.5">
+              <div key={row.label} className="flex items-center justify-between rounded-lg bg-white/[0.03] border border-white/5 px-3 py-2">
                 <span className="text-[10px] font-black text-slate-400 uppercase">{row.label}</span>
                 <span className={`text-[11px] font-black ${row.color}`}>{row.value}</span>
               </div>
@@ -2838,23 +2659,14 @@ const ResearchToolPanel = ({ symbol: symbolProp } = {}) => {
             {!tech && !techLoading && (
               <p className="text-center text-[10px] text-slate-600 py-3">Select a symbol to load levels</p>
             )}
-            <div className="rounded-lg border border-amber-500/10 bg-amber-500/5 px-3 py-2">
-              <div className="flex items-center gap-1.5 text-amber-300 text-[9px] font-black uppercase tracking-widest">
-                <Zap size={9} /> Research Cue
-              </div>
-              <p className="text-[10px] text-slate-400 mt-1 leading-relaxed">
-                Confirm thesis with cross-source validation before acting.
-              </p>
-            </div>
           </div>
         )}
 
       </div>
 
       {/* ── Footer ── */}
-      <div className="px-4 py-2 border-t border-white/5 space-y-1">
+      <div className="px-4 py-2 border-t border-white/5">
         <p className="text-[9px] text-slate-600 italic">Research only. No trade execution.</p>
-        <p className="text-[9px] text-slate-500">Usage: pick a symbol from the dashboard or watchlist, then switch between Signals, Research, and Levels.</p>
       </div>
     </div>
   );
@@ -2862,9 +2674,31 @@ const ResearchToolPanel = ({ symbol: symbolProp } = {}) => {
 
 function ResearchView({ activeModule, onRequestModuleChange }) {
   const navigate = useNavigate();
-  const [niftyQuote, setNiftyQuote] = useState(null);
+  const { settings: savedSettings } = useContext(SettingsContext);
+  const { rows, loading: watchlistLoading } = useWatchlist();
 
-  // Fetch live NIFTY 50 quote for the workspace header.
+  const [expandedChart, setExpandedChart] = useState(null);
+  const [timeframe, setTimeframe]         = useState("15m");
+  const [showIndicators, setShowIndicators] = useState(false);
+  const [activeIndicators, setActiveIndicators] = useState(new Set(['ma7', 'ma25']));
+  const [showIndicatorMenu, setShowIndicatorMenu] = useState(false);
+  const [layout, setLayout]               = useState("4-grid");
+  const [niftyQuote, setNiftyQuote]       = useState(null);
+
+  // Apply saved display settings once context loads
+  useEffect(() => {
+    if (!savedSettings?.display) return;
+    const d = savedSettings.display;
+    if (d.defaultTimeframe) setTimeframe(d.defaultTimeframe);
+    if (d.defaultLayout)    setLayout(d.defaultLayout);
+    if (typeof d.showIndicators === 'boolean') setShowIndicators(d.showIndicators);
+  }, [savedSettings]);
+
+  const [analysisSymbol, setAnalysisSymbol] = useState(null);
+  const [focusedSymbol, setFocusedSymbol]   = useState('RELIANCE');
+  const { setAsset } = useAsset();
+
+  // Fetch live NIFTY 50 quote (same API as the chart)
   useEffect(() => {
     let alive = true;
     const load = async () => {
@@ -2893,6 +2727,19 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
         <div className="dashboard-layout flex flex-col w-full">
           <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0 }}>
             <SharedAdvancedWatchlist />
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (activeModule === "RADAR") {
+    // Radar terminal removed — redirect to dashboard main view
+    return (
+      <MainLayout>
+        <div className="dashboard-layout flex flex-col w-full">
+          <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0 }}>
+            <div className="p-6 text-center text-sm text-[#9fb2cf]">Radar terminal has been removed.</div>
           </div>
         </div>
       </MainLayout>
@@ -2935,6 +2782,21 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
     );
   }
 
+  if (analysisSymbol) {
+    return (
+        <div className="dashboard-layout flex flex-col w-full">
+            <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0 }}>
+                {}
+                <TraderStockPage 
+                    overrideSymbol={analysisSymbol} 
+                    onBack={() => setAnalysisSymbol(null)} 
+                    isInDashboard={true}
+                />
+            </div>
+        </div>
+    )
+  }
+
   if (activeModule === "SCREENERS") {
     return (
       <MainLayout>
@@ -2970,8 +2832,8 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
   if (activeModule === "MULTI-CHART") {
     return (
       <div className="dashboard-layout flex flex-col w-full">
-          <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0, height: 'calc(100vh - 64px)' }}>
-          <MultiChartGrid useTradingView={true} />
+        <div className="flex-1 overflow-y-auto main-content-area" style={{ padding: 0, height: 'calc(100vh - 64px)' }}>
+          <MultiChartWorkspace />
         </div>
       </div>
     );
@@ -3004,27 +2866,100 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
                   </p>
                 </section>
 
-                <section className="tr-surface-card tr-panel-shell tr-panel-shell--chart overflow-hidden">
-                  <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-3">
-                    <div>
-                      <div className="text-[10px] font-black uppercase tracking-[0.22em] text-slate-400">TradingView Workspace</div>
-                      <h2 className="mt-1 text-lg font-black tracking-tight text-white">Multi-chart market view</h2>
+                <section className="tr-surface-card tr-panel-shell tr-panel-shell--chart">
+                  <div className="workspace-header">
+                    <div className="workspace-title">
+                      <span className="workspace-label">Multi-Chart Workspace</span>
+                      <span className="workspace-symbol">
+                        NIFTY 50{' '}
+                        {niftyQuote ? (
+                          <span className={niftyQuote.pos ? 'text-[#42C0A5]' : 'text-red-400'}>
+                            {niftyQuote.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}{' '}
+                            {niftyQuote.pos ? '+' : ''}{niftyQuote.pct}%
+                          </span>
+                        ) : (
+                          <span className="text-white/30 text-xs">Loading…</span>
+                        )}
+                      </span>
                     </div>
-                    <div className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1.5 text-[11px] font-semibold text-cyan-100">
-                      NIFTY 50{' '}
-                      {niftyQuote ? (
-                        <span className={niftyQuote.pos ? 'text-[#42C0A5]' : 'text-red-400'}>
-                          {niftyQuote.price.toLocaleString('en-IN', { maximumFractionDigits: 2 })}{' '}
-                          {niftyQuote.pos ? '+' : ''}{niftyQuote.pct}%
-                        </span>
-                      ) : (
-                        <span className="text-white/30 text-xs">Loading…</span>
-                      )}
+                    <div className="workspace-controls">
+                      {["1m", "5m", "15m", "1h", "4h", "1D"].map((tf) => (
+                        <button
+                          key={tf}
+                          onClick={() => setTimeframe(tf)}
+                          className={`workspace-chip ${tf === timeframe ? "active" : ""}`}
+                        >
+                          {tf.toUpperCase()}
+                        </button>
+                      ))}
+                      <div className="relative">
+                        <button
+                          onClick={() => setShowIndicatorMenu(v => !v)}
+                          className={`workspace-chip ${activeIndicators.size > 0 ? "active" : ""}`}
+                        >
+                          Indicators {activeIndicators.size > 0 && `(${activeIndicators.size})`}
+                        </button>
+                        {showIndicatorMenu && (
+                          <div
+                            className="absolute top-full right-0 mt-1 z-50 bg-[#0f1520] border border-white/10 rounded-xl shadow-2xl p-2 min-w-[160px]"
+                            onMouseLeave={() => setShowIndicatorMenu(false)}
+                          >
+                            {[
+                              { id: 'ma7',  label: 'MA 7',      color: '#FFA500' },
+                              { id: 'ma25', label: 'MA 25',     color: '#FF1493' },
+                              { id: 'vwap', label: 'VWAP',      color: '#60a5fa' },
+                              { id: 'bb',   label: 'Bollinger', color: '#a78bfa' },
+                              { id: 'rsi',  label: 'RSI (14)',  color: '#34d399' },
+                            ].map(ind => (
+                              <button
+                                key={ind.id}
+                                onClick={() => setActiveIndicators(prev => {
+                                  const next = new Set(prev);
+                                  next.has(ind.id) ? next.delete(ind.id) : next.add(ind.id);
+                                  return next;
+                                })}
+                                className="flex items-center gap-2 w-full px-3 py-1.5 rounded-lg hover:bg-white/5 transition-colors text-left"
+                              >
+                                <div className="w-2.5 h-2.5 rounded-full border-2 flex items-center justify-center"
+                                  style={{ borderColor: ind.color, backgroundColor: activeIndicators.has(ind.id) ? ind.color : 'transparent' }}
+                                >
+                                  {activeIndicators.has(ind.id) && <div className="w-1 h-1 rounded-full bg-[#0f1520]" />}
+                                </div>
+                                <span className="text-xs font-mono" style={{ color: activeIndicators.has(ind.id) ? ind.color : '#9ca3af' }}>
+                                  {ind.label}
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => {
+                          const layouts = ["1-grid", "2-grid", "4-grid"];
+                          const currentIndex = layouts.indexOf(layout);
+                          const nextIndex = (currentIndex + 1) % layouts.length;
+                          setLayout(layouts[nextIndex]);
+                        }}
+                        className="workspace-chip"
+                      >
+                        Layouts
+                      </button>
                     </div>
                   </div>
-                  <div className="min-h-[760px]">
-                    <MultiChartGrid useTradingView={true} />
-                  </div>
+                  <SharedMultiChartGrid
+                    className="workspace-body"
+                    onOpenChart={(title) => {
+                      setExpandedChart(title);
+                      if (title) {
+                        setFocusedSymbol(title);
+                        setAsset(title, 'stock');
+                      }
+                    }}
+                    timeframe={timeframe}
+                    activeIndicators={activeIndicators}
+                    showGridLines={savedSettings?.display?.showGridLines ?? true}
+                    layout={layout}
+                  />
                 </section>
 
                 <section className="tr-surface-card tr-panel-shell tr-panel-shell--auto">
@@ -3079,7 +3014,7 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
                 </div>
 
                 <div className="tr-surface-card tr-panel-shell tr-panel-shell--sidebar">
-                  <ResearchToolPanel />
+                  <ResearchToolPanel symbol={focusedSymbol || analysisSymbol || undefined} />
                 </div>
 
                 <div className="tr-surface-card tr-panel-shell tr-panel-shell--sidebar">
@@ -3097,10 +3032,48 @@ function ResearchView({ activeModule, onRequestModuleChange }) {
       </div>
 
 
+      {expandedChart && (
+        <>
+          {/* Backdrop — fixed, full viewport, click to close */}
+          <div
+            className="chart-modal-backdrop"
+            onClick={() => setExpandedChart(null)}
+          />
+          {/* Centering shell */}
+          <div className="chart-modal">
+            <div
+              className="chart-modal-panel"
+              role="dialog"
+              aria-modal="true"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="chart-modal-header">
+                <div className="chart-modal-title">
+                  {expandedChart} — Full Screen
+                </div>
+                <button
+                  className="chart-modal-close"
+                  onClick={() => setExpandedChart(null)}
+                >
+                  Close
+                </button>
+              </div>
+              <div className="chart-modal-body" style={{ padding: 0 }}>
+                <AdvancedTradingChart
+                  symbol={resolveBackendSymbol(expandedChart)}
+                  initialTimeframe="D"
+                  height={680}
+                  showHeader={false}
+                />
+              </div>
+            </div>
+          </div>
+        </>
+      )}
+
     </MainLayout>
   );
 }
 
 
 export default ResearchView;
-

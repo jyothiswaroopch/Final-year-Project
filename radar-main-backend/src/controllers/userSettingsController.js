@@ -64,30 +64,17 @@ const validateSettings = (payload) => {
         }
     }
 
-    // Validate ticker settings
-    if (payload.ticker) {
-        if (payload.ticker.customSymbols) {
-            if (!Array.isArray(payload.ticker.customSymbols)) {
-                errors.push('ticker.customSymbols must be an array');
-            } else if (payload.ticker.customSymbols.length > 50) {
-                errors.push('Too many custom symbols');
-            } else {
-                const symRegex = /^[A-Z0-9\.\-_]{1,30}$/;
-                for (const s of payload.ticker.customSymbols) {
-                    if (typeof s !== 'string' || !symRegex.test(s)) {
-                        errors.push(`Invalid ticker symbol: ${s}`);
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
     return errors;
 };
 
 const getUserSettings = async (req, res) => {
-    const userId = req.user._id;
+    const user = req.user;
+    if (!user || !user._id) {
+        logger.warn('getUserSettings called without authenticated user', { user });
+        return res.status(401).json({ error: 'Not authorized' });
+    }
+
+    const userId = user._id;
     try {
         let settings = await UserSettings.findOne({ user: userId }).lean();
         if (!settings) {
@@ -96,7 +83,8 @@ const getUserSettings = async (req, res) => {
         }
         res.json(settings);
     } catch (error) {
-        logger.error('getUserSettings error', { error: error.message, userId });
+        // Log full stack for easier debugging (temporary verbose logging)
+        logger.error('getUserSettings error', { error: error?.stack || error?.message || String(error), userId });
         res.status(500).json({ error: 'Failed to load settings' });
     }
 };
@@ -119,7 +107,10 @@ const updateUserSettings = async (req, res) => {
         if (payload.alerts) allowedUpdates.alerts = payload.alerts;
         if (payload.risk) allowedUpdates.risk = payload.risk;
         if (payload.data) allowedUpdates.data = payload.data;
-        if (payload.ticker) allowedUpdates.ticker = payload.ticker;
+        if (payload.terminal) allowedUpdates.terminal = payload.terminal;
+        if (payload.marketDisplay) allowedUpdates.marketDisplay = payload.marketDisplay;
+        if (payload.notifications) allowedUpdates.notifications = payload.notifications;
+        if (payload.security) allowedUpdates.security = payload.security;
 
         const updated = await UserSettings.findOneAndUpdate(
             { user: userId },

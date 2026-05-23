@@ -19,7 +19,7 @@ export default function AnalysisFinancials({ symbol }) {
         if (!symbol) { setIsLoading(false); return; }
         let active = true;
         setIsLoading(true);
-        api.get(`/stocks/${encodeURIComponent(symbol)}/fundamentals`)
+        api.get(`/stocks/financials?symbol=${encodeURIComponent(symbol)}`)
             .then(res => {
                 if (!active) return;
                 const d = res.data?.data ?? res.data;

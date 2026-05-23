@@ -52,49 +52,88 @@ const EmptyState = ({ onAdd }) => (
     </div>
 );
 
+const PRIORITY_STYLES = {
+    Urgent: 'bg-rose-50 text-rose-700 border-rose-200',
+    High:   'bg-amber-50 text-amber-700 border-amber-200',
+    Medium: 'bg-blue-50 text-blue-700 border-blue-200',
+    Low:    'bg-slate-50 text-slate-500 border-slate-200',
+};
+
 const AttentionCard = ({ stock }) => {
     const navigate = useNavigate();
+    const priority = stock.priority || 'High';
+    const priorityStyle = PRIORITY_STYLES[priority] || PRIORITY_STYLES.Medium;
+    const proximity = typeof stock.progressPercent === 'number' ? stock.progressPercent : null;
+
     return (
-        <div className="bg-white rounded-[16px] p-5 border border-slate-100 hover:border-blue-100 transition-all flex flex-col justify-between shadow-sm relative group h-full">
-            <div className="flex justify-between items-start mb-4">
+        <div className="bg-white rounded-[16px] p-4 border border-slate-100 hover:border-blue-100 transition-all flex flex-col gap-3 shadow-sm relative group h-full">
+            {/* Header */}
+            <div className="flex justify-between items-start">
                 <div>
-                    <h4 className="font-bold text-slate-800 text-base">{stock.name}</h4>
-                    <div className="flex items-baseline gap-2 mt-0.5">
-                        <span className="text-xl font-black text-slate-900">{stock.price}</span>
+                    <h4 className="font-black text-slate-800 text-[15px] leading-none mb-1">{stock.name}</h4>
+                    <div className="flex items-baseline gap-1.5">
+                        <span className="text-lg font-bold text-slate-900">{stock.price}</span>
                         <span className={`text-[11px] font-bold ${stock.isPositive ? 'text-blue-600' : 'text-rose-500'}`}>
-                            {stock.change} today
+                            {stock.change}
                         </span>
                     </div>
                 </div>
-                {stock.tagTop && (
-                    <div className={`px-2 py-0.5 rounded-md text-[10px] font-bold flex items-center gap-1.5 ${stock.tagTopColor === 'amber' ? 'bg-amber-50 text-amber-700 border border-amber-100/50' :
-                        stock.tagTopColor === 'rose' ? 'bg-rose-50 text-rose-700 border border-rose-100/50' : 'bg-blue-50 text-blue-700 border border-blue-100/50'
+                <div className="flex flex-col items-end gap-1">
+                    {stock.tagTop && (
+                        <div className={`px-2 py-0.5 rounded-md text-[9px] font-bold border ${
+                            stock.tagTopColor === 'amber' ? 'bg-amber-50 text-amber-700 border-amber-100' :
+                            stock.tagTopColor === 'rose'  ? 'bg-rose-50 text-rose-700 border-rose-100'   :
+                            stock.tagTopColor === 'purple'? 'bg-purple-50 text-purple-700 border-purple-100' :
+                                                            'bg-blue-50 text-blue-700 border-blue-100'
                         }`}>
-                        {stock.tagTop}
+                            {stock.tagTop}
+                        </div>
+                    )}
+                    <div className={`px-2 py-0.5 rounded-md text-[9px] font-bold border ${priorityStyle}`}>
+                        {priority} Priority
                     </div>
-                )}
+                </div>
             </div>
 
-            <div className="bg-slate-50/80 rounded-xl p-3 mb-3 text-[13px] text-slate-600 font-medium leading-relaxed border border-slate-100/50 space-y-2.5">
+            {/* Proximity bar */}
+            {proximity !== null && (
                 <div>
-                    <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px] block mb-0.5">Alert Trigger</span>
-                    <div className="text-slate-600 font-medium">{stock.insight}</div>
+                    <div className="flex justify-between items-center mb-1">
+                        <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">Alert Proximity</span>
+                        <span className={`text-[10px] font-black ${
+                            proximity >= 95 ? 'text-rose-600' : proximity >= 75 ? 'text-amber-600' : 'text-blue-600'
+                        }`}>{proximity}%</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                            className={`h-full rounded-full transition-all ${
+                                proximity >= 95 ? 'bg-rose-500' : proximity >= 75 ? 'bg-amber-500' : 'bg-blue-500'
+                            }`}
+                            style={{ width: `${proximity}%` }}
+                        />
+                    </div>
                 </div>
-                <div className="pt-2.5 border-t border-slate-200/60">
-                    <span className="font-bold text-slate-700 uppercase tracking-wider text-[10px] block mb-0.5">Alert</span>
-                    <div className="text-slate-800 font-bold">{stock.realAlert || `Target: ₹${stock.targetPrice || stock.value || 1935}`}</div>
+            )}
+
+            {/* Alert detail */}
+            <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 text-[12px] space-y-1.5">
+                <div>
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-0.5">Why this needs attention</span>
+                    <div className="text-slate-600 font-medium leading-snug">{stock.insight}</div>
+                </div>
+                <div className="pt-1.5 border-t border-slate-200/60">
+                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-wider block mb-0.5">Your Alert</span>
+                    <div className="text-slate-800 font-bold text-[13px]">{stock.realAlert || `Target: ₹${stock.targetPrice || stock.value || '—'}`}</div>
                 </div>
             </div>
 
-            <div className="flex justify-end mt-auto">
-                <button
-                    onClick={() => navigate(`/investor/advanced-charts?symbol=${encodeURIComponent(stock.name.toUpperCase().replace(/\.(NS|BO)$/i, ''))}`)}
-                    className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-blue-50 group-hover:text-blue-600 transition-colors shadow-sm border border-slate-100 group-hover:border-blue-100 cursor-pointer"
-                    title="View Stock Data"
-                >
-                    <ArrowRight size={14} />
-                </button>
-            </div>
+            {/* CTA */}
+            <button
+                onClick={() => navigate(`/investor/advanced-charts?symbol=${encodeURIComponent(stock.name.toUpperCase().replace(/\.(NS|BO)$/i, ''))}`)}
+                className="mt-auto flex items-center justify-center gap-1.5 text-[11px] font-bold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-lg py-2 transition-all"
+            >
+                View Chart <ArrowRight size={12} />
+            </button>
         </div>
     );
 };
@@ -1306,55 +1345,88 @@ const Watchlist = () => {
 
                                 {/* What Needs Attention + Recent Changes */}
                                 <div className="flex flex-col lg:flex-row gap-6">
-                                    <div className="lg:w-[65%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 transition-all">
+                                    {/* What Needs Attention */}
+                                    <div className="lg:w-[60%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 transition-all">
                                         <div className="flex items-center justify-between mb-5">
                                             <h3 className="text-[15px] font-black text-slate-800 flex items-center gap-2">
                                                 <AlertTriangle size={18} className="text-amber-500" />
                                                 What Needs Attention
-                                                <TooltipInfo text="Stocks that have triggered a predefined manual or system-level alert requiring immediate review by the investor." />
+                                                <TooltipInfo text="Stocks (in or outside your watchlist) that have active alerts within range of being triggered. Sorted by proximity to alert threshold." />
                                             </h3>
                                             <span className="text-[11px] font-bold text-amber-600 bg-amber-50 border border-amber-100 px-2 py-0.5 rounded-md">Priority Review</span>
                                         </div>
-                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                            {dynamicAttentionStocks.length > 0 ? dynamicAttentionStocks.map(stock => (
-                                                <AttentionCard key={stock.id} stock={stock} />
-                                            )) : (
-                                                <div className="col-span-1 md:col-span-3 py-8 text-center text-slate-500 text-[13px] font-medium border border-dashed border-slate-200 rounded-xl">
-                                                    All clear — no stocks require immediate attention.
+                                        {dynamicAttentionStocks.length > 0 ? (
+                                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                                {dynamicAttentionStocks.map(stock => (
+                                                    <AttentionCard key={stock.id} stock={stock} />
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="py-10 flex flex-col items-center gap-3 border border-dashed border-slate-200 rounded-xl">
+                                                <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center">
+                                                    <CheckCircle size={18} className="text-emerald-500" />
                                                 </div>
-                                            )}
-                                        </div>
+                                                <div className="text-center">
+                                                    <div className="text-[13px] font-bold text-slate-700">All clear</div>
+                                                    <div className="text-[12px] text-slate-400 mt-0.5">No alerts are within trigger range right now.</div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
-                                    <div className="lg:w-[35%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col h-full min-h-[380px]">
-                                        <h3 className="text-[16px] font-black text-slate-800 mb-6 flex items-center gap-2">
+                                    {/* Recent Changes */}
+                                    <div className="lg:w-[40%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 flex flex-col min-h-[340px]">
+                                        <h3 className="text-[15px] font-black text-slate-800 mb-5 flex items-center gap-2">
                                             <Activity size={18} className="text-blue-500" />
                                             Recent Changes
-                                            <TooltipInfo text="A chronological activity log of objective, factual events affecting the stocks on your watchlist." />
+                                            <TooltipInfo text="Significant indicator events for your watchlist stocks — MACD crossovers, RSI extremes, Bollinger %B breakouts, EMA crosses, volume spikes, and more." />
                                         </h3>
-                                        <div className="flex-grow space-y-6">
+                                        <div className="flex-grow space-y-4">
                                             {dynamicRecentChanges.length > 0 ? dynamicRecentChanges.map((change, i) => (
-                                                <div key={i} className="flex gap-4 relative">
-                                                    <div className="mt-1.5 flex flex-col items-center">
-                                                        {change.type === 'positive' ? <div className="w-3 h-3 rounded-full bg-blue-500 ring-4 ring-blue-50 relative z-10"></div> :
-                                                            change.type === 'negative' ? <div className="w-3 h-3 rounded-full bg-rose-500 ring-4 ring-rose-50 relative z-10"></div> :
-                                                                <div className="w-3 h-3 rounded-full bg-amber-500 ring-4 ring-amber-50 relative z-10"></div>}
-                                                        {i !== dynamicRecentChanges.length - 1 && <div className="w-px h-full bg-slate-100 absolute top-4"></div>}
+                                                <div key={i} className="flex gap-3 relative">
+                                                    <div className="mt-1 flex flex-col items-center flex-shrink-0">
+                                                        <div className={`w-2.5 h-2.5 rounded-full relative z-10 ring-4 ${
+                                                            change.type === 'positive' ? 'bg-blue-500 ring-blue-50' :
+                                                            change.type === 'negative' ? 'bg-rose-500 ring-rose-50' :
+                                                            'bg-amber-500 ring-amber-50'
+                                                        }`} />
+                                                        {i !== dynamicRecentChanges.length - 1 && (
+                                                            <div className="w-px flex-grow bg-slate-100 mt-1" style={{ minHeight: 20 }} />
+                                                        )}
                                                     </div>
-                                                    <div className="pb-2 w-full">
-                                                        <div className="flex justify-between items-start w-full">
-                                                            <div className="text-[14px] font-bold text-slate-800">{change.title}</div>
-                                                            <div className="text-[10px] font-bold text-slate-400 mt-0.5 tracking-wide">{change.date}, {change.time}</div>
+                                                    <div className="pb-3 w-full min-w-0">
+                                                        <div className="flex justify-between items-start gap-2">
+                                                            <div className="text-[13px] font-bold text-slate-800 leading-snug">{change.title}</div>
+                                                            <div className="text-[9px] font-bold text-slate-400 tracking-wide whitespace-nowrap flex-shrink-0 mt-0.5">{change.date}, {change.time}</div>
                                                         </div>
-                                                        <div className="text-[12px] font-medium text-slate-500 leading-relaxed mt-1.5 pr-2">{change.desc}</div>
+                                                        {change.indicator && (
+                                                            <span className={`inline-block mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                                                                change.type === 'positive' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                                                                change.type === 'negative' ? 'bg-rose-50 text-rose-600 border-rose-100' :
+                                                                'bg-amber-50 text-amber-600 border-amber-100'
+                                                            }`}>{change.indicator}</span>
+                                                        )}
+                                                        <div className="text-[11px] font-medium text-slate-500 leading-relaxed mt-1">{change.desc}</div>
                                                     </div>
                                                 </div>
                                             )) : (
-                                                <div className="py-8 text-center text-slate-500 text-[13px] font-medium border border-dashed border-slate-200 rounded-xl h-full flex items-center justify-center">
-                                                    No recent market changes.
+                                                <div className="py-8 flex flex-col items-center gap-2 border border-dashed border-slate-200 rounded-xl h-full justify-center">
+                                                    <Activity size={20} className="text-slate-300" />
+                                                    <div className="text-[12px] font-medium text-slate-400 text-center">
+                                                        {watchlist.length === 0
+                                                            ? 'Add stocks to your watchlist to see indicator changes.'
+                                                            : 'No significant indicator changes detected.'}
+                                                    </div>
                                                 </div>
                                             )}
                                         </div>
+                                        {dynamicRecentChanges.length > 0 && (
+                                            <div className="mt-4 pt-4 border-t border-slate-100">
+                                                <button className="w-full text-[12px] font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                                                    View Full Activity Log
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

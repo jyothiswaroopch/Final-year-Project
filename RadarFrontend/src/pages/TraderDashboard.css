@@ -89,6 +89,7 @@
 .tr-dashboard-stage {
   padding: 0;
   background: transparent;
+  min-height: calc(100vh - 76px);
 }
 
 .tr-layer-panel {
@@ -133,20 +134,19 @@
 .tr-watchlist-bridge {
   height: 100%;
   padding: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
   background: var(--tr-tone-base);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.34);
 }
 
 .trader-dashboard-container {
   width: 100%;
   margin: 0;
-  padding: 8px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 0;
-  background: #020617;
+  gap: 16px;
 }
 
 .trader-section-header {
@@ -220,7 +220,7 @@
 .trader-dashboard-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
-  gap: 8px;
+  gap: 20px;
   align-items: stretch;
   width: 100%;
   min-width: 0;
@@ -230,7 +230,7 @@
 .trader-right-column {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 20px;
   min-width: 0;
 }
 
@@ -240,7 +240,6 @@
   align-self: start;
   height: auto;
   overflow: visible;
-  border-left: none;
 }
 
 .trader-left-column {
@@ -248,7 +247,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 20px;
 }
 
 .trader-insights-grid {
@@ -271,10 +270,10 @@
 }
 
 .tr-surface-card {
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
   background: var(--tr-tone-base);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.28);
   overflow: hidden;
 }
 
@@ -300,16 +299,18 @@
   min-height: 420px;
   width: 100%;
   min-width: 0;
+  container-type: inline-size;
 }
 
 .workspace-body {
   width: 100%;
   min-width: 0;
+  overflow: hidden;
 }
 
 .workspace-body .multi-chart-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
   gap: 16px;
   width: 100%;
   min-width: 0;
@@ -319,10 +320,46 @@
   grid-template-columns: minmax(0, 1fr);
 }
 
+.workspace-body .multi-chart-grid.layout-2-grid,
+.workspace-body .multi-chart-grid.layout-4-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 360px), 1fr));
+}
+
 .workspace-body .chart-card {
   width: 100%;
   min-width: 0;
   height: 260px;
+}
+
+.workspace-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.workspace-title,
+.workspace-controls {
+  min-width: 0;
+}
+
+.workspace-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+@container (max-width: 760px) {
+  .workspace-body .multi-chart-grid.layout-2-grid,
+  .workspace-body .multi-chart-grid.layout-4-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .workspace-body .chart-card {
+    height: 300px;
+  }
 }
 
 .tr-panel-shell--fixed {
@@ -423,7 +460,7 @@
   box-shadow: 0 0 12px var(--tr-accent-glow);
 }
 
-@media (max-width: 1280px) {
+@media (max-width: 1500px) {
   .trader-dashboard-grid,
   .trader-insights-grid,
   .trader-market-grid {
@@ -435,6 +472,8 @@
   }
 
   .trader-right-column {
+    width: 100%;
+    max-width: none;
     height: auto;
     position: static;
     overflow: visible;
@@ -443,12 +482,12 @@
 
 @media (max-width: 768px) {
   .tr-dashboard-stage {
-    padding: 0;
+    padding: 16px;
   }
 
   .trader-dashboard-header,
   .trader-section-header {
-    padding: 12px 16px;
+    padding: 16px;
     align-items: flex-start;
     flex-direction: column;
   }
@@ -471,7 +510,11 @@
 
   .trader-left-column,
   .trader-right-column {
-    gap: 0;
+    gap: 16px;
+  }
+
+  .trader-dashboard-container {
+    padding: 16px;
   }
 }
 
@@ -559,4 +602,3 @@
     grid-column: span 12;
   }
 }
-

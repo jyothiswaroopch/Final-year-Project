@@ -1,9 +1,11 @@
-import React, { Suspense, lazy, useEffect } from 'react';
+import { Suspense, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { AssetProvider } from './context/AssetContext';
+import { WatchlistProvider } from './context/WatchlistContext';
+import { SettingsProvider } from './context/SettingsContext';
+import { DisplaySettingsProvider } from './context/DisplaySettingsProvider';
 import { fetchUniverse } from './services/universeService';
-import PrivacyPolicy from './pages/PrivacyPolicy';
-import TermsOfService from './pages/TermsOfService';
+
 import {
   VerifyEmailPage,
   ResetPasswordPage,
@@ -16,7 +18,6 @@ import {
   PortfolioPage,
   AlertsPage,
   ReportsExportPage,
-  SettingsPage,
   HelpSupportPage,
   InvestorFilingsPage,
 } from './pages/ContractPages';
@@ -32,16 +33,16 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const TraderStockPage = lazy(() => import('./pages/TraderStockPage'));
 const TradeTerminalPage = lazy(() => import('./pages/TradeTerminalPage'));
 const MinimalChartPage = lazy(() => import('./pages/MinimalChartPage'));
-const TraderSettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
+const SettingsPage = lazy(() => import('./pages/settings/SettingsPage'));
 const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const RealtimeDemoPage = lazy(() => import('./pages/RealtimeDemoPage'));
 const SpecShowcasePage = lazy(() => import('./pages/SpecShowcase'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
-
+const InvestorStockPage = lazy(() => import('./pages/InvestorStockPageOld'));
 const MarketResearchDashboard = lazy(() => import('./pages/MarketResearchDashboard'));
 const ScreenerPage = lazy(() => import('./pages/ScreenerPage'));
-
-// InvestorStockPage has been removed — stocks now open in Advanced Charts
+const WatchlistDashboard = lazy(() => import('./pages/WatchlistDashboard'));
+// Radar terminal page removed per request
 
 const AppLoader = () => (
   <div className="min-h-screen flex items-center justify-center bg-[#020617] text-[#E2E8F0]">
@@ -51,16 +52,6 @@ const AppLoader = () => (
     </div>
   </div>
 );
-
-const ScrollToTop = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
-  }, [location.pathname, location.search, location.hash]);
-
-  return null;
-};
 
 const RouteStatusPage = ({ title, message, actionTo = '/', actionLabel = 'Go Home' }) => (
   <div className="min-h-screen flex items-center justify-center bg-[#020617] text-[#E2E8F0] px-4">
@@ -91,13 +82,6 @@ const AssetAliasRoute = () => {
   const { symbol } = useParams();
   const nextSymbol = encodeURIComponent(String(symbol || '').trim());
   return <Navigate to={`/stocks/${nextSymbol}`} replace />;
-};
-
-// Investor stock pages → redirect to Advanced Charts with symbol
-const InvestorStockRedirect = () => {
-  const { symbol } = useParams();
-  const clean = encodeURIComponent(String(symbol || 'RELIANCE').trim().toUpperCase().replace(/\.(NS|BO)$/i, ''));
-  return <Navigate to={`/investor/advanced-charts?symbol=${clean}`} replace />;
 };
 
 const OAuthCallbackRoute = () => {
@@ -144,7 +128,7 @@ const ProfileRoute = () => (
     : <Navigate to="/investor/dashboard/profile" replace />
 );
 
-const SettingsRoute = () => (getStoredMode() === 'TRADER' ? <TraderSettingsPage /> : <SettingsPage />);
+const SettingsRoute = () => <SettingsPage />;
 
 const SupportRoute = () => (getStoredMode() === 'TRADER' ? <Navigate to="/trader/dashboard/support" replace /> : <HelpSupportPage dashboardPath="/investor/dashboard" />);
 const InvestorSupportRoute = () => <HelpSupportPage dashboardPath="/investor/dashboard" />;
@@ -167,40 +151,6 @@ const DashboardRedirect = () => {
   return <Navigate to={mode === 'TRADER' ? '/trader/dashboard' : '/investor/dashboard'} replace />;
 };
 
-class GlobalErrorBoundary extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, error: null };
-  }
-  static getDerivedStateFromError(error) {
-    return { hasError: true, error };
-  }
-  componentDidCatch(error, errorInfo) {
-    console.error('Global Error Boundary caught:', error, errorInfo);
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="min-h-screen flex items-center justify-center bg-[#020617] text-white p-4">
-          <div className="bg-red-500/10 border border-red-500/30 p-6 rounded-xl max-w-xl text-center">
-            <h2 className="text-2xl font-bold text-red-400 mb-4">Something went wrong</h2>
-            <p className="text-gray-300 text-sm mb-4">
-              {this.state.error && this.state.error.toString()}
-            </p>
-            <pre className="text-left text-xs text-red-300 bg-black/50 p-4 rounded overflow-auto mb-4 max-h-40">
-              {this.state.error && this.state.error.stack}
-            </pre>
-            <button onClick={() => window.location.reload()} className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-bold">
-              Hard Refresh Page
-            </button>
-          </div>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
 function App() {
   // Initialize market universe on app startup
   useEffect(() => {
@@ -209,90 +159,96 @@ function App() {
 
   return (
     <AssetProvider>
-      <GlobalErrorBoundary>
-        <Router>
-          <ScrollToTop />
-          <Suspense fallback={<AppLoader />}>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<DashboardRedirect />} />
-            <Route path="/dashboard/trader" element={<Navigate to="/trader/dashboard" replace />} />
-            <Route path="/dashboard/investor" element={<Navigate to="/investor/dashboard" replace />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/privacy" element={<PrivacyPolicy />} />
-            <Route path="/terms" element={<TermsOfService />} />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
-            <Route path="/auth/oauth/callback" element={<OAuthCallbackRoute />} />
-            <Route path="/stocks/:symbol" element={<TraderStockPage />} />
-            <Route path="/trade/:symbol" element={<TradeTerminalPage />} />
-            <Route path="/chart/:symbol" element={<MinimalChartPage />} />
-            <Route path="/investor-stock/:symbol" element={<InvestorStockRedirect />} />
-            <Route path="/asset/:symbol" element={<AssetAliasRoute />} />
+      <SettingsProvider>
+        <DisplaySettingsProvider>
+          <WatchlistProvider>
+            <Router>
+              <Suspense fallback={<AppLoader />}>
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/dashboard" element={<DashboardRedirect />} />
+              <Route path="/dashboard/trader" element={<Navigate to="/trader/dashboard" replace />} />
+              <Route path="/dashboard/investor" element={<Navigate to="/investor/dashboard" replace />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/verify-email" element={<VerifyEmailPage />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password/:token" element={<ResetPassword />} />
+              <Route path="/auth/oauth/callback" element={<OAuthCallbackRoute />} />
+              <Route path="/stocks/:symbol" element={<TraderStockPage />} />
+              <Route path="/trader/stock/:symbol" element={<TraderStockPage />} />
+              <Route path="/trade/:symbol" element={<TradeTerminalPage />} />
+              <Route path="/chart/:symbol" element={<MinimalChartPage />} />
+              <Route path="/investor-stock/:symbol" element={<InvestorStockPage />} />
+              <Route path="/asset/:symbol" element={<AssetAliasRoute />} />
 
-            {/* Persona Dashboards */}
-            <Route path="/investor/dashboard/:module?" element={<DashboardAliasRoute mode="INVESTOR" />} />
-            <Route path="/trader/dashboard/:module?" element={<DashboardAliasRoute mode="TRADER" />} />
+              {/* Persona Dashboards */}
+              <Route path="/investor/dashboard/:module?" element={<DashboardAliasRoute mode="INVESTOR" />} />
+              <Route path="/trader/dashboard/:module?" element={<DashboardAliasRoute mode="TRADER" />} />
 
-            {/* Investor Specialized Routes */}
-            <Route path="/investor/momentum" element={<DashboardAliasRoute mode="INVESTOR" />} />
-            <Route path="/investor/valuation" element={<DashboardAliasRoute mode="INVESTOR" />} />
-            <Route path="/investor/filings" element={<InvestorFilingsPage />} />
-            <Route path="/investor/screener" element={<ScreenerPage />} />
-            <Route path="/investor/search" element={<GlobalSearchPage />} />
-            <Route path="/investor/discovery" element={<DiscoveryPage />} />
-            <Route path="/investor/calendar" element={<CalendarPage />} />
-            <Route path="/investor/news" element={<NewsPage />} />
-            <Route path="/investor/watchlists" element={<InvestorWatchlistsPage />} />
-            <Route path="/investor/portfolio" element={<PortfolioPage />} />
-            <Route path="/investor/alerts" element={<AlertsPage />} />
-            <Route path="/investor/reports/export" element={<ReportsExportPage />} />
-            <Route path="/investor/profile" element={<Navigate to="/investor/dashboard/profile" replace />} />
-            <Route path="/investor/settings" element={<SettingsPage />} />
-            <Route path="/investor/support" element={<HelpSupportPage dashboardPath="/investor/dashboard" />} />
-            <Route path="/investor/advanced-charts" element={<InvestorAdvancedCharts />} />
+              {/* Investor Specialized Routes */}
+              <Route path="/investor/momentum" element={<DashboardAliasRoute mode="INVESTOR" />} />
+              <Route path="/investor/valuation" element={<DashboardAliasRoute mode="INVESTOR" />} />
+              <Route path="/investor/filings" element={<InvestorFilingsPage />} />
+              <Route path="/investor/screener" element={<ScreenerPage />} />
+              <Route path="/investor/search" element={<GlobalSearchPage />} />
+              <Route path="/investor/discovery" element={<DiscoveryPage />} />
+              <Route path="/investor/calendar" element={<CalendarPage />} />
+              <Route path="/investor/news" element={<NewsPage />} />
+              <Route path="/investor/watchlists" element={<InvestorWatchlistsPage />} />
+              <Route path="/investor/portfolio" element={<PortfolioPage />} />
+              <Route path="/investor/alerts" element={<AlertsPage />} />
+              <Route path="/investor/reports/export" element={<ReportsExportPage />} />
+              <Route path="/investor/profile" element={<Navigate to="/investor/dashboard/profile" replace />} />
+              <Route path="/investor/settings" element={<SettingsPage />} />
+              <Route path="/investor/support" element={<HelpSupportPage dashboardPath="/investor/dashboard" />} />
+              <Route path="/investor/advanced-charts" element={<InvestorAdvancedCharts />} />
 
-            {/* Trader Specialized Routes */}
-            <Route path="/trader/profile" element={<Navigate to="/trader/dashboard/profile" replace />} />
-            <Route path="/trader/settings" element={<Navigate to="/trader/dashboard/settings" replace />} />
-            <Route path="/trader/support" element={<Navigate to="/trader/dashboard/support" replace />} />
-            <Route path="/trader/terminal/:symbol" element={<TradeTerminalPage />} />
-            <Route path="/trader/charts/:symbol" element={<MinimalChartPage />} />
-            <Route path="/trader/watchlists" element={<TraderWatchlistsPage />} />
+              {/* Trader Specialized Routes */}
+              <Route path="/trader/profile" element={<Navigate to="/trader/dashboard/profile" replace />} />
+              <Route path="/trader/settings" element={<Navigate to="/trader/dashboard/settings" replace />} />
+              <Route path="/trader/support" element={<Navigate to="/trader/dashboard/support" replace />} />
+              <Route path="/trader/terminal/:symbol" element={<TradeTerminalPage />} />
+              <Route path="/trader/charts/:symbol" element={<MinimalChartPage />} />
+              <Route path="/trader/watchlists" element={<TraderWatchlistsPage />} />
+              <Route path="/trader/watchlist-dashboard" element={<WatchlistDashboard />} />
+              {/* Radar routes removed: redirect to dashboard */}
+              <Route path="/trader/radar" element={<Navigate to="/trader/dashboard" replace />} />
+              <Route path="/radar" element={<Navigate to="/dashboard" replace />} />
 
-            {/* Legacy/Redirect Routes */}
-            <Route path="/profile" element={<ProfileRoute />} />
-            <Route path="/settings" element={<SettingsRoute />} />
-            <Route path="/support" element={<SupportRoute />} />
-            <Route path="/help" element={<SupportRoute />} />
-            <Route path="/advanced-charts" element={<AdvancedChartsRoute />} />
-            
-            {/* Legacy Investor Mappings (Redirect to namespaced) */}
-            <Route path="/screener" element={<Navigate to="/investor/screener" replace />} />
-            <Route path="/search" element={<Navigate to="/investor/search" replace />} />
-            <Route path="/discovery" element={<Navigate to="/investor/discovery" replace />} />
-            <Route path="/calendar" element={<Navigate to="/investor/calendar" replace />} />
-            <Route path="/news" element={<Navigate to="/investor/news" replace />} />
-            <Route path="/watchlists" element={<Navigate to="/investor/watchlists" replace />} />
-            <Route path="/portfolio" element={<Navigate to="/investor/portfolio" replace />} />
-            <Route path="/alerts" element={<Navigate to="/investor/alerts" replace />} />
-            <Route path="/reports/export" element={<Navigate to="/investor/reports/export" replace />} />
-            <Route path="/trader-profile" element={<Navigate to="/trader/dashboard/profile" replace />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/health" element={<Navigate to="/admin" replace />} />
-            <Route path="/demo" element={<RealtimeDemoPage />} />
-            <Route path="/research-dashboard" element={<MarketResearchDashboard />} />
-            <Route path="/spec/components" element={<SpecShowcasePage />} />
-            <Route path="/onboarding" element={<Onboarding />} />
-            <Route path="/404" element={<RouteStatusPage title="404 - Not Found" message="The page you requested does not exist or may have moved." actionTo="/" actionLabel="Return Home" />} />
-            <Route path="/500" element={<RouteStatusPage title="500 - Server Error" message="Something went wrong while processing your request. Please try again." actionTo="/" actionLabel="Return Home" />} />
-            <Route path="*" element={<Navigate to="/404" replace />} />
-          </Routes>
-        </Suspense>
-      </Router>
-      </GlobalErrorBoundary>
+              {/* Legacy/Redirect Routes */}
+              <Route path="/profile" element={<ProfileRoute />} />
+              <Route path="/settings" element={<SettingsRoute />} />
+              <Route path="/support" element={<SupportRoute />} />
+              <Route path="/help" element={<SupportRoute />} />
+              <Route path="/advanced-charts" element={<AdvancedChartsRoute />} />
+              
+              {/* Legacy Investor Mappings (Redirect to namespaced) */}
+              <Route path="/screener" element={<Navigate to="/investor/screener" replace />} />
+              <Route path="/search" element={<Navigate to="/investor/search" replace />} />
+              <Route path="/discovery" element={<Navigate to="/investor/discovery" replace />} />
+              <Route path="/calendar" element={<Navigate to="/investor/calendar" replace />} />
+              <Route path="/news" element={<Navigate to="/investor/news" replace />} />
+              <Route path="/watchlists" element={<Navigate to="/investor/watchlists" replace />} />
+              <Route path="/portfolio" element={<Navigate to="/investor/portfolio" replace />} />
+              <Route path="/alerts" element={<Navigate to="/investor/alerts" replace />} />
+              <Route path="/reports/export" element={<Navigate to="/investor/reports/export" replace />} />
+              <Route path="/trader-profile" element={<Navigate to="/trader/dashboard/profile" replace />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/health" element={<Navigate to="/admin" replace />} />
+              <Route path="/demo" element={<RealtimeDemoPage />} />
+              <Route path="/research-dashboard" element={<MarketResearchDashboard />} />
+              <Route path="/spec/components" element={<SpecShowcasePage />} />
+              <Route path="/onboarding" element={<Onboarding />} />
+              <Route path="/404" element={<RouteStatusPage title="404 - Not Found" message="The page you requested does not exist or may have moved." actionTo="/" actionLabel="Return Home" />} />
+              <Route path="/500" element={<RouteStatusPage title="500 - Server Error" message="Something went wrong while processing your request. Please try again." actionTo="/" actionLabel="Return Home" />} />
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Routes>
+          </Suspense>
+        </Router>
+      </WatchlistProvider>
+      </DisplaySettingsProvider>
+      </SettingsProvider>
     </AssetProvider>
   );
 }

@@ -14,15 +14,11 @@ function Root() {
     </SettingsProvider>
   );
 
-  if (googleClientId) {
-    return (
-      <GoogleOAuthProvider clientId={googleClientId}>
-        {app}
-      </GoogleOAuthProvider>
-    );
-  }
-
-  return app;
+  return (
+    <GoogleOAuthProvider clientId={googleClientId || 'dummy_client_id'}>
+      {app}
+    </GoogleOAuthProvider>
+  );
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { createChart, CrosshairMode, LineStyle } from 'lightweight-charts';
+import { createChart, CrosshairMode, LineStyle, ColorType, CandlestickSeries, LineSeries } from 'lightweight-charts';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   TrendingUp,
@@ -34,6 +34,18 @@ const TIMEFRAMES = [
   { id: 'W', label: '1W', seconds: 604800 },
   { id: 'M', label: '1M', seconds: 2592000 },
 ];
+
+const BACKEND_TIMEFRAME = {
+  '1': '1m',
+  '5': '5m',
+  '15': '15m',
+  '30': '30m',
+  '60': '1h',
+  '240': '1h',
+  D: '1d',
+  W: '1wk',
+  M: '1mo',
+};
 
 const CHART_TYPES = [
   { id: 'candlestick', label: 'Candlestick', icon: 'C' },
@@ -102,90 +114,61 @@ const AdvancedTradingChart = ({
   useEffect(() => {
     if (!chartContainerRef.current) return;
 
-    const containerWidth = chartContainerRef.current.clientWidth;
-    const containerHeight = chartContainerRef.current.clientHeight || height;
-
-    // Ensure container has valid dimensions
-    if (containerWidth <= 0 || containerHeight <= 0) {
-      console.warn('Chart container has invalid dimensions', { containerWidth, containerHeight });
-      return;
-    }
-
-    let chart;
-    try {
-      chart = createChart(chartContainerRef.current, {
-        width: containerWidth,
-        height: containerHeight,
-        layout: {
-          background: { color: '#0f172a' },
-          textColor: '#94a3b8',
+    const chart = createChart(chartContainerRef.current, {
+      width: chartContainerRef.current.clientWidth,
+      height: showHeader ? height : height + 80,
+      layout: {
+        background: { type: ColorType.Solid, color: '#0f172a' },
+        textColor: '#94a3b8',
+      },
+      grid: {
+        vertLines: { color: '#1e293b', style: LineStyle.Dashed },
+        horzLines: { color: '#1e293b', style: LineStyle.Dashed },
+      },
+      crosshair: {
+        mode: CrosshairMode.Normal,
+        vertLine: {
+          color: '#06b6d4',
+          width: 1,
+          style: LineStyle.Dashed,
+          labelBackgroundColor: '#06b6d4',
         },
-        grid: {
-          vertLines: { color: '#1e293b', style: LineStyle.Dashed },
-          horzLines: { color: '#1e293b', style: LineStyle.Dashed },
+        horzLine: {
+          color: '#06b6d4',
+          width: 1,
+          style: LineStyle.Dashed,
+          labelBackgroundColor: '#06b6d4',
         },
-        crosshair: {
-          mode: CrosshairMode.Normal,
-          vertLine: {
-            color: '#06b6d4',
-            width: 1,
-            style: LineStyle.Dashed,
-            labelBackgroundColor: '#06b6d4',
-          },
-          horzLine: {
-            color: '#06b6d4',
-            width: 1,
-            style: LineStyle.Dashed,
-            labelBackgroundColor: '#06b6d4',
-          },
+      },
+      timeScale: {
+        borderColor: '#1e293b',
+        timeVisible: true,
+        secondsVisible: false,
+      },
+      rightPriceScale: {
+        borderColor: '#1e293b',
+        scaleMargins: {
+          top: 0.1,
+          bottom: 0.2,
         },
-        timeScale: {
-          borderColor: '#1e293b',
-          timeVisible: true,
-          secondsVisible: false,
-        },
-        rightPriceScale: {
-          borderColor: '#1e293b',
-          scaleMargins: {
-            top: 0.1,
-            bottom: 0.2,
-          },
-        },
-      });
-    } catch (error) {
-      console.error('Error creating chart:', error);
-      return;
-    }
-
-    // Validate chart object
-    if (!chart || typeof chart.addCandlestickSeries !== 'function') {
-      console.error('Invalid chart object returned from createChart');
-      return;
-    }
+      },
+    });
 
     chartRef.current = chart;
 
-    try {
-      const candleSeries = chart.addCandlestickSeries({
-        upColor: '#10b981',
-        downColor: '#ef4444',
-        borderVisible: false,
-        wickUpColor: '#10b981',
-        wickDownColor: '#ef4444',
-      });
+    const candleSeries = chart.addSeries(CandlestickSeries, {
+      upColor: '#10b981',
+      downColor: '#ef4444',
+      borderVisible: false,
+      wickUpColor: '#10b981',
+      wickDownColor: '#ef4444',
+    });
 
-      candleSeriesRef.current = candleSeries;
-      loadChartData();
-    } catch (error) {
-      console.error('Error setting up chart series:', error);
-    }
+    candleSeriesRef.current = candleSeries;
 
     const handleResize = () => {
       if (chartContainerRef.current && chartRef.current) {
-        chart.applyOptions({
-          width: chartContainerRef.current.clientWidth,
-          height: chartContainerRef.current.clientHeight || height,
-        });
+        chart.applyOptions({ width: chartContainerRef.current.clientWidth });
       }
     };
 
@@ -193,13 +176,7 @@ const AdvancedTradingChart = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      if (chart) {
-        try {
-          chart.remove();
-        } catch (error) {
-          console.error('Error removing chart:', error);
-        }
-      }
+      chart.remove();
     };
   }, []);
 
@@ -207,17 +184,21 @@ const AdvancedTradingChart = ({
     setIsLoading(true);
     try {
       const response = await fetchOHLCData(symbol, {
-        timeframe: timeframe.includes('m') ? timeframe : timeframe === 'D' ? '1d' : timeframe === 'W' ? '1wk' : '1mo',
+        exchange: 'NSE',
+        timeframe: BACKEND_TIMEFRAME[timeframe] || '15m',
         limit: 200
       });
       
       const data = response.data.map(d => ({
-        time: d.timestamp / 1000,
-        open: d.open,
-        high: d.high,
-        low: d.low,
-        close: d.close,
-      })).sort((a, b) => a.time - b.time);
+        time: Math.floor(new Date(d.timestamp).getTime() / 1000),
+        open: Number(d.open),
+        high: Number(d.high),
+        low: Number(d.low),
+        close: Number(d.close),
+      }))
+        .filter(d => Number.isFinite(d.time) && d.time > 0 && Number.isFinite(d.close))
+        .sort((a, b) => a.time - b.time)
+        .filter((d, index, rows) => index === 0 || d.time !== rows[index - 1].time);
       
       if (candleSeriesRef.current && data.length > 0) {
         candleSeriesRef.current.setData(data);
@@ -241,7 +222,13 @@ const AdvancedTradingChart = ({
     } finally {
       setIsLoading(false);
     }
-  }, [onChartReady]);
+  }, [symbol, timeframe, onChartReady]);
+
+  useEffect(() => {
+    if (candleSeriesRef.current) {
+      loadChartData();
+    }
+  }, [loadChartData]);
 
 
 
@@ -268,7 +255,7 @@ const AdvancedTradingChart = ({
       const chartData = candleSeriesRef.current.data();
       
       if (indicator.category === 'Moving Averages') {
-        const lineSeries = chartRef.current.addLineSeries({
+        const lineSeries = chartRef.current.addSeries(LineSeries, {
           color: indicator.color,
           lineWidth: 2,
           title: indicator.label,
@@ -420,7 +407,7 @@ const AdvancedTradingChart = ({
       )}
 
       {}
-      <div ref={chartContainerRef} className="w-full h-full min-h-0" />
+      <div ref={chartContainerRef} className="w-full h-full" />
 
       {}
       {isLoading && (

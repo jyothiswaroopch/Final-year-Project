@@ -25,15 +25,24 @@ const ScreenerPage = () => {
     search: '',
     sector: 'All',
     signals: [],
-    minPriceChange: 0,
-    maxPriceChange: null,
+    signalStrength: [],
+    minPriceChange: '',
+    maxPriceChange: '',
     minRsi: 0,
     maxRsi: 100,
     minPrice: '',
     maxPrice: '',
     minVolume: '',
+    minRvol: '',
+    maxRvol: '',
+    minPe: '',
+    maxPe: '',
+    minMarketCap: '',
+    timeframe: 'all',
     showOnlySignals: true,
-    trendType: 'all', // 'bullish', 'bearish', 'neutral', 'all'
+    trendType: 'all',
+    emaFilter: 'all',
+    macdFilter: 'all',
   });
 
   const [stocks, setStocks] = useState([]);
@@ -361,6 +370,7 @@ const ScreenerPage = () => {
   useEffect(() => {
     let result = stocks;
 
+    // Search
     if (filters.search) {
       result = result.filter(
         (stock) =>
@@ -369,38 +379,69 @@ const ScreenerPage = () => {
       );
     }
 
+    // Sector
     if (filters.sector !== 'All') {
       result = result.filter((stock) => stock.sector === filters.sector);
     }
 
-    if (filters.signals.length > 0) {
+    // Signal type
+    if (filters.signals?.length > 0) {
       result = result.filter((stock) => filters.signals.includes(stock.signal));
     }
 
-    if (filters.minPriceChange !== null) {
-      result = result.filter((stock) => stock.change >= filters.minPriceChange);
-    }
-    if (filters.maxPriceChange !== null) {
-      result = result.filter((stock) => stock.change <= filters.maxPriceChange);
+    // Signal strength
+    if (filters.signalStrength?.length > 0) {
+      result = result.filter((stock) => filters.signalStrength.includes(stock.signalStrength));
     }
 
+    // Price change %
+    if (filters.minPriceChange !== '' && filters.minPriceChange !== null) {
+      result = result.filter((stock) => stock.change >= parseFloat(filters.minPriceChange));
+    }
+    if (filters.maxPriceChange !== '' && filters.maxPriceChange !== null) {
+      result = result.filter((stock) => stock.change <= parseFloat(filters.maxPriceChange));
+    }
+
+    // RSI
     result = result.filter((stock) => stock.rsi >= filters.minRsi && stock.rsi <= filters.maxRsi);
 
-    if (filters.minPrice) {
-      result = result.filter((stock) => stock.price >= parseFloat(filters.minPrice));
-    }
-    if (filters.maxPrice) {
-      result = result.filter((stock) => stock.price <= parseFloat(filters.maxPrice));
-    }
+    // Price range
+    if (filters.minPrice) result = result.filter((stock) => stock.price >= parseFloat(filters.minPrice));
+    if (filters.maxPrice) result = result.filter((stock) => stock.price <= parseFloat(filters.maxPrice));
 
-    if (filters.minVolume) {
-      result = result.filter((stock) => stock.volume >= parseFloat(filters.minVolume));
-    }
+    // Volume
+    if (filters.minVolume) result = result.filter((stock) => stock.volume >= parseFloat(filters.minVolume));
 
+    // RVOL
+    if (filters.minRvol) result = result.filter((stock) => stock.rvol >= parseFloat(filters.minRvol));
+    if (filters.maxRvol) result = result.filter((stock) => stock.rvol <= parseFloat(filters.maxRvol));
+
+    // PE ratio
+    if (filters.minPe) result = result.filter((stock) => stock.pe >= parseFloat(filters.minPe));
+    if (filters.maxPe) result = result.filter((stock) => stock.pe > 0 && stock.pe <= parseFloat(filters.maxPe));
+
+    // Market cap
+    if (filters.minMarketCap) result = result.filter((stock) => (stock.marketCap ?? 0) >= parseFloat(filters.minMarketCap));
+
+    // Trend type
     if (filters.trendType !== 'all') {
       result = result.filter((stock) => stock.trend === filters.trendType);
     }
 
+    // Timeframe
+    if (filters.timeframe && filters.timeframe !== 'all') {
+      result = result.filter((stock) => stock.timeframe === filters.timeframe);
+    }
+
+    // MACD filter (client-side using macd field if present)
+    if (filters.macdFilter && filters.macdFilter !== 'all') {
+      result = result.filter((stock) => {
+        const macdBias = stock.macdBias || (stock.change >= 0 ? 'bullish' : 'bearish');
+        return macdBias === filters.macdFilter;
+      });
+    }
+
+    // Signal tab filter
     if (filters.showOnlySignals && activeSignalTab !== 'all') {
       result = result.filter((stock) => stock.signal.toLowerCase() === activeSignalTab.toLowerCase());
     }

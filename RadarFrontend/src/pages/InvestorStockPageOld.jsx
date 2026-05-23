@@ -402,7 +402,41 @@ const InvestorStockPage = () => {
           api.get(`/market/quotes?symbols=${activeSymbol}`)
         ]);
 
-        if (finRes.status === 'fulfilled') setFinancialData(finRes.value.data);
+        if (finRes.status === 'fulfilled') {
+          // Normalize backend response into the shape expected by this component
+          const raw = finRes.value.data;
+          const rawData = raw?.data || {};
+          const quarterly = rawData.financialPerformance?.quarterly || [];
+          const yearly = rawData.financialPerformance?.yearly || [];
+          setFinancialData({
+            ...raw,
+            data: {
+              ...rawData,
+              // Map quarterly/yearly into revenue[] and profit[] arrays expected by getMetricData()
+              revenue: yearly.length > 0
+                ? yearly.map(d => ({ year: d.quarter, value: d.revenue }))
+                : quarterly.map(d => ({ year: d.quarter, value: d.revenue })),
+              profit: yearly.length > 0
+                ? yearly.map(d => ({ year: d.quarter, value: d.profit }))
+                : quarterly.map(d => ({ year: d.quarter, value: d.profit })),
+              shareholding: rawData.shareholding || [],
+              // Stats object pulled from top-level fields (used in header stats bar)
+              stats: {
+                dayLow:  rawData.fiftyTwoWeekLow  || null,
+                dayHigh: rawData.fiftyTwoWeekHigh || null,
+                low52w:  rawData.fiftyTwoWeekLow  || null,
+                high52w: rawData.fiftyTwoWeekHigh || null,
+                open:    null, // populated from quoteData
+              },
+              // Description / website / sector / industry
+              description: rawData.longBusinessSummary || null,
+              website:     rawData.website     || null,
+              sector:      rawData.sector      || null,
+              industry:    rawData.industry    || null,
+              isin:        rawData.isin        || null,
+            },
+          });
+        }
         if (newsRes.status === 'fulfilled') setNewsImpactData(newsRes.value.data);
 
         // Primary price source: /api/market/quotes — works for ANY symbol
@@ -1058,8 +1092,8 @@ const InvestorStockPage = () => {
                   {[
                     { label: 'Price', val: `₹${livePrice.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, tag: 'Live', hint: 'Current index level', type: 'neutral' },
                     { label: 'Change', val: `${liveChange.pct >= 0 ? '+' : ''}${Number(liveChange.pct).toFixed(2)}%`, tag: liveChange.pct >= 0 ? 'Gaining' : 'Declining', hint: 'Today vs prev close', type: liveChange.pct >= 0 ? 'green' : 'red' },
-                    { label: 'Day High', val: quoteData?.dayHigh ? `₹${Number(quoteData.dayHigh).toLocaleString('en-IN')}` : '—', tag: 'Intraday', hint: 'Session high', type: 'neutral' },
-                    { label: 'Day Low', val: quoteData?.dayLow ? `₹${Number(quoteData.dayLow).toLocaleString('en-IN')}` : '—', tag: 'Intraday', hint: 'Session low', type: 'neutral' },
+                    { label: 'Day High', val: (quoteData?.high ?? quoteData?.dayHigh) ? `₹${Number(quoteData.high ?? quoteData.dayHigh).toLocaleString('en-IN')}` : '—', tag: 'Intraday', hint: 'Session high', type: 'neutral' },
+                    { label: 'Day Low', val: (quoteData?.low ?? quoteData?.dayLow) ? `₹${Number(quoteData.low ?? quoteData.dayLow).toLocaleString('en-IN')}` : '—', tag: 'Intraday', hint: 'Session low', type: 'neutral' },
                     { label: 'Volume', val: quoteData?.volume ? Number(quoteData.volume).toLocaleString('en-IN') : '—', tag: 'Shares', hint: 'Total traded today', type: 'neutral' },
                     { label: 'Index Type', val: 'Market Index', tag: 'NSE', hint: 'Basket of stocks', type: 'neutral' },
                   ].map((m, i) => (

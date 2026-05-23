@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import AdvancedTradingChart from './AdvancedTradingChart';
 
-const INDEX_SYMBOLS = ['NIFTY 50', 'BANKNIFTY', 'SENSEX', 'NIFTY IT'];
+
 
 const LAYOUTS = [
   { id: '1x1', label: '1 Chart', rows: 1, cols: 1, icon: '1x1' },
@@ -31,14 +31,17 @@ const LAYOUTS = [
   { id: '3x3', label: '3x3', rows: 3, cols: 3, icon: '3x3' },
 ];
 
+// Initial placeholder — replaced with live API symbols after mount
+const PLACEHOLDER_SYMBOLS = ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK'];
+
 const MultiChartWorkspace = () => {
   const [layout, setLayout] = useState('2x2');
-  const [availableSymbols] = useState(INDEX_SYMBOLS);
+  const [availableSymbols, setAvailableSymbols] = useState(PLACEHOLDER_SYMBOLS);
   const [charts, setCharts] = useState([
-    { id: 1, symbol: 'NIFTY 50', timeframe: '15' },
-    { id: 2, symbol: 'BANKNIFTY', timeframe: '15' },
-    { id: 3, symbol: 'SENSEX', timeframe: '15' },
-    { id: 4, symbol: 'NIFTY IT', timeframe: '15' },
+    { id: 1, symbol: 'RELIANCE', timeframe: '15' },
+    { id: 2, symbol: 'TCS', timeframe: '15' },
+    { id: 3, symbol: 'INFY', timeframe: '15' },
+    { id: 4, symbol: 'HDFCBANK', timeframe: '15' },
   ]);
   const [fullscreenChart, setFullscreenChart] = useState(null);
   const [syncEnabled, setSyncEnabled] = useState(false);
@@ -46,6 +49,16 @@ const MultiChartWorkspace = () => {
   const [showSaveMenu, setShowSaveMenu] = useState(false);
   const [workspaceName, setWorkspaceName] = useState('');
   const [savedWorkspaces, setSavedWorkspaces] = useState([]);
+
+  // Load symbols dynamically from the backend
+  useEffect(() => {
+    api.get('/market/data', { params: { type: 'STOCK', limit: 50 } })
+      .then(res => {
+        const syms = (res.data || []).map(s => s.symbol).filter(Boolean);
+        if (syms.length > 0) setAvailableSymbols(syms);
+      })
+      .catch(() => { /* keep placeholder */ });
+  }, []);
 
   const currentLayout = LAYOUTS.find(l => l.id === layout);
   const totalCharts = currentLayout.rows * currentLayout.cols;
@@ -73,11 +86,11 @@ const MultiChartWorkspace = () => {
   const addChart = useCallback(() => {
     const newChart = {
       id: Date.now(),
-      symbol: INDEX_SYMBOLS[charts.length % INDEX_SYMBOLS.length],
+      symbol: availableSymbols[charts.length % availableSymbols.length],
       timeframe: '15',
     };
     setCharts(prev => [...prev, newChart]);
-  }, [charts.length]);
+  }, [charts.length, availableSymbols]);
 
   const changeLayout = useCallback((newLayout) => {
     setLayout(newLayout);
@@ -152,8 +165,140 @@ const MultiChartWorkspace = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="px-3 py-2 rounded-lg bg-slate-800 text-slate-200">
-            <span className="text-sm font-semibold">2×2</span>
+          {}
+          <div className="relative">
+            <button
+              onClick={() => setShowLayoutMenu(!showLayoutMenu)}
+              className="px-4 py-2 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-all flex items-center gap-2"
+            >
+              <Layout className="w-4 h-4" />
+              <span className="text-sm font-semibold">{currentLayout.label}</span>
+              <span className="text-lg">{currentLayout.icon}</span>
+            </button>
+
+            <AnimatePresence>
+              {showLayoutMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full mt-2 right-0 w-64 bg-slate-800 rounded-xl border border-slate-700 shadow-2xl overflow-hidden z-50"
+                >
+                  <div className="p-2">
+                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider px-3 py-2">
+                      Select Layout
+                    </div>
+                    {LAYOUTS.map(l => (
+                      <button
+                        key={l.id}
+                        onClick={() => changeLayout(l.id)}
+                        className={`w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-700 transition-colors ${
+                          layout === l.id ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-300'
+                        }`}
+                      >
+                        <span className="text-sm font-semibold">{l.label}</span>
+                        <span className="text-xl">{l.icon}</span>
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {}
+          <button
+            onClick={() => setSyncEnabled(!syncEnabled)}
+            className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
+              syncEnabled
+                ? 'bg-cyan-500 text-white'
+                : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+            }`}
+          >
+            <Copy className="w-4 h-4" />
+            <span className="text-sm font-semibold">Sync</span>
+          </button>
+
+          {}
+          <div className="relative">
+            <button
+              onClick={() => setShowSaveMenu(!showSaveMenu)}
+              className="px-4 py-2 rounded-lg bg-slate-800 text-slate-300 hover:bg-slate-700 transition-all flex items-center gap-2"
+            >
+              <FolderOpen className="w-4 h-4" />
+              <span className="text-sm font-semibold">Workspace</span>
+            </button>
+
+            <AnimatePresence>
+              {showSaveMenu && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="absolute top-full mt-2 right-0 w-80 bg-slate-800 rounded-xl border border-slate-700 shadow-2xl overflow-hidden z-50"
+                >
+                  {}
+                  <div className="p-4 border-b border-slate-700">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+                      Save Current Workspace
+                    </label>
+                    <div className="flex items-center gap-2 mt-2">
+                      <input
+                        type="text"
+                        value={workspaceName}
+                        onChange={(e) => setWorkspaceName(e.target.value)}
+                        placeholder="Workspace name..."
+                        className="flex-1 px-3 py-2 bg-slate-900 border border-slate-700 rounded-lg text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                      />
+                      <button
+                        onClick={saveWorkspace}
+                        disabled={!workspaceName.trim()}
+                        className="px-4 py-2 rounded-lg bg-cyan-500 text-white hover:bg-cyan-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                      >
+                        <Save className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {}
+                  <div className="p-2 max-h-80 overflow-y-auto">
+                    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider px-3 py-2">
+                      Saved Workspaces ({savedWorkspaces.length})
+                    </div>
+                    {savedWorkspaces.length === 0 ? (
+                      <div className="text-center py-8 text-slate-500 text-sm">
+                        No saved workspaces yet
+                      </div>
+                    ) : (
+                      savedWorkspaces.map(workspace => (
+                        <div
+                          key={workspace.id}
+                          className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-slate-700 group"
+                        >
+                          <button
+                            onClick={() => loadWorkspace(workspace)}
+                            className="flex-1 text-left"
+                          >
+                            <div className="text-sm font-semibold text-white group-hover:text-cyan-300">
+                              {workspace.name}
+                            </div>
+                            <div className="text-xs text-slate-500">
+                              {workspace.layout} | {workspace.charts.length} charts
+                            </div>
+                          </button>
+                          <button
+                            onClick={() => deleteWorkspace(workspace.id)}
+                            className="p-1 rounded text-slate-500 hover:text-rose-400 transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </div>
@@ -271,9 +416,9 @@ const MultiChartWorkspace = () => {
       })()}
 
       {/* ── Normal grid view ── */}
-      <div className="flex-1 p-4 overflow-auto min-h-0">
+      <div className="flex-1 p-4 overflow-auto">
         <div
-          className="grid gap-4 h-full min-h-0"
+          className="grid gap-4 h-full"
           style={{
             gridTemplateRows: `repeat(${currentLayout.rows}, 1fr)`,
             gridTemplateColumns: `repeat(${currentLayout.cols}, 1fr)`,
@@ -285,15 +430,39 @@ const MultiChartWorkspace = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
-              className="relative bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 group min-h-0"
+              className="relative bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 group"
             >
               {}
+              <div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => toggleFullscreen(chart.id)}
+                  className="p-2 rounded-lg bg-slate-800/80 text-slate-300 hover:bg-slate-700 hover:text-white backdrop-blur-sm transition-all"
+                  title="Fullscreen"
+                >
+                  <Maximize2 className="w-4 h-4" />
+                </button>
+                {totalCharts > 1 && (
+                  <button
+                    onClick={() => removeChart(chart.id)}
+                    className="p-2 rounded-lg bg-slate-800/80 text-slate-300 hover:bg-rose-500 hover:text-white backdrop-blur-sm transition-all"
+                    title="Remove"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
 
               {}
-              <div className="absolute top-2 left-2 z-10 transition-opacity">
-                <div className="px-3 py-1.5 bg-slate-800/80 border border-slate-700 rounded-lg text-white text-sm font-semibold">
-                  {chart.symbol}
-                </div>
+              <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+                <select
+                  value={chart.symbol}
+                  onChange={(e) => updateChart(chart.id, { symbol: e.target.value })}
+                  className="px-3 py-1.5 bg-slate-800/80 backdrop-blur-sm border border-slate-700 rounded-lg text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-cyan-500"
+                >
+                  {availableSymbols.map(symbol => (
+                    <option key={symbol} value={symbol}>{symbol}</option>
+                  ))}
+                </select>
               </div>
 
               <AdvancedTradingChart
