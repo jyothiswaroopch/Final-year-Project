@@ -334,13 +334,13 @@ router.get('/quotes', async (req, res) => {
 
                 return {
                     symbol:        sym,
-                    price:         resObj.currentPrice,
-                    changePercent: resObj.percentChange,
-                    change:        resObj.percentChange,
-                    high:          resObj.high,
-                    low:           resObj.low,
-                    open:          resObj.open,
-                    volume:        resObj.volume,
+                    price:         priceValue,
+                    changePercent,
+                    change:        changePercent,
+                    high:          priceData?.high  ?? null,
+                    low:           priceData?.low   ?? null,
+                    open:          priceData?.open  ?? null,
+                    volume:        priceData?.volume ?? null,
                     // New STEP 5 explicit fields
                     currentPrice:  resObj.currentPrice,
                     percentChange: resObj.percentChange,
@@ -349,13 +349,6 @@ router.get('/quotes', async (req, res) => {
                     trendDirection: resObj.trendDirection,
                     marketStatus:  resObj.marketStatus,
                     lastUpdated:   resObj.lastUpdated,
-                    price:         priceValue,
-                    changePercent,
-                    change:        changePercent,
-                    high:          priceData?.high  ?? null,
-                    low:           priceData?.low   ?? null,
-                    open:          priceData?.open  ?? null,
-                    volume:        priceData?.volume ?? null,
                     // Fundamentals
                     pe:            fundamentals.pe,
                     priceToBook:   fundamentals.priceToBook,
@@ -390,7 +383,6 @@ router.get('/quotes', async (req, res) => {
                     consensus:     priceData?.consensus || null,
                     tradeCount:    priceData?.tradeCount || null,
                     // Source metadata
-                    priceSource:   resObj.priceSource,
                     priceSource:   providerName,
                     fundamentalSource: 'yahoo-finance2',
                     timestamp:     resObj.lastUpdated,
