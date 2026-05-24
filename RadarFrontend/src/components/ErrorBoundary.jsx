@@ -7,6 +7,11 @@ class ErrorBoundary extends React.Component {
   }
 
   static getDerivedStateFromError(error) {
+    // Automatically reload the page if a Vite dynamic import fails due to a new deployment
+    if (error && error.message && error.message.includes('Failed to fetch dynamically imported module')) {
+      window.location.reload();
+      return { hasError: true, error };
+    }
     return { hasError: true, error };
   }
 
