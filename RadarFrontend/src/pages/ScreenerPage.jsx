@@ -47,6 +47,7 @@ const ScreenerPage = () => {
 
   const [stocks, setStocks] = useState([]);
   const [filteredStocks, setFilteredStocks] = useState([]);
+  const [baseFilteredStocks, setBaseFilteredStocks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedStocks, setSelectedStocks] = useState([]);
   const [activeSignalTab, setActiveSignalTab] = useState('all');
@@ -267,10 +268,41 @@ const ScreenerPage = () => {
   ];
 
   // Live load on mount — replaces MOCK_STOCKS
-  const fetchAndSet = useCallback(async () => {
+  const fetchAndSet = useCallback(async (currentFilters) => {
     setLoading(true);
     try {
-      const res = await runScreenerScan({ limit: 50 });
+      // Map frontend filters to backend expected format
+      const apiFilters = {};
+      if (currentFilters) {
+        if (currentFilters.minPrice !== '') apiFilters.minPrice = parseFloat(currentFilters.minPrice);
+        if (currentFilters.maxPrice !== '') apiFilters.maxPrice = parseFloat(currentFilters.maxPrice);
+        if (currentFilters.minPriceChange !== '') apiFilters.minChange = parseFloat(currentFilters.minPriceChange);
+        if (currentFilters.maxPriceChange !== '') apiFilters.maxChange = parseFloat(currentFilters.maxPriceChange);
+        if (currentFilters.minPe !== '') apiFilters.minPe = parseFloat(currentFilters.minPe);
+        if (currentFilters.maxPe !== '') apiFilters.maxPe = parseFloat(currentFilters.maxPe);
+        if (currentFilters.minMarketCap !== '') apiFilters.minMarketCap = parseFloat(currentFilters.minMarketCap);
+        if (currentFilters.sector !== 'All') apiFilters.sectors = [currentFilters.sector];
+        
+        // Technical filters
+        if (currentFilters.minRsi > 0) apiFilters.minRsi = currentFilters.minRsi;
+        if (currentFilters.maxRsi < 100) apiFilters.maxRsi = currentFilters.maxRsi;
+      }
+
+      let sortBy = 'change';
+      let sortOrder = 'desc';
+
+      // If they are looking for oversold, sort by RSI asc
+      if (currentFilters && currentFilters.minRsi >= 0 && currentFilters.maxRsi <= 40) {
+        sortBy = 'rsi';
+        sortOrder = 'asc';
+      }
+
+      const res = await runScreenerScan({ 
+        limit: 50,
+        filters: apiFilters,
+        sortBy,
+        sortOrder
+      });
       // Backend wraps: { success, data: { results: [...] } }
       const inner = res?.data ?? res;
       const raw = inner?.results ?? inner?.stocks ?? inner?.data ?? (Array.isArray(inner) ? inner : []);
@@ -342,12 +374,16 @@ const ScreenerPage = () => {
   }, []);
 
   useEffect(() => {
+    let initialFilters = filters;
     try {
       const saved = localStorage.getItem(SETTINGS_STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         if (parsed && typeof parsed === 'object') {
-          if (parsed.filters && typeof parsed.filters === 'object') setFilters((prev) => ({ ...prev, ...parsed.filters }));
+          if (parsed.filters && typeof parsed.filters === 'object') {
+            initialFilters = { ...initialFilters, ...parsed.filters };
+            setFilters((prev) => ({ ...prev, ...parsed.filters }));
+          }
           if (typeof parsed.activeSignalTab === 'string') setActiveSignalTab(parsed.activeSignalTab);
           if (typeof parsed.viewMode === 'string') setViewMode(parsed.viewMode);
           if (typeof parsed.filterOpen === 'boolean') setFilterOpen(parsed.filterOpen);
@@ -356,7 +392,7 @@ const ScreenerPage = () => {
     } catch (error) {
       console.error('Failed to restore screener settings:', error);
     }
-    fetchAndSet();
+    fetchAndSet(initialFilters);
   }, [fetchAndSet]);
 
   useEffect(() => {
@@ -441,6 +477,10 @@ const ScreenerPage = () => {
       });
     }
 
+    // Save base filtered stocks for the tabs to use
+    const baseResult = [...result];
+    setBaseFilteredStocks(baseResult);
+
     // Signal tab filter
     if (filters.showOnlySignals && activeSignalTab !== 'all') {
       result = result.filter((stock) => stock.signal.toLowerCase() === activeSignalTab.toLowerCase());
@@ -464,13 +504,13 @@ const ScreenerPage = () => {
   const handleRefresh = useCallback(async () => {
     setLoading(true);
     try {
-      await fetchAndSet();
+      await fetchAndSet(filters);
       setLastUpdated(new Date());
       pushNotice('Scanner refreshed with live data.');
     } finally {
       setLoading(false);
     }
-  }, [fetchAndSet]);
+  }, [fetchAndSet, filters]);
 
   const toggleStockSelection = (stockId) => {
     setSelectedStocks((prev) =>
@@ -533,10 +573,10 @@ const ScreenerPage = () => {
   };
 
   const SIGNAL_TABS = [
-    { id: 'all', label: 'Market Opportunities', count: filteredStocks.length },
-    { id: 'breakout', label: 'Breakout', count: filteredStocks.filter((s) => s.signal === 'BREAKOUT').length },
-    { id: 'momentum', label: 'Momentum', count: filteredStocks.filter((s) => s.signal === 'MOMENTUM').length },
-    { id: 'pullback', label: 'Pullback', count: filteredStocks.filter((s) => s.signal === 'PULLBACK').length },
+    { id: 'all', label: 'Market Opportunities', count: baseFilteredStocks.length },
+    { id: 'breakout', label: 'Breakout', count: baseFilteredStocks.filter((s) => s.signal === 'BREAKOUT').length },
+    { id: 'momentum', label: 'Momentum', count: baseFilteredStocks.filter((s) => s.signal === 'MOMENTUM').length },
+    { id: 'pullback', label: 'Pullback', count: baseFilteredStocks.filter((s) => s.signal === 'PULLBACK').length },
   ];
   const scansActive = Math.max(12, filteredStocks.length * 8 + 2);
 
