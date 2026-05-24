@@ -1463,7 +1463,7 @@ export function SettingsPage() {
                                         placeholder="Add symbol (e.g. RELIANCE)" 
                                         className="flex-1 px-3 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all"
                                         onFocus={() => { if(searchResults.length > 0) setShowDropdown(true); }}
-                                        onBlur={() => setTimeout(() => setShowDropdown(false), 200)}
+                                        onBlur={() => setTimeout(() => setShowDropdown(false), 300)}
                                     />
                                     <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-black shadow-md shadow-blue-100 hover:bg-blue-700 transition-all">Add</button>
                                     
@@ -1477,6 +1477,7 @@ export function SettingsPage() {
                                                     <div 
                                                         key={item.symbol} 
                                                         className="px-3 py-2 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0"
+                                                        onMouseDown={(e) => e.preventDefault()}
                                                         onClick={() => {
                                                             setNewTicker(item.symbol);
                                                             setShowDropdown(false);
