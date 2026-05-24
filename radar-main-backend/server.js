@@ -32,7 +32,10 @@ const parsePort = (value, fallback) => {
 };
 
 const BASE_PORT = parsePort(process.env.PORT, 5000);
+// In a cloud environment (Railway/Vercel), we must strictly bind to the assigned PORT.
+// Never auto-fallback if process.env.PORT is explicitly provided.
 const SHOULD_AUTO_FALLBACK_PORT =
+    !process.env.PORT &&
     process.env.NODE_ENV !== 'production' &&
     process.env.PORT_STRICT !== 'true' &&
     process.env.PORT_AUTO_FALLBACK !== 'false';
