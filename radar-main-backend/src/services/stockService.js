@@ -127,13 +127,12 @@ const warnThrottled = (key, message, meta = {}) => {
 
 
 const parseStockSymbols = async () => {
-    // Combine universe.json with SEED_SYMBOLS and fallbackStockMeta to ensure a massive universe for screeners
-    const universeSymbols = universe.map(asset => asset.symbol);
-    const seedSymbolsNS = SEED_SYMBOLS.map(s => `${s}.NS`);
+    // Pull all active symbols dynamically from the DB, ensuring a massive real universe
+    const activeSymbols = await getActiveSymbolsWithSuffix();
     const metaSymbolsNS = Object.keys(fallbackStockMeta)
         .filter(k => !k.includes('.') && k !== 'NIFTY' && k !== 'SENSEX' && k !== 'BANKNIFTY')
         .map(k => `${k}.NS`);
-    return [...new Set([...universeSymbols, ...seedSymbolsNS, ...metaSymbolsNS])];
+    return [...new Set([...activeSymbols, ...metaSymbolsNS])];
 };
 
 const fallbackStockMeta = {

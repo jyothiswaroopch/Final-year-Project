@@ -111,7 +111,7 @@ const ScreenerPage = () => {
       }
 
       const res = await runScreenerScan({ 
-        limit: 50,
+        limit: 200,
         filters: apiFilters,
         sortBy,
         sortOrder
