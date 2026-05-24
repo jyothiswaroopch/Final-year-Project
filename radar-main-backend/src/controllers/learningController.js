@@ -15,7 +15,12 @@ const readCourses = async () => {
 // GET /api/learning  — all courses
 const getLearnings = async (req, res) => {
     try {
-        const courses = await readCourses();
+        let courses = await readCourses();
+        const audience = req.query.audience;
+        if (audience) {
+            // Strictly unique courses for each audience
+            courses = courses.filter(c => c.audience === audience);
+        }
         res.json({ success: true, data: courses });
     } catch (error) {
         logger.error('Failed to load learning data:', error);
