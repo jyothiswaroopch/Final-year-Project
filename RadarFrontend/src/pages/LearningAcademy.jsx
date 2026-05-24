@@ -65,8 +65,6 @@ const saveLocalProgress = (courseId, data, mode = '') => {
   localStorage.setItem(LOCAL_KEY(courseId, mode), JSON.stringify(data));
 };
 
-}
-
 // ── Quiz Component ───────────────────────────────────────────────────────────
 function QuizSection({ quiz, courseId, isTrader, onFinish }) {
   const [answers, setAnswers] = useState({});
