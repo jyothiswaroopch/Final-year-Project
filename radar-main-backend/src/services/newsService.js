@@ -495,9 +495,8 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
 
 const getCompanyNews = async (symbol, companyName = '') => {
     try {
-        const YahooFinance = new (require('yahoo-finance2').default)();
-        const yahooFinance = new YahooFinance();
-        
+        const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });                
         let yahooSymbol = String(symbol || '').toUpperCase().trim();
         if (!yahooSymbol.includes('.')) {
             yahooSymbol = `${yahooSymbol}.NS`;

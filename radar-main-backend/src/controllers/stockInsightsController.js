@@ -6,9 +6,8 @@ const {
 } = require('../services/stockInsightsService');
 
 
-const YahooFinance = new (require('yahoo-finance2').default)();
-
-const yahooFinance = new YahooFinance();
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const getFundamentals = async (req, res) => {
 
     let yahooSymbol = '';

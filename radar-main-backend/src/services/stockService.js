@@ -1,5 +1,5 @@
-const YahooFinance = new (require('yahoo-finance2').default)();
-const yahooFinance = new YahooFinance();
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const axios = require('axios');
 const universe = require('../data/universe.json');
 const { generateHistory } = require('../utils/mockGenerator');

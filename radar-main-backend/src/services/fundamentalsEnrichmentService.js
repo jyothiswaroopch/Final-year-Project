@@ -19,7 +19,7 @@
  *   valStatus, deliveryPct, asOf
  */
 
-const YahooFinance = new (require('yahoo-finance2').default)();
+const YahooFinance = require('yahoo-finance2').default;
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const NodeCache    = require('node-cache');
 const logger       = require('../config/logger');

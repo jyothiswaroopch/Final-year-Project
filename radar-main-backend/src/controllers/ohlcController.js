@@ -4,9 +4,8 @@ const stockDetailsService = require('../services/stockDetailsService');
 const logger = require('../config/logger');
 
 
-const YahooFinance = new (require('yahoo-finance2').default)();
-
-const yahooFinance = new YahooFinance();
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 const getHistoricalData = async (req, res) => {
 

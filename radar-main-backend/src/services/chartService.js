@@ -1,8 +1,7 @@
 const mapSymbol = require('../utils/symbolMapper');
 
-const YahooFinance = new (require('yahoo-finance2').default)();
-
-const yahooFinance = new YahooFinance();
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 
 const getChartData = async (
     symbol,

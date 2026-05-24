@@ -1,7 +1,6 @@
-const YahooFinance = new (require('yahoo-finance2').default)();
-const normalizeStockData = require('../utils/normalizeStockData');
+const YahooFinance = require('yahoo-finance2').default;
+const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });const normalizeStockData = require('../utils/normalizeStockData');
 
-const yahooFinance = new YahooFinance();
 
 const INDEX_MAP = {
   NIFTY: '^NSEI',
