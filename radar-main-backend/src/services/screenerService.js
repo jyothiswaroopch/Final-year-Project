@@ -221,44 +221,7 @@ const runScreener = async (payload = {}) => {
     const stocks = await fetchStockData();
 
     const baseRows = (Array.isArray(stocks) ? stocks : []).map(buildRow);
-    const enrichedBaseRows = await Promise.all(
-    baseRows.map(async (row) => {
-
-        const fundamentals =
-            await fetchYahooFundamentals(row.symbol);
-        console.log(
-            'YAHOO FUNDAMENTALS:',
-            row.symbol,
-            fundamentals
-        );
-        return {
-            ...row,
-
-            pe:
-                getValidFundamental(fundamentals?.peRatio, row.pe),
-
-            marketCap:
-                getValidFundamental(fundamentals?.marketCap, row.marketCap),
-
-            sector:
-                getValidFundamental(fundamentals?.sector, row.sector),
-
-            eps:
-                getValidFundamental(fundamentals?.eps, null),
-
-            beta:
-                getValidFundamental(fundamentals?.beta, null),
-
-            dividendYield:
-                getValidFundamental(fundamentals?.dividendYield, row.dividendYield),
-
-            roe:
-                getValidFundamental(fundamentals?.roe, row.roe),
-        };
-    })
-);
-
-    console.log("FIRST BASE ROW:", baseRows[0]);
+    const enrichedBaseRows = baseRows;
 
     const filteredBase = applyBaseFilters(enrichedBaseRows, filters)
     const enrichedRows = needsTechnicalData(filters, sortBy)
@@ -269,7 +232,7 @@ const runScreener = async (payload = {}) => {
     const sorted = sortRows(filteredRows, sortBy, sortOrder);
     console.log("DEBUG: enrichedBaseRows length:", enrichedBaseRows.length);
     console.log("DEBUG: sorted length:", sorted.length);
-    const finalRows = sorted.length > 0 ? sorted : sortRows(enrichedBaseRows, sortBy, sortOrder);
+    const finalRows = sorted;
     console.log("DEBUG: finalRows length:", finalRows.length);
     
     const results = await Promise.all(finalRows.slice(0, limit).map(async (row) => {
