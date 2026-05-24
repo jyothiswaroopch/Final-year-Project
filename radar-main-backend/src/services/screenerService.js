@@ -46,10 +46,12 @@ const inRange = (value, min, max, { excludeOnMissing = false } = {}) => {
  * Priority: BREAKOUT > SQUEEZE > PULLBACK > REVERSAL > MOMENTUM
  */
 const classifySignal = (row) => {
-    const { rsi, score, change, bias, volumeRatio, ema20, price } = row;
+    const { rsi, score, changePercent, bias, volumeRatio, ema20, price } = row;
 
-    // BREAKOUT: strong price move + RSI momentum zone + volume surge
-    if (change >= 1.5 && rsi >= 55 && rsi <= 80 && volumeRatio >= 1.5) return 'BREAKOUT';
+    if (rsi > 60 && changePercent > 1.5 && volumeRatio > 1.5) return 'BREAKOUT';
+    if (rsi < 40 && changePercent > 0) return 'REVERSAL';
+    if (rsi < 45 && changePercent < 0) return 'PULLBACK';
+    if (rsi > 55 && rsi <= 70 && changePercent > 0) return 'MOMENTUM';
 
     // SQUEEZE: price near EMA20 with low volume (consolidation)
     if (ema20 && price && Math.abs((price - ema20) / ema20) < 0.015 && volumeRatio < 1.2) return 'SQUEEZE';
@@ -131,6 +133,7 @@ const buildRow = (stock, dbFund) => {
         type:            stock.type || 'STOCK',
         price:           toNumber(stock.price, NaN),
         change:          toNumber(stock.change, NaN),
+        changePercent:   toNumber(stock.changePercent, NaN),
         sector,
         pe,
         marketCap:       marketCapRaw,
@@ -151,7 +154,7 @@ const buildRow = (stock, dbFund) => {
 // ── Apply base (fundamental) filters ─────────────────────────────────────────
 const applyBaseFilters = (rows, filters) => rows.filter((row) => {
     if (!inRange(row.price,           filters.minPrice,     filters.maxPrice))     return false;
-    if (!inRange(row.change,          filters.minChange,    filters.maxChange))    return false;
+    if (!inRange(row.changePercent,   filters.minChange,    filters.maxChange))    return false;
     if (!inRange(row.pe,              filters.minPe,        filters.maxPe))        return false;
     if (!inRange(row.marketCapNumeric, filters.minMarketCap, filters.maxMarketCap)) return false;
     if (!inRange(row.roe,             filters.minRoe,       filters.maxRoe))        return false;
@@ -209,7 +212,7 @@ const applyTechnicalFilters = (rows, filters) => rows.filter((row) => {
     if (!inRange(row.score, filters.minScore, filters.maxScore)) return false;
 
     if (filters.trendType && filters.trendType !== 'all') {
-        const rowTrend = classifyTrend(row.bias, row.rsi, row.change);
+        const rowTrend = classifyTrend(row.bias, row.rsi, row.changePercent);
         if (rowTrend !== filters.trendType) return false;
     }
 
@@ -256,6 +259,7 @@ const runScreener = async (payload = {}) => {
     const sortOrder = payload.sortOrder || 'desc';
     const limit     = Math.max(1, Math.min(MAX_LIMIT, Number(payload.limit || DEFAULT_LIMIT)));
     const strictLive = payload.strictLive === true;
+    const reqTimeframe = filters.timeframe || '1D';
 
     // ── Step 1: Get price universe from Yahoo (cached in stockService) ────────
     const stocks = await fetchStockData();
@@ -308,6 +312,7 @@ const runScreener = async (payload = {}) => {
         const rsiVal    = isFiniteNum(row.rsi)   ? row.rsi   : 50;
         const scoreVal  = isFiniteNum(row.score) ? row.score : 60;
         const changeVal = isFiniteNum(row.change) ? row.change : 0;
+        const changePercentVal = isFiniteNum(row.changePercent) ? row.changePercent : 0;
         const rvolVal   = isFiniteNum(row.volumeRatio) ? row.volumeRatio : 1;
 
         const enrichedRow = {
@@ -315,6 +320,7 @@ const runScreener = async (payload = {}) => {
             rsi:         rsiVal,
             score:       scoreVal,
             change:      changeVal,
+            changePercent: changePercentVal,
             volumeRatio: rvolVal,
             price:       row.price,
             ema20:       row.ema20,
@@ -322,12 +328,12 @@ const runScreener = async (payload = {}) => {
 
         const signal         = classifySignal(enrichedRow);
         const signalStrength = classifyStrength(scoreVal, rsiVal, rvolVal);
-        const trend          = classifyTrend(row.bias, rsiVal, changeVal);
-        const macdBias       = classifyMacdBias(row.bias, changeVal);
+        const trend          = classifyTrend(row.bias, rsiVal, changePercentVal);
+        const macdBias       = classifyMacdBias(row.bias, changePercentVal);
 
         // Build reasons from real data
         const reasons = [];
-        if (changeVal > 1.5) reasons.push(`Strong price momentum (+${changeVal.toFixed(1)}%)`);
+        if (changePercentVal > 1.5) reasons.push(`Strong price momentum (+${changePercentVal.toFixed(1)}%)`);
         if (rvolVal > 1.5)   reasons.push(`Volume surge (${rvolVal.toFixed(1)}x RVOL)`);
         if (rsiVal > 60 && rsiVal < 70) reasons.push('RSI entering bullish momentum zone');
         if (rsiVal < 35)     reasons.push('Oversold RSI — potential bounce zone');
@@ -340,7 +346,7 @@ const runScreener = async (payload = {}) => {
             name:          row.name,
             price:         isFiniteNum(row.price)  ? Number(row.price.toFixed(2))  : null,
             change:        isFiniteNum(changeVal)   ? Number(changeVal.toFixed(2))  : null,
-            changePercent: isFiniteNum(changeVal)   ? Number(changeVal.toFixed(2))  : null,
+            changePercent: isFiniteNum(changePercentVal) ? Number(changePercentVal.toFixed(2)) : null,
             volume:        isFiniteNum(row.volume)  ? row.volume                    : null,
             sector:        row.sector,
             pe:            isFiniteNum(row.pe)      ? Number(row.pe.toFixed(2))     : null,
@@ -359,6 +365,7 @@ const runScreener = async (payload = {}) => {
             roe:           isFiniteNum(row.roe)          ? Number(row.roe.toFixed(2))         : null,
             dividendYield: isFiniteNum(row.dividendYield)? Number(row.dividendYield.toFixed(2)): null,
             technicalLive: row.technicalLive,
+            timeframe:     reqTimeframe,
             sparklineData,
             chart:         sparklineData ? sparklineData.map(p => p.value) : [],
         };
