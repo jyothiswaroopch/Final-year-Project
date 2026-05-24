@@ -170,6 +170,13 @@ const MostBoughtStocks = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 content-start">
+                {cards.length === 0 && !isLoading && (
+                    <div className="col-span-full flex flex-col items-center justify-center py-12 text-center text-slate-400">
+                        <Activity size={32} className="mb-3 opacity-30" />
+                        <p className="text-sm font-semibold">Market data loading…</p>
+                        <p className="text-xs mt-1 opacity-70">Analytics will appear once the feed syncs</p>
+                    </div>
+                )}
                 {cards.map((stock) => {
                     const sym = displaySymbol(stock.name).toUpperCase();
                     const isSaved = savedSymbols.has(sym);

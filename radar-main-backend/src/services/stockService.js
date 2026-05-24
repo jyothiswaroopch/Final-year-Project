@@ -1324,9 +1324,10 @@ const fetchStockData = async (customSymbols = null) => {
                 logger.warn(`All live quote providers failed. Serving stale cache for ${symbols.length} symbols.`);
                 return lastKnownGoodQuotes;
             }
-            // Truly nothing available — log but don't crash; return empty so caller degrades gracefully
-            logger.error(`Live quotes unavailable for ${symbols.slice(0, 5).join(', ')}${symbols.length > 5 ? '...' : ''} — no stale fallback either.`);
-            return [];
+            // All live providers failed — use synthetic fallback so Market Pulse / Screener are never empty
+            logger.warn(`Live quotes unavailable. Serving synthetic fallback for ${symbols.length} symbols.`);
+            const fallbackSymbols = symbols.slice(0, 30);
+            return buildFallbackQuotes(fallbackSymbols);
         }
 
         if (!customSymbols) {
