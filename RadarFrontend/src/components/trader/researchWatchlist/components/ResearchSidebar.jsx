@@ -47,8 +47,8 @@ const ResearchSidebar = ({ row, onRemove, onOpen, onAlert }) => {
             <Metric label="RSI" value={row.rsi != null ? row.rsi.toFixed(1) : '—'} />
             <Metric
               label="MACD Hist."
-              value={row.indicatorsReady ? row.macd.histogram.toFixed(2) : '—'}
-              tone={row.indicatorsReady && row.macd.histogram >= 0 ? 'text-emerald-400' : 'text-rose-400'}
+              value={row.indicatorsReady && row.macd ? row.macd.histogram.toFixed(2) : '—'}
+              tone={row.indicatorsReady && row.macd && row.macd.histogram >= 0 ? 'text-emerald-400' : 'text-rose-400'}
             />
             <Metric label="Trend" value={row.trend} />
             <Metric label="Sentiment" value={row.sentiment} />
@@ -61,7 +61,7 @@ const ResearchSidebar = ({ row, onRemove, onOpen, onAlert }) => {
             </div>
             <p className="text-xs leading-relaxed text-slate-400">
               {row.technicalSignal}. RSI {row.rsi != null ? row.rsi.toFixed(1) : '—'}, MACD histogram{' '}
-              {row.indicatorsReady ? row.macd.histogram.toFixed(2) : '—'}, volume {compactNumber(row.volume)}.
+              {row.indicatorsReady && row.macd ? row.macd.histogram.toFixed(2) : '—'}, volume {compactNumber(row.volume)}.
               {row.source && (
                 <span className="mt-2 block text-[10px] text-slate-600">Feed Source: {row.source}</span>
               )}

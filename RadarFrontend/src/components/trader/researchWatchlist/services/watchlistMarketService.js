@@ -55,7 +55,7 @@ export const enrichWatchlistSymbol = async (symbol) => {
       return {
         ...row,
         id: row.symbol,
-        indicatorsReady: row.rsi !== null && row.macd?.histogram !== null,
+      indicatorsReady: row.rsi != null && row.macd != null && row.macd.histogram != null,
       };
     }
   } catch (error) {
@@ -72,7 +72,7 @@ export const enrichWatchlistSymbols = async (symbols) => {
     return rawRows.map((row) => ({
       ...row,
       id: row.symbol,
-      indicatorsReady: row.rsi !== null && row.macd?.histogram !== null,
+      indicatorsReady: row.rsi != null && row.macd != null && row.macd.histogram != null,
     }));
   } catch (error) {
     console.error('Failed to enrich watchlist symbols:', error);
