@@ -44,22 +44,22 @@ const getStockDetails = async (symbol) => {
         'defaultKeyStatistics',
         'price',
         'summaryDetail',
-        'incomeStatementHistory',
-        'incomeStatementHistoryQuarterly',
         'majorHoldersBreakdown'
       ]
     }
   );
   console.log(summary.assetProfile);
-  const quarterly = summary?.incomeStatementHistoryQuarterly?.incomeStatementHistory || [];
-  const yearly = summary?.incomeStatementHistory?.incomeStatementHistory || [];
 
-  const formatIncomeData = (history, isQuarterly) => {
-    return history
-      .slice(0, 5)
-      .reverse()
-      .map(item => {
-        const date = new Date(item.endDate);
+  const period1 = new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+  const [quarterlyTS, yearlyTS] = await Promise.all([
+      yahooFinance.fundamentalsTimeSeries(yahooSymbol, { period1, module: 'financials', type: 'quarterly' }).catch(() => []),
+      yahooFinance.fundamentalsTimeSeries(yahooSymbol, { period1, module: 'financials', type: 'annual' }).catch(() => [])
+  ]);
+
+  const formatTSData = (history, isQuarterly) => {
+    if (!history || !history.length) return [];
+    return history.slice(-5).map(item => {
+        const date = new Date(item.date);
         let periodLabel = '';
         if (isQuarterly) {
             periodLabel = `Q${Math.floor(date.getMonth() / 3) + 1} '${date.getFullYear().toString().slice(-2)}`;
@@ -68,15 +68,15 @@ const getStockDetails = async (symbol) => {
         }
         return {
           quarter: periodLabel,
-          revenue: (item.totalRevenue || 0) / 10000000,
-          profit: (item.netIncome || 0) / 10000000
+          revenue: (item.totalRevenue || item.operatingRevenue || 0) / 10000000,
+          profit: (item.netIncome || item.normalizedIncome || 0) / 10000000
         };
-      });
+    });
   };
 
   const financialPerformance = {
-    quarterly: formatIncomeData(quarterly, true),
-    yearly: formatIncomeData(yearly, false)
+    quarterly: formatTSData(quarterlyTS, true),
+    yearly: formatTSData(yearlyTS, false)
   };
 
   const majorHolders = summary?.majorHoldersBreakdown || {};

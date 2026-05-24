@@ -25,25 +25,29 @@ const getFundamentals = async (req, res) => {
                 'summaryDetail',
                 'defaultKeyStatistics',
                 'financialData',
-                'assetProfile',
-                'incomeStatementHistory',
-                'incomeStatementHistoryQuarterly'
+                'assetProfile'
             ]
         });
 
-        const formatIncomeData = (history, isQuarterly) => {
-            if (!history || !history.incomeStatementHistory) return [];
-            return history.incomeStatementHistory.map(item => {
-                const date = new Date(item.endDate);
+        const period1 = new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+        const [quarterlyTS, yearlyTS] = await Promise.all([
+            yahooFinance.fundamentalsTimeSeries(yahooSymbol, { period1, module: 'financials', type: 'quarterly' }).catch(() => []),
+            yahooFinance.fundamentalsTimeSeries(yahooSymbol, { period1, module: 'financials', type: 'annual' }).catch(() => [])
+        ]);
+
+        const formatTSData = (history, isQuarterly) => {
+            if (!history || !history.length) return [];
+            return history.slice(-4).map(item => {
+                const date = new Date(item.date);
                 const periodLabel = isQuarterly 
                     ? `Q${Math.floor(date.getMonth() / 3) + 1} '${date.getFullYear().toString().slice(-2)}`
                     : `'${date.getFullYear().toString().slice(-2)}`;
                 return {
                     quarter: periodLabel,
-                    revenue: (item.totalRevenue || 0) / 10000000,
-                    profit: (item.netIncome || 0) / 10000000
+                    revenue: (item.totalRevenue || item.operatingRevenue || 0) / 10000000,
+                    profit: (item.netIncome || item.normalizedIncome || 0) / 10000000
                 };
-            }).reverse();
+            });
         };
 
         const fundamentals = {
@@ -108,8 +112,8 @@ const getFundamentals = async (req, res) => {
                 null,
                 
             financialPerformance: {
-                quarterly: formatIncomeData(result?.incomeStatementHistoryQuarterly, true),
-                yearly: formatIncomeData(result?.incomeStatementHistory, false)
+                quarterly: formatTSData(quarterlyTS, true),
+                yearly: formatTSData(yearlyTS, false)
             }
         };
 
