@@ -1,6 +1,6 @@
 const mapSymbol = require('../utils/symbolMapper');
 
-const YahooFinance = require('yahoo-finance2').default;
+const YahooFinance = new (require('yahoo-finance2').default)();
 
 const yahooFinance = new YahooFinance();
 

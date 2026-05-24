@@ -273,7 +273,7 @@ const ScreenerPage = () => {
       const res = await runScreenerScan({ limit: 50 });
       // Backend wraps: { success, data: { results: [...] } }
       const inner = res?.data ?? res;
-      const raw = inner?.results ?? inner?.stocks ?? (Array.isArray(inner) ? inner : []);
+      const raw = inner?.results ?? inner?.stocks ?? inner?.data ?? (Array.isArray(inner) ? inner : []);
       
       const normalized = raw.map((s, i) => {
         const changePercent = Number(s.changePercent ?? s.change ?? 0);

@@ -64,6 +64,8 @@ import {
     YAxis,
     Tooltip
 } from 'recharts';
+import { fetchCourses } from '../api/learningApi';
+import { CourseCard } from '../components/learning/CourseCard';
 
 const toPayload = (value, fallback = null) => {
     if (value && typeof value === 'object' && Object.prototype.hasOwnProperty.call(value, 'data')) {
@@ -827,6 +829,8 @@ export function ProfilePage() {
     const [insights, setInsights] = useState([]);
     const [events, setEvents] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [courses, setCourses] = useState([]);
+    const [progressMap, setProgressMap] = useState({});
 
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editData, setEditData] = useState({
@@ -859,17 +863,28 @@ export function ProfilePage() {
     useEffect(() => {
         const loadDashboardData = async () => {
             try {
-                const [profileRes, portfolioRes, insightsRes, eventsRes] = await Promise.all([
+                const [profileRes, portfolioRes, insightsRes, eventsRes, coursesData] = await Promise.all([
                     api.get('/user/profile').catch(() => ({ data: { username: 'Investor', email: 'guest@radar.com', joinedDate: 'Joined Feb 2024' } })),
                     api.get('/user/portfolio').catch(() => ({ data: null })),
                     api.get('/user/insights').catch(() => ({ data: [] })),
-                    api.get('/user/events').catch(() => ({ data: [] }))
+                    api.get('/user/events').catch(() => ({ data: [] })),
+                    fetchCourses().catch(() => [])
                 ]);
 
                 setProfile(toPayload(profileRes.data, null));
                 setPortfolio(toPayload(portfolioRes.data, null));
                 setInsights(toPayload(insightsRes.data, []));
                 setEvents(toPayload(eventsRes.data, []));
+                setCourses(coursesData);
+                
+                const pmap = {};
+                coursesData.forEach(c => {
+                    const local = localStorage.getItem(`radar_academy_progress_investor_${c.id}`);
+                    if (local) {
+                        try { pmap[c.id] = JSON.parse(local); } catch (e) {}
+                    }
+                });
+                setProgressMap(pmap);
             } catch (error) {
                 console.error("Failed to load profile data", error);
             } finally {
@@ -904,11 +919,9 @@ export function ProfilePage() {
         </div>
     );
 
-    const learningProgress = [
-        { title: 'Stock Market Basics', status: 'Completed', progress: 100, icon: <BookOpen size={14} /> },
-        { title: 'Technical Indicators', status: 'In Progress', progress: 70, icon: <TrendingUp size={14} /> },
-        { title: 'Risk Management', status: 'Not Started', progress: 0, icon: <ShieldCheck size={14} /> }
-    ];
+    const totalChapters = courses.reduce((s, c) => s + (c.chapters?.length || 0), 0);
+    const totalCompleted = courses.reduce((s, c) => s + Object.values(progressMap[c.id]?.chapters || {}).filter(Boolean).length, 0);
+    const totalProgressPct = totalChapters ? Math.round((totalCompleted / totalChapters) * 100) : 0;
 
     const dna = profile?.investorDNA || null;
     const hasDNA = dna && dna.dominant;
@@ -1065,26 +1078,17 @@ export function ProfilePage() {
                                 <h2 className="text-xl font-black text-slate-800 uppercase tracking-widest">Learning Journey</h2>
                                 <p className="text-xs text-slate-500 font-bold mt-1">Progress through financial intelligence modules</p>
                             </div>
-                            <div className="px-3 py-1 bg-blue-50 rounded-lg text-[10px] font-black text-blue-600">70% TOTAL PROGRESS</div>
+                            <div className="px-3 py-1 bg-blue-50 rounded-lg text-[10px] font-black text-blue-600">{totalProgressPct}% TOTAL PROGRESS</div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {learningProgress.map((item, idx) => (
-                                <div key={idx} className="p-6 rounded-[20px] bg-white border border-slate-100 shadow-sm flex flex-col gap-4">
-                                    <div className="flex justify-between items-start">
-                                        <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-blue-500">
-                                            {item.icon}
-                                        </div>
-                                        <span className={`text-[9px] font-black uppercase px-2 py-1 rounded-md ${item.status === 'Completed' ? 'bg-emerald-50 text-emerald-600' : 'bg-blue-50 text-blue-600'}`}>
-                                            {item.status}
-                                        </span>
-                                    </div>
-                                    <div>
-                                        <h4 className="text-sm font-black text-slate-800">{item.title}</h4>
-                                        <div className="w-full bg-slate-100 rounded-full h-1.5 mt-4 overflow-hidden">
-                                            <div className="bg-blue-500 h-full rounded-full transition-all duration-1000" style={{ width: `${item.progress}%` }} />
-                                        </div>
-                                    </div>
-                                </div>
+                            {courses.slice(0, 3).map(c => (
+                                <CourseCard 
+                                    key={c.id}
+                                    course={c}
+                                    isTrader={false}
+                                    progress={progressMap[c.id] || {}}
+                                    onClick={() => navigate('/investor/academy')}
+                                />
                             ))}
                         </div>
                     </div>

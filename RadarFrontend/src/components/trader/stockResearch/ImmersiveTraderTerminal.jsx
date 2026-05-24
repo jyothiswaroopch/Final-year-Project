@@ -531,7 +531,7 @@ const ImmersiveTraderTerminal = ({ symbol: initialSymbol = "RELIANCE", basePrice
   
   const [timeframe, setTimeframe] = useState('10m');
   const [chartType, setChartType] = useState('candles');
-  const [activeIndicators, setActiveIndicators] = useState({ rsi: false, macd: false });
+  const [activeIndicators, setActiveIndicators] = useState({ rsi: false, macd: false, vwap: false, ema: false });
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [sidebarTab, setSidebarTab] = useState('watchlist');
   const [activeTool, setActiveTool] = useState('cursor');

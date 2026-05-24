@@ -1,4 +1,4 @@
-const YahooFinance = require('yahoo-finance2').default;
+const YahooFinance = new (require('yahoo-finance2').default)();
 const yahooFinance = new YahooFinance();
 const axios = require('axios');
 const universe = require('../data/universe.json');

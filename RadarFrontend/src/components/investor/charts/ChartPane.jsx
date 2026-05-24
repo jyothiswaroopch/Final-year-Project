@@ -318,17 +318,17 @@ const ChartPane = ({
     }
 
     // ── Overlay indicators ───────────────────────────────────────────────────
-    if (indicators.sma?.length) {
+    if (panel.indicators?.sma && indicators.sma?.length) {
       const s = chart.addSeries(LineSeries, { color: '#3b82f6', lineWidth: 1.5, priceLineVisible: false, title: 'SMA(20)' });
       s.setData(indicators.sma);
       indicatorSeriesRef.current.push(s);
     }
-    if (indicators.ema?.length) {
+    if (panel.indicators?.ema && indicators.ema?.length) {
       const s = chart.addSeries(LineSeries, { color: '#8b5cf6', lineWidth: 1.5, priceLineVisible: false, title: 'EMA(9)' });
       s.setData(indicators.ema);
       indicatorSeriesRef.current.push(s);
     }
-    if (indicators.bb) {
+    if (panel.indicators?.bb && indicators.bb) {
       const commonBB = { priceLineVisible: false, lineWidth: 1 };
       const upper = chart.addSeries(LineSeries, { ...commonBB, color: 'rgba(99,102,241,0.6)', title: 'BB Up' });
       const middle = chart.addSeries(LineSeries, { ...commonBB, color: 'rgba(99,102,241,0.4)', title: 'BB Mid' });
@@ -338,7 +338,7 @@ const ChartPane = ({
       if (indicators.bb.lower?.length) lower.setData(indicators.bb.lower);
       indicatorSeriesRef.current.push(upper, middle, lower);
     }
-    if (indicators.vwap?.length) {
+    if (panel.indicators?.vwap && indicators.vwap?.length) {
       const s = chart.addSeries(LineSeries, { color: '#f59e0b', lineWidth: 1.5, priceLineVisible: false, title: 'VWAP' });
       s.setData(indicators.vwap);
       indicatorSeriesRef.current.push(s);

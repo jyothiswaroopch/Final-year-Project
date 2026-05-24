@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { TrendingUp, TrendingDown, Zap, Flame, RefreshCw, BarChart3 } from 'lucide-react';
 
@@ -51,6 +51,9 @@ const ScreenerResultsTable = ({ stocks, onOpenResearch }) => {
             </th>
             <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
               P/E
+            </th>
+            <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
+              Ind. P/E
             </th>
             <th className="px-6 py-4 text-left text-xs font-bold text-slate-300 uppercase tracking-wider">
               Trend
@@ -147,10 +150,15 @@ const ScreenerResultsTable = ({ stocks, onOpenResearch }) => {
 
               {}
               <td className="px-6 py-4">
-                <p className="text-sm text-slate-300">{stock.pe.toFixed(1)}</p>
+                <p className="text-sm text-slate-300">{stock.pe?.toFixed(1) || '—'}</p>
               </td>
 
-              {}
+              {/* Ind. PE Column */}
+              <td className="px-6 py-4">
+                <p className="text-sm text-slate-400">{stock.industryPeAvg?.toFixed(1) || '—'}</p>
+              </td>
+
+              {/* Trend Column */}
               <td className="px-6 py-4">
                 <span
                   className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold border ${getTrendBadgeColor(

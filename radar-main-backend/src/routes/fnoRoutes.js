@@ -1,1 +1,6 @@
-const express = require('express');const router = express.Router();const { getDashboardData } = require('../controllers/fnoController');const { authMiddleware } = require('../middleware/authMiddleware');router.get('/dashboard', authMiddleware, getDashboardData);module.exports = router;
+const express = require('express');
+const router = express.Router();
+const { getDashboardData } = require('../controllers/fnoController');
+const { authMiddleware } = require('../middleware/authMiddleware');
+router.get('/dashboard', authMiddleware, getDashboardData);
+module.exports = router;

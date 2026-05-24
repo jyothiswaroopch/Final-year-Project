@@ -495,7 +495,7 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
 
 const getCompanyNews = async (symbol, companyName = '') => {
     try {
-        const YahooFinance = require('yahoo-finance2').default;
+        const YahooFinance = new (require('yahoo-finance2').default)();
         const yahooFinance = new YahooFinance();
         
         let yahooSymbol = String(symbol || '').toUpperCase().trim();
@@ -548,7 +548,7 @@ const getCompanyNews = async (symbol, companyName = '') => {
                 title: title,
                 summary: title,
                 source: article.publisher || 'Yahoo Finance',
-                publishedAt: new Date(article.providerPublishTime * 1000).toISOString(),
+                publishedAt: new Date(article.providerPublishTime).toISOString(),
                 url: article.link || article.url || '#',
                 sentiment: sentiment,
                 thumbnail: article.thumbnail?.resolutions?.[0]?.url || ''

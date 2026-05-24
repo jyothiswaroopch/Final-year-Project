@@ -1,4 +1,4 @@
-const YahooFinance = require('yahoo-finance2').default;
+const YahooFinance = new (require('yahoo-finance2').default)();
 const normalizeStockData = require('../utils/normalizeStockData');
 
 const yahooFinance = new YahooFinance();

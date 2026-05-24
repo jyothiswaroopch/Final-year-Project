@@ -59,6 +59,10 @@ const FundamentalsSnapshotSchema = new mongoose.Schema(
         // ── Derived ────────────────────────────────────────────────────────
         valStatus:      { type: String, enum: ['undervalued', 'fair', 'overvalued'], default: 'fair' },
         deliveryPct:    { type: Number, default: null },
+        industryPeAvg:  { type: Number, default: null },
+        industryRoeAvg: { type: Number, default: null },
+        industryMarginAvg: { type: Number, default: null },
+        industryGrowthAvg: { type: Number, default: null },
 
         // ── Metadata ───────────────────────────────────────────────────────
         asOf:           { type: Date, default: Date.now },

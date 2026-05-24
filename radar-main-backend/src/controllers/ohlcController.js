@@ -4,7 +4,7 @@ const stockDetailsService = require('../services/stockDetailsService');
 const logger = require('../config/logger');
 
 
-const YahooFinance = require('yahoo-finance2').default;
+const YahooFinance = new (require('yahoo-finance2').default)();
 
 const yahooFinance = new YahooFinance();
 

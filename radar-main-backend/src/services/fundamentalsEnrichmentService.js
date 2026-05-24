@@ -19,7 +19,7 @@
  *   valStatus, deliveryPct, asOf
  */
 
-const YahooFinance = require('yahoo-finance2').default;
+const YahooFinance = new (require('yahoo-finance2').default)();
 const yahooFinance = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const NodeCache    = require('node-cache');
 const logger       = require('../config/logger');
@@ -175,7 +175,7 @@ async function persistToDb(symbol, data) {
 }
 
 // ── Main public function ──────────────────────────────────────────────────────
-async function getFundamentals(symbol, changePercent = 0, { forceRefresh = false } = {}) {
+async function getFundamentals(symbol, changePercent = 0, { forceRefresh = false, isProxyFetch = false } = {}) {
     const yahooSym = normalizeSymbol(symbol);
     const dbKey    = String(symbol).toUpperCase().replace(/\.(NS|BO)$/i, '');
     const memKey   = `fund:${yahooSym}`;
@@ -211,6 +211,27 @@ async function getFundamentals(symbol, changePercent = 0, { forceRefresh = false
     try {
         logger.info(`[Fundamentals] Fetching from Yahoo Finance for ${yahooSym}`);
         const result = await fetchFromYahoo(yahooSym, changePercent);
+
+        if (!isProxyFetch && result.sector && SECTOR_PROXIES[result.sector]) {
+            const proxySym = SECTOR_PROXIES[result.sector];
+            if (proxySym !== yahooSym) {
+                try {
+                    const proxyData = await getFundamentals(proxySym, 0, { isProxyFetch: true });
+                    result.industryPeAvg = proxyData.pe;
+                    result.industryRoeAvg = proxyData.roe;
+                    result.industryMarginAvg = proxyData.profitMargins;
+                    result.industryGrowthAvg = proxyData.revenueGrowth;
+                } catch (e) {
+                    logger.warn(`[Fundamentals] Failed to fetch proxy ${proxySym}: ${e.message}`);
+                }
+            } else {
+                result.industryPeAvg = result.pe;
+                result.industryRoeAvg = result.roe;
+                result.industryMarginAvg = result.profitMargins;
+                result.industryGrowthAvg = result.revenueGrowth;
+            }
+        }
+
         memCache.set(memKey, result);
         await persistToDb(dbKey, result); // fire-and-forget persist
         logger.info(`[Fundamentals] ✅ ${yahooSym}: PE=${result.pe}, ROE=${result.roe}%, MktCap=${result.marketCap}`);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Star, Newspaper, Bell, Edit3, BarChart2, X, Loader2, ExternalLink, TrendingUp, TrendingDown, Trash2 } from 'lucide-react';
+import { Star, Newspaper, Bell, Edit3, BarChart2, X, Loader2, ExternalLink, TrendingUp, TrendingDown, Trash2, AlertCircle } from 'lucide-react';
 import api from '../../../api/api';
 import useStockDetails from '../../../hooks/useStockDetails';
 
@@ -348,9 +348,11 @@ export const WatchlistDrawer = ({ symbol, isDark }) => {
   const [watchlist, setWatchlist] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isAdding, setIsAdding] = useState(false);
+  const [error, setError] = useState(null);
 
   const fetchWatchlist = async () => {
     setLoading(true);
+    setError(null);
     try {
       const res = await api.get('/watchlist').catch(() => null);
       if (res && res.data) {
@@ -386,11 +388,13 @@ export const WatchlistDrawer = ({ symbol, isDark }) => {
       if (list && list._id) {
         await api.post(`/watchlist/${list._id}/add`, { symbol });
         setWatchlist(prev => [...new Set([...prev, symbol])]);
+        setError(null);
       } else {
-        throw new Error("Could not find or create a watchlist");
+        throw new Error("Could not find or create a watchlist. Please ensure you are logged in.");
       }
     } catch (e) {
       console.error('Failed to add to watchlist', e);
+      setError(e?.response?.data?.error || e?.message || "Failed to add stock. Please try again.");
     } finally {
       setIsAdding(false);
     }
@@ -444,6 +448,12 @@ export const WatchlistDrawer = ({ symbol, isDark }) => {
             {isInWatchlist ? 'In Watchlist' : isAdding ? 'Adding...' : 'Add to Watchlist'}
           </button>
         </div>
+        {error && (
+          <div className="mt-2 text-[10px] font-bold text-red-500 flex items-center gap-1">
+            <AlertCircle size={12} />
+            {error}
+          </div>
+        )}
       </div>
 
       {/* Watchlist Section */}

@@ -59,7 +59,8 @@ const addToWatchlist = async (req, res) => {
         await watchlist.save();
         res.json(watchlist);
     } catch (error) {
-        res.status(500).json({ error: "Failed to add to watchlist" });
+        console.error("addToWatchlist error:", error);
+        res.status(500).json({ error: error.message || "Failed to add to watchlist" });
     }
 };
 
