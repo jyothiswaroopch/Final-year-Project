@@ -25,7 +25,9 @@ const getHistory = async (req, res) => {
                 rawData = dbResponse.data;
             } else {
                 // Fallback to live API only if database is completely empty
-                rawData = await fetchStockHistory(symbol.toLowerCase(), interval, { allowSynthetic: false });
+                // Preserve case for index symbols (e.g. ^BSESN, ^NSEBANK) — Yahoo Finance is case-sensitive
+                const resolvedSymbol = symbol.startsWith('^') ? symbol : symbol.toLowerCase();
+                rawData = await fetchStockHistory(resolvedSymbol, interval, { allowSynthetic: false });
             }
         } catch (error) {
             return res.status(404).json({ error: error.message });
