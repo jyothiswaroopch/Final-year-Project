@@ -20,8 +20,14 @@ const getWatchlistData = async (req, res) => {
                 });
                 if (allSymbols.size > 0) {
                     customSymbols = Array.from(allSymbols);
+                } else {
+                    return res.json([]); // Return early if watchlist is empty
                 }
+            } else {
+                return res.json([]); // No watchlists found
             }
+        } else {
+            return res.json([]); // No user found
         }
 
         const stocks = await fetchStockData(customSymbols);
