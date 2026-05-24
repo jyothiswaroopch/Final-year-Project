@@ -12,6 +12,7 @@ const getChartData = async (
 ) => {
 
     const yahooSymbol = mapSymbol(symbol);
+    const safeInterval = String(interval || '1d').toLowerCase();
 
     let effectiveDaysBack = Number(daysBack);
     // Fetch extra days to account for weekends/holidays
@@ -22,11 +23,11 @@ const getChartData = async (
     }
 
     // Enforce Yahoo Finance strict limits to prevent API crashes
-    if (interval === '1m' && effectiveDaysBack > 7) {
+    if (safeInterval === '1m' && effectiveDaysBack > 7) {
         effectiveDaysBack = 7;
-    } else if (['2m', '5m', '15m', '30m', '90m'].includes(interval) && effectiveDaysBack > 60) {
+    } else if (['2m', '5m', '15m', '30m', '90m'].includes(safeInterval) && effectiveDaysBack > 60) {
         effectiveDaysBack = 60;
-    } else if (interval === '1h' && effectiveDaysBack > 730) {
+    } else if (safeInterval === '1h' && effectiveDaysBack > 730) {
         effectiveDaysBack = 730;
     }
 
@@ -36,7 +37,7 @@ const getChartData = async (
     const result = await yahooFinance.chart(yahooSymbol, {
         period1: p1,
         period2: p2,
-        interval
+        interval: safeInterval
     });
 
     if (!result?.quotes || result.quotes.length === 0) {
