@@ -35,7 +35,7 @@ const mapArticle = (article) => ({
     sentiment: 'Neutral',
 });
 
-const fetchFinnhubNews = async ({ category, symbol, limit, q, region }) => {
+const fetchFinnhubNews = async ({ category, symbol, limit, q, region, assetClass }) => {
     if (!process.env.FINNHUB_API_KEY) {
         return [];
     }

@@ -192,7 +192,12 @@ app.use('/api/auth',          require('./src/routes/authRoutes'));
 app.use('/api/stocks',        require('./src/routes/ohlcRoutes'));
 app.use('/api/user',          require('./src/routes/userRoutes'));
 app.use('/api/market',        require('./src/routes/marketRoutes'));
-app.use('/api/news',          require('./src/routes/marketRoutes')); // alias: /api/news → same handlers as /api/market/news
+// Explicit /api/news shortcut — calls the same news handlers as /api/market/news
+const _newsRouter = require('express').Router();
+const { getMarketNews: _getMarketNews, getNewsInsight: _getNewsInsight } = require('./src/controllers/newsController');
+_newsRouter.get('/', _getMarketNews);
+_newsRouter.post('/insight', _getNewsInsight);
+app.use('/api/news', _newsRouter);
 
 app.use('/api/watchlist',     require('./src/routes/watchlistRoutes'));
 app.use('/api/portfolio',     require('./src/routes/portfolioRoutes'));

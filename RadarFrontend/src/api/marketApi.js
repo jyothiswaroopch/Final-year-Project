@@ -147,15 +147,19 @@ export const fetchMarketHistory = async (symbol, type = 'STOCK', interval = '1D'
 
 export const fetchMarketNews = async (params = {}) => {
     try {
-        // Normalize region: UI sends 'IN' or 'GLOBAL', backend expects 'india' or ''
+        // Normalize region: UI sends 'india', 'IN', 'global', etc.
+        // Backend expects 'india' for Indian news or omitted for global
         const normalizedParams = { ...params };
         if (params.region) {
             const r = String(params.region).toUpperCase();
-            normalizedParams.region = r === 'IN' ? 'india' : '';
+            // Accept both 'IN' and 'INDIA' as India region
+            normalizedParams.region = (r === 'IN' || r === 'INDIA') ? 'india' : '';
             if (!normalizedParams.region) delete normalizedParams.region;
         }
 
-        const response = await api.get('/news', { params: normalizedParams });
+        // /api/news (root) maps to getMarketData (wrong handler!)
+        // Use /api/market/news which correctly calls getMarketNews
+        const response = await api.get('/market/news', { params: normalizedParams });
         const data = response.data?.data ?? response.data;
         if (data && data.length > 0) {
             // Cache keyed by region so India and Global don't overwrite each other
@@ -172,9 +176,11 @@ export const fetchMarketNews = async (params = {}) => {
                 normalizedParams.region = r === 'IN' ? 'india' : '';
                 if (!normalizedParams.region) delete normalizedParams.region;
             }
-            const response = await api.get('/market/news', { params: normalizedParams });
-            const data = response.data;
-            if (data && data.length > 0) {
+            // Already using /market/news — no secondary fallback needed
+            // If this is reached, it means the first try above threw an exception
+            const response2 = await api.get('/market/news', { params: normalizedParams });
+            const data = response2.data?.data ?? response2.data;
+            if (data && Array.isArray(data) && data.length > 0) {
                 const cacheKey = `radar_news_cache_${params.region || 'global'}`;
                 localStorage.setItem(cacheKey, JSON.stringify(data));
             }
