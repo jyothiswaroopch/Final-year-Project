@@ -20,20 +20,27 @@ const cleanSymbolSuffix = (value) => {
 };
 
 const normalizeStock = (data) => {
-    return data.map(stock => ({
-        id: cleanSymbolSuffix(stock.symbol),
-        symbol: cleanSymbolSuffix(stock.symbol),
-        name: stock.name,
-        price: stock.price,
-        change_24h: stock.change,
-        image: null,
-        type: 'STOCK',
-        details: stock.details,
-        financials: stock.financials,
-        volume: stock.volume || 0,
-        dayLow: stock.dayLow || 0,
-        dayHigh: stock.dayHigh || 0
-    }));
+    const INDICES = ['NIFTY 50', 'SENSEX', 'BANKNIFTY', 'NIFTY', 'FINNIFTY', 'MIDCPNIFTY', 'INDIA VIX', 'SPX', 'NDX', 'DJIA'];
+
+    return data.map(stock => {
+        const sym = cleanSymbolSuffix(stock.symbol);
+        const isIndex = INDICES.includes(sym) || sym.startsWith('^');
+        
+        return {
+            id: sym,
+            symbol: sym,
+            name: stock.name,
+            price: stock.price,
+            change_24h: stock.change,
+            image: null,
+            type: isIndex ? 'INDEX' : 'STOCK',
+            details: stock.details,
+            financials: stock.financials,
+            volume: stock.volume || 0,
+            dayLow: stock.dayLow || 0,
+            dayHigh: stock.dayHigh || 0
+        };
+    });
 };
 
 const normalizeForex = (data) => {

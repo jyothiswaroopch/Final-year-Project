@@ -140,8 +140,8 @@ export default function TickerTape({ variant = "dark" }) {
                     setItems(processedRes.map((item) => {
                         const type        = (item.type || item.category || "").toLowerCase();
                         const isCrypto    = type === "crypto" || type === "cryptocurrency";
-                        const isStock     = type === "stock" || type === "equity";
-                        const currSymbol  = isCrypto ? "$" : (isInvestor && !isStock ? "" : "₹");
+                        const isIndex     = type === "index" || ["NIFTY", "SENSEX", "BANKNIFTY", "SPX", "NDX", "DJIA"].some(idx => String(item.symbol).includes(idx));
+                        const currSymbol  = isCrypto ? "$" : (isIndex ? "" : "₹");
                         const price       = Number(item.price);
                         return {
                             symbol: String(item.symbol || item.name || "ASSET").split(".")[0].substring(0, 10),
