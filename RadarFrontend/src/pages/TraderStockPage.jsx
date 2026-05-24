@@ -124,7 +124,7 @@ export default function TraderStockPage({ overrideSymbol, onBack }) {
 
   // Watchlist membership flag
   const isInWatchlist = watchlistRows.some(
-    w => w.symbol.toUpperCase() === symbol.replace(/\.(NS|BO)$/i, '').toUpperCase()
+    w => w.symbol.replace(/\.(NS|BO)$/i, '').toUpperCase() === symbol.replace(/\.(NS|BO)$/i, '').toUpperCase()
   );
 
   const handleManualRefresh = async () => {

@@ -413,7 +413,9 @@ export const WatchlistDrawer = ({ symbol, isDark }) => {
     }
   };
 
-  const isInWatchlist = watchlist.includes(symbol);
+  const isInWatchlist = watchlist.some(w => 
+    w.replace(/\.(NS|BO)$/i, '').toUpperCase() === symbol.replace(/\.(NS|BO)$/i, '').toUpperCase()
+  );
 
   if (loading) return (
     <div className="flex items-center justify-center py-16">

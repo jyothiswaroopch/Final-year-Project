@@ -125,8 +125,17 @@ export const WatchlistProvider = ({ children }) => {
 
   const removeSymbol = useCallback(async (symbol) => {
     if (!watchlistId) return;
-    await removeSymbolFromWatchlist(watchlistId, symbol);
-    await load();
+    
+    // Optimistically update the UI immediately
+    setRows(prev => prev.filter(row => normalizeSymbol(row.symbol) !== normalizeSymbol(symbol)));
+    
+    try {
+      await removeSymbolFromWatchlist(watchlistId, symbol);
+      load().catch(console.error); // Load in background without awaiting
+    } catch (err) {
+      console.error('Failed to remove symbol:', err);
+      load().catch(console.error); // Rollback on error
+    }
   }, [watchlistId, load]);
 
   const reorderSymbols = useCallback(async (symbols) => {
