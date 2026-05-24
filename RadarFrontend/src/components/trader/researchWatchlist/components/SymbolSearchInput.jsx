@@ -7,8 +7,8 @@ import { currency, normalizeSymbol, toPercent } from '../utils/formatters';
 
 const SearchResultRow = ({ item, active, onSelect }) => {
   const positive = Number(item.changePercent || 0) >= 0;
-  const ex = item.exchange || 'NSE';
-  const sector = item.sector || item.industry || 'Equity';
+  const ex = item.type === 'CRYPTO' ? 'CRYPTO' : (item.exchange || 'NSE');
+  const sector = item.type === 'CRYPTO' ? 'Cryptocurrency' : (item.sector || item.industry || 'Equity');
 
   return (
     <button

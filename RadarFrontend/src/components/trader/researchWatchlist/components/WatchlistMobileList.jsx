@@ -26,7 +26,7 @@ const WatchlistMobileList = ({ rows, selectedSymbol, onSelect, onOpen, onRemove,
           <div className="flex items-start justify-between gap-3">
             <div>
               <h3 className="text-base font-black text-white">{row.symbol}</h3>
-              <p className="text-xs text-slate-500">{row.name || 'Equity'}</p>
+              <p className="text-xs text-slate-500">{row.name || (row.type === 'CRYPTO' ? 'Cryptocurrency' : 'Equity')}</p>
             </div>
             <div className="text-right">
               {hasError ? (
