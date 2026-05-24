@@ -309,9 +309,17 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
 
     let finalRows = [];
 
+    // For crypto, Finnhub is the best source regardless of region
+    if (assetClass === 'crypto' || normalizedCategory === 'crypto') {
+        try {
+            const finnhubRows = await fetchFinnhubNews({ category: 'crypto', symbol, limit, q: '', region: '', assetClass });
+            if (finnhubRows.length > 0) finalRows = finnhubRows;
+        } catch (error) { logger.warn('Finnhub crypto failed', { error: error.message }); }
+    }
+
     // If region is India, Finnhub's general feed is polluted because it lacks country filters.
-    // Prioritize Yahoo RSS, then MarketAux, GNews, and NewsAPI.
-    if (region === 'india') {
+    // Prioritize Yahoo RSS, then MarketAux, GNews, NewsAPI, and finally Finnhub ADRs as fallback.
+    if (!finalRows.length && region === 'india') {
         try {
             const yahooRows = await fetchYahooRSSNews(limit, region, symbol);
             if (yahooRows.length) finalRows = yahooRows;
@@ -337,7 +345,25 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
                 if (newsApiRows.length) finalRows = newsApiRows;
             } catch (error) { logger.warn('NewsAPI failed', { error: error.message }); }
         }
-    } else {
+
+        // Finnhub as final real-data fallback for India:
+        // fetchFinnhubNews already has a special path for Indian ADR stocks (INFY, HDB, IBN)
+        if (!finalRows.length) {
+            try {
+                const finnhubRows = await fetchFinnhubNews({ category: normalizedCategory, symbol, limit, q: '', region: 'india', assetClass });
+                if (finnhubRows.length > 0) finalRows = finnhubRows;
+            } catch (error) { logger.warn('Finnhub India ADR fallback failed', { error: error.message }); }
+        }
+
+        // Second Finnhub attempt: general news filtered for India keywords
+        if (!finalRows.length) {
+            try {
+                const finnhubRows = await fetchFinnhubNews({ category: 'general', symbol: '', limit, q: 'india', region: '', assetClass });
+                if (finnhubRows.length > 0) finalRows = finnhubRows;
+            } catch (error) { logger.warn('Finnhub India general fallback failed', { error: error.message }); }
+        }
+
+    } else if (!finalRows.length) {
         // Global news or specific symbol: Finnhub is best.
         try {
             const finnhubRows = await fetchFinnhubNews({ category: normalizedCategory, symbol, limit, q, region, assetClass });
@@ -375,7 +401,8 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
     }
 
     if (finalRows.length === 0) {
-        const compName = q || symbol || (region === 'india' ? 'Indian markets' : 'Global markets');
+        // All live providers failed — return richly-structured mock articles
+        // so the frontend renders complete cards (title, time, source, sentiment, etc.)
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
@@ -385,55 +412,79 @@ const fetchMarketNews = async (category = 'general', options = {}) => {
         if (region === 'india') {
             finalRows = [
                 {
-                    id: `${symbol}-in-sim-1`,
-                    title: `${compName}: Nifty 50 holds support amid FII outflows; domestic buying cushions markets`,
-                    summary: `Foreign institutional investors logged net outflows while mutual funds and retail participation offered stability to benchmark indices.`,
+                    id: 'in-sim-1',
+                    title: 'Nifty 50 holds support amid FII outflows; domestic buying cushions markets',
+                    summary: 'Foreign institutional investors logged net outflows while mutual funds and retail participation offered stability to benchmark indices.',
                     source: 'Economic Times',
                     url: '#',
+                    time: toDisplayTime(today.toISOString()),
                     publishedAt: today.toISOString(),
+                    sentiment: 'Neutral',
+                    category: 'Macro',
+                    impact: 'Neutral',
                 },
                 {
-                    id: `${symbol}-in-sim-2`,
-                    title: `RBI policy watch: Rate trajectory, liquidity measures in focus for Q2`,
-                    summary: `Market participants are closely watching the Reserve Bank of India's next move as inflation data and global cues shape domestic monetary policy expectations.`,
+                    id: 'in-sim-2',
+                    title: 'RBI policy watch: Rate trajectory, liquidity measures in focus for Q2',
+                    summary: 'Market participants are closely watching the Reserve Bank of India\'s next move as inflation data and global cues shape domestic monetary policy expectations.',
                     source: 'Business Standard',
                     url: '#',
+                    time: toDisplayTime(yesterday.toISOString()),
                     publishedAt: yesterday.toISOString(),
+                    sentiment: 'Neutral',
+                    category: 'Policy',
+                    impact: 'Neutral',
                 },
                 {
-                    id: `${symbol}-in-sim-3`,
-                    title: `BSE Sensex: Mid-cap and small-cap segments see renewed interest from domestic investors`,
-                    summary: `Selective buying in mid-cap and small-cap counters signals improving risk appetite among retail and HNI investors amid earnings season optimism.`,
+                    id: 'in-sim-3',
+                    title: 'BSE Sensex: Mid-cap and small-cap segments see renewed interest from domestic investors',
+                    summary: 'Selective buying in mid-cap and small-cap counters signals improving risk appetite among retail and HNI investors amid earnings season optimism.',
                     source: 'Moneycontrol',
                     url: '#',
+                    time: toDisplayTime(twoDaysAgo.toISOString()),
                     publishedAt: twoDaysAgo.toISOString(),
+                    sentiment: 'Positive',
+                    category: 'Earnings',
+                    impact: 'Positive',
                 }
             ];
         } else {
             finalRows = [
                 {
-                    id: `${symbol}-gl-sim-1`,
-                    title: `${compName}: Global equity markets stabilise as Fed signals data-dependent rate path`,
-                    summary: `Investors digest mixed signals from Federal Reserve officials as Treasury yields pull back from recent highs, supporting risk-on sentiment across major indices.`,
+                    id: 'gl-sim-1',
+                    title: 'Global equity markets stabilise as Fed signals data-dependent rate path',
+                    summary: 'Investors digest mixed signals from Federal Reserve officials as Treasury yields pull back from recent highs, supporting risk-on sentiment across major indices.',
                     source: 'Reuters',
                     url: '#',
+                    time: toDisplayTime(today.toISOString()),
                     publishedAt: today.toISOString(),
+                    sentiment: 'Positive',
+                    category: 'Policy',
+                    impact: 'Positive',
                 },
                 {
-                    id: `${symbol}-gl-sim-2`,
-                    title: `Oil and energy stocks in focus as OPEC+ output decision approaches`,
-                    summary: `Crude oil prices remain range-bound ahead of the OPEC+ production review, with energy equities tracking commodity moves in thin pre-market trading.`,
+                    id: 'gl-sim-2',
+                    title: 'Oil and energy stocks in focus as OPEC+ output decision approaches',
+                    summary: 'Crude oil prices remain range-bound ahead of the OPEC+ production review, with energy equities tracking commodity moves in thin pre-market trading.',
                     source: 'Bloomberg',
                     url: '#',
+                    time: toDisplayTime(yesterday.toISOString()),
                     publishedAt: yesterday.toISOString(),
+                    sentiment: 'Neutral',
+                    category: 'Macro',
+                    impact: 'Neutral',
                 },
                 {
-                    id: `${symbol}-gl-sim-3`,
-                    title: `Tech sector leads gains as AI infrastructure spending outlook brightens`,
-                    summary: `Large-cap technology stocks outperformed broader markets amid analyst upgrades tied to cloud and artificial intelligence capital expenditure forecasts.`,
+                    id: 'gl-sim-3',
+                    title: 'Tech sector leads gains as AI infrastructure spending outlook brightens',
+                    summary: 'Large-cap technology stocks outperformed broader markets amid analyst upgrades tied to cloud and artificial intelligence capital expenditure forecasts.',
                     source: 'Financial Times',
                     url: '#',
+                    time: toDisplayTime(twoDaysAgo.toISOString()),
                     publishedAt: twoDaysAgo.toISOString(),
+                    sentiment: 'Positive',
+                    category: 'Earnings',
+                    impact: 'Positive',
                 }
             ];
         }
