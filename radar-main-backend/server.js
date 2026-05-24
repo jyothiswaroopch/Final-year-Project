@@ -8,7 +8,7 @@ const { connectDB, getDbStatus } = require('./src/config/db');
 require('dotenv').config();
 
 if (!process.env.JWT_SECRET || !process.env.MONGO_URI) {
-    logger.error("FATAL ERROR: Missing required environment variables (JWT_SECRET or MONGO_URI).");
+    console.error("FATAL ERROR: Missing required environment variables (JWT_SECRET or MONGO_URI).");
     process.exit(1);
 }
 
