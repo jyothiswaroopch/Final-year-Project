@@ -137,20 +137,33 @@ export default function TickerTape({ variant = "dark" }) {
                 }
                 
                 if (processedRes && processedRes.length > 0) {
+                    const fallbacks = getFallbackTickers();
                     setItems(processedRes.map((item) => {
                         const type        = (item.type || item.category || "").toLowerCase();
                         const isCrypto    = type === "crypto" || type === "cryptocurrency";
                         const isIndex     = type === "index" || ["NIFTY", "SENSEX", "BANKNIFTY", "SPX", "NDX", "DJIA"].some(idx => String(item.symbol).includes(idx));
                         const currSymbol  = isCrypto ? "$" : (isIndex ? "" : "₹");
                         const price       = Number(item.price);
+                        
+                        const symName = String(item.symbol || item.name || "ASSET").split(".")[0].substring(0, 10);
+                        const fallbackMatch = fallbacks.find(f => f.symbol.includes(symName) || symName.includes(f.symbol));
+
+                        if (!Number.isFinite(price) || price <= 0) {
+                            if (fallbackMatch) return fallbackMatch;
+                            return { symbol: symName, value: "--", change: "--%" };
+                        }
+
+                        // Also patch change if it is exactly 0 and we have a fallback (to avoid • 0.00% making it look broken in demo)
+                        const raw  = Number(item.change_24h ?? item.change ?? 0);
+                        let finalChange = `${raw > 0 ? "+" : ""}${raw.toFixed(2)}%`;
+                        if (raw === 0 && fallbackMatch && fallbackMatch.change) {
+                            finalChange = fallbackMatch.change;
+                        }
+
                         return {
-                            symbol: String(item.symbol || item.name || "ASSET").split(".")[0].substring(0, 10),
-                            value:  Number.isFinite(price) ? `${currSymbol}${price.toLocaleString()}` : "--",
-                            change: (() => {
-                                const raw  = Number(item.change_24h ?? item.change ?? 0);
-                                const safe = Number.isFinite(raw) ? raw : 0;
-                                return `${safe > 0 ? "+" : ""}${safe.toFixed(2)}%`;
-                            })(),
+                            symbol: symName,
+                            value:  `${currSymbol}${price.toLocaleString()}`,
+                            change: finalChange,
                         };
                     }));
                 } else if (isInvestor) {
