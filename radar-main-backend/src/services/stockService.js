@@ -401,6 +401,11 @@ const toStooqSymbol = (symbol) => {
         return `${normalized.split('.')[0].toLowerCase()}.in`;
     }
 
+    // Index symbols (^NSEI, ^BSESN, ^NSEBANK) — pass through without country suffix
+    if (normalized.startsWith('^')) {
+        return normalized.toLowerCase();
+    }
+
     if (normalized.includes('.')) {
         const [base, market] = normalized.split('.');
         return `${base.toLowerCase()}.${String(market || 'US').toLowerCase()}`;
@@ -1089,53 +1094,39 @@ const fetchStooqQuotes = async (symbols) => {
         .filter(Boolean);
 };
 
-/*const fetchYahooHistory = async (symbol, interval = '1D') => {
-    const normalizedSymbol = String(symbol || '').toUpperCase();
+const fetchYahooHistory = async (symbol, interval = '1D') => {
     const intervalMap = {
-        '5M': { range: '5d', interval: '5m' },
-        '15M': { range: '5d', interval: '15m' },
-        '1H': { range: '1mo', interval: '60m' },
-        '1D': { range: '6mo', interval: '1d' },
-        '1W': { range: '1y', interval: '1wk' },
-        '1M': { range: '3mo', interval: '1d' },
-        '3M': { range: '6mo', interval: '1d' },
-        '6M': { range: '1y', interval: '1d' },
-        '1Y': { range: '2y', interval: '1d' },
+        '5M':  { range: '5d',  interval: '5m'  },
+        '15M': { range: '5d',  interval: '15m' },
+        '1H':  { range: '1mo', interval: '60m' },
+        '1D':  { range: '6mo', interval: '1d'  },
+        '1W':  { range: '1y',  interval: '1wk' },
+        '1M':  { range: '3mo', interval: '1d'  },
+        '3M':  { range: '6mo', interval: '1d'  },
+        '6M':  { range: '1y',  interval: '1d'  },
+        '1Y':  { range: '2y',  interval: '1d'  },
     };
     const config = intervalMap[String(interval).toUpperCase()] || { range: '3mo', interval: '1d' };
 
-    const response = await axios.get(`https://query1.finance.yahoo.com/v8/finance/chart/${normalizedSymbol}`, {
-        params: {
-            range: config.range,
-            interval: config.interval,
-            includePrePost: false,
-        },
-        timeout: 6000,
-        headers: {
-            'User-Agent': 'Mozilla/5.0',
-            Accept: 'application/json',
-        },
+    const result = await yahooFinance.chart(symbol, {
+        interval: config.interval,
+        range: config.range,
+        includePrePost: false,
     });
 
-    const result = response.data?.chart?.result?.[0];
-    const timestamps = result?.timestamp || [];
-    const closes = result?.indicators?.quote?.[0]?.close || [];
-
-    return timestamps
-        .map((timestamp, index) => {
-            const close = Number(closes[index]);
-            if (!Number.isFinite(close)) {
-                return null;
-            }
-
-            return {
-                timestamp: timestamp * 1000,
-                date: new Date(timestamp * 1000).toISOString(),
-                price: close,
-            };
-        })
-        .filter(Boolean);
-};*/
+    const quotes = Array.isArray(result?.quotes) ? result.quotes : [];
+    return quotes
+        .filter(q => q != null && Number.isFinite(Number(q.close)) && Number(q.close) > 0)
+        .map(q => ({
+            timestamp: new Date(q.date).getTime(),
+            datetime:  new Date(q.date).toISOString(),
+            open:   Number(q.open  ?? q.close),
+            high:   Number(q.high  ?? q.close),
+            low:    Number(q.low   ?? q.close),
+            close:  Number(q.close),
+            volume: Number(q.volume ?? 0),
+        }));
+};
 
 const fetchStockData = async (customSymbols = null) => {
     const now = Date.now();
