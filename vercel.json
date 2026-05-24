@@ -1,8 +1,8 @@
 {
+  "buildCommand": "npm --prefix RadarFrontend install && npm --prefix RadarFrontend run build",
+  "outputDirectory": "RadarFrontend/dist",
+  "framework": "vite",
   "rewrites": [
-    {
-      "source": "/((?!assets/).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
