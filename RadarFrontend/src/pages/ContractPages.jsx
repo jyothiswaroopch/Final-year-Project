@@ -868,7 +868,7 @@ export function ProfilePage() {
                     api.get('/user/portfolio').catch(() => ({ data: null })),
                     api.get('/user/insights').catch(() => ({ data: [] })),
                     api.get('/user/events').catch(() => ({ data: [] })),
-                    fetchCourses().catch(() => [])
+                    fetchCourses('investor').catch(() => [])
                 ]);
 
                 setProfile(toPayload(profileRes.data, null));
