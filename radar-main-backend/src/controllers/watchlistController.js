@@ -102,16 +102,19 @@ const getWatchlistData = async (req, res) => {
                 try {
                     const nseSym = sym.includes('.') ? sym : `${sym}.NS`;
                     // Fetch quote and indicators in parallel
-                    const [quote, indicators] = await Promise.allSettled([
+                    const [quoteResult, indicatorsResult] = await Promise.allSettled([
                         freeApiAggregator.getQuote(nseSym),
-                        getTechnicalIndicators(sym),
+                        getTechnicalIndicators('stock', sym, '1D'),  // FIX: correct arg order
                     ]);
 
-                    const q = quote.status === 'fulfilled' ? quote.value : null;
-                    const ind = indicators.status === 'fulfilled' ? indicators.value : {};
+                    // freeApiAggregator returns { success, data: {...} } — unwrap .data
+                    const rawQuote = quoteResult.status === 'fulfilled' ? quoteResult.value : null;
+                    const q = rawQuote?.success ? (rawQuote.data ?? rawQuote) : null;
+                    const ind = indicatorsResult.status === 'fulfilled' ? indicatorsResult.value : {};
 
-                    const price = Number(q?.price ?? q?.ltp ?? q?.close ?? 0) || null;
-                    const changePercent = Number(q?.changePercent ?? q?.percentChange ?? 0) || 0;
+                    // .current is the main field from yahoo/twelvedata, also try .price/.ltp/.close
+                    const price = Number(q?.current ?? q?.price ?? q?.ltp ?? q?.close ?? 0) || null;
+                    const changePercent = Number(q?.changePercent ?? q?.percentChange ?? q?.change ?? 0) || 0;
                     const rsi = ind?.rsi ?? null;
                     const macd = ind?.macd ?? null;
 
@@ -142,10 +145,11 @@ const getWatchlistData = async (req, res) => {
                         signals,
                         sentiment: trend,
                         technicalSignal: ind?.signal || (rsi !== null ? `RSI ${Math.round(rsi)}` : 'Live'),
-                        source: q?.priceSource || q?.provider || q?.source || 'yahoo',
+                        source: rawQuote?.source || q?.priceSource || q?.provider || 'yahoo',
                         sector: q?.sector || q?.industry || 'Equity',
                         exchange: 'NSE',
                         indicatorsReady: rsi !== null && macd !== null,
+                        // No .error field = the frontend will show price normally
                     };
                 } catch (err) {
                     return {
