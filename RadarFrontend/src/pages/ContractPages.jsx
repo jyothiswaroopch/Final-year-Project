@@ -1081,7 +1081,7 @@ export function ProfilePage() {
                             <div className="px-3 py-1 bg-blue-50 rounded-lg text-[10px] font-black text-blue-600">{totalProgressPct}% TOTAL PROGRESS</div>
                         </div>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            {courses.slice(0, 3).map(c => (
+                            {courses.map(c => (
                                 <CourseCard 
                                     key={c.id}
                                     course={c}
