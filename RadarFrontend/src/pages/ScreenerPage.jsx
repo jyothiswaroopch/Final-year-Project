@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -15,6 +15,22 @@ import ScreenerStockCard from '../components/screener/ScreenerStockCard';
 import ScreenerResultsTable from '../components/screener/ScreenerResultsTable';
 import './ScreenerPage.css';
 import { runScreenerScan } from '../api/screenerApi';
+
+// Diverse fallback dataset — covers every filter dimension so any preset returns results
+const MOCK_STOCKS = [
+  { id: 1, symbol: 'INFY', name: 'Infosys', price: 1556.15, change: 2.21, changePercent: 2.21, volume: 8500000, sector: 'IT', signal: 'BREAKOUT', signalStrength: 'Strong', signalType: 'EMA breakout + volume surge', reasons: ['Breakout above 20 EMA', 'Volume spike (2.1x RVOL)'], catalyst: 'Q4 Earnings Beat', rsi: 62, pe: 25.3, marketCap: 650000000000, trend: 'bullish', sentiment: 65, macdBias: 'bullish', strength: 'Confidence 85%', entry: 1548.2, target: 1602.6, stopLoss: 1528.9, rvol: 2.1, timeframe: '5M', chart: [1500, 1510, 1520, 1535, 1545, 1556] },
+  { id: 2, symbol: 'HDFCBANK', name: 'HDFC Bank', price: 1689.20, change: 1.48, changePercent: 1.48, volume: 7600000, sector: 'Banking', signal: 'MOMENTUM', signalStrength: 'Strong', signalType: 'MACD bullish crossover', reasons: ['MACD Bullish Crossover', 'Trend continuation'], catalyst: '', rsi: 65, pe: 22.1, marketCap: 1200000000000, trend: 'bullish', sentiment: 72, macdBias: 'bullish', strength: 'Confidence 78%', entry: 1680.4, target: 1725.8, stopLoss: 1662.7, rvol: 1.8, timeframe: '5M', chart: [1650, 1665, 1675, 1682, 1687, 1689] },
+  { id: 3, symbol: 'TCS', name: 'Tata Consultancy Services', price: 3627.55, change: 1.16, changePercent: 1.16, volume: 3100000, sector: 'IT', signal: 'MOMENTUM', signalStrength: 'Strong', signalType: 'Momentum + MACD crossover', reasons: ['Momentum acceleration', 'IT sector breadth'], catalyst: '', rsi: 68, pe: 28.5, marketCap: 1300000000000, trend: 'bullish', sentiment: 68, macdBias: 'bullish', strength: 'Confidence 82%', entry: 3605.2, target: 3715.6, stopLoss: 3558.4, rvol: 1.6, timeframe: '1D', chart: [3500, 3540, 3580, 3610, 3620, 3628] },
+  { id: 4, symbol: 'RELIANCE', name: 'Reliance Industries', price: 2845.00, change: 1.40, changePercent: 1.40, volume: 9900000, sector: 'Energy', signal: 'BREAKOUT', signalStrength: 'Strong', signalType: 'Range breakout +volume', reasons: ['Multi-week range breakout', 'Institutional buying'], catalyst: 'AGM Meeting', rsi: 58, pe: 20.2, marketCap: 1900000000000, trend: 'bullish', sentiment: 75, macdBias: 'bullish', strength: 'Confidence 88%', entry: 2830.4, target: 2898.1, stopLoss: 2796.2, rvol: 2.3, timeframe: '15M', chart: [2800, 2820, 2835, 2840, 2843, 2845] },
+  { id: 5, symbol: 'KOTAKBANK', name: 'Kotak Mahindra Bank', price: 1850.50, change: -4.70, changePercent: -4.70, volume: 2200000, sector: 'Banking', signal: 'PULLBACK', signalStrength: 'Medium', signalType: 'Pullback to support level', reasons: ['Sharp pullback to support', 'Oversold RSI'], catalyst: 'Management Transition', rsi: 28, pe: 19.8, marketCap: 350000000000, trend: 'bearish', sentiment: -35, macdBias: 'bearish', strength: 'Confidence 64%', entry: 1862.2, target: 1910.4, stopLoss: 1822.6, rvol: 1.4, timeframe: '1D', chart: [1950, 1910, 1880, 1865, 1855, 1850] },
+  { id: 6, symbol: 'SBIN', name: 'State Bank of India', price: 826.50, change: -1.55, changePercent: -1.55, volume: 11200000, sector: 'Banking', signal: 'MOMENTUM', signalStrength: 'Medium', signalType: 'Bearish MACD cross', reasons: ['Bearish MACD cross', 'Distribution volume'], catalyst: '', rsi: 35, pe: 18.4, marketCap: 750000000000, trend: 'bearish', sentiment: -45, macdBias: 'bearish', strength: 'Confidence 61%', entry: 832.6, target: 856.2, stopLoss: 812.4, rvol: 1.9, timeframe: '1D', chart: [840, 835, 831, 829, 828, 826] },
+  { id: 7, symbol: 'BAJAJAUTO', name: 'Bajaj Auto', price: 9250.75, change: 3.21, changePercent: 3.21, volume: 1800000, sector: 'Auto', signal: 'BREAKOUT', signalStrength: 'Strong', signalType: 'ATH Range Breakout', reasons: ['All-time high breakout', 'Sector outperformance'], catalyst: '', rsi: 78, pe: 24.6, marketCap: 270000000000, trend: 'bullish', sentiment: 82, macdBias: 'bullish', strength: 'Confidence 91%', entry: 9202.4, target: 9495.8, stopLoss: 9068.3, rvol: 2.6, timeframe: '5M', chart: [8900, 9000, 9100, 9200, 9230, 9251] },
+  { id: 8, symbol: 'ITC', name: 'ITC Limited', price: 468.25, change: 0.54, changePercent: 0.54, volume: 8400000, sector: 'FMCG', signal: 'MOMENTUM', signalStrength: 'Low', signalType: 'Consolidation zone', reasons: ['Flat consolidation', 'Defensive sector flow'], catalyst: '', rsi: 48, pe: 21.3, marketCap: 580000000000, trend: 'neutral', sentiment: 12, macdBias: 'bullish', strength: 'Confidence 53%', entry: 465.8, target: 478.4, stopLoss: 458.3, rvol: 0.9, timeframe: '1D', chart: [460, 463, 465, 467, 468, 468] },
+  { id: 9, symbol: 'WIPRO', name: 'Wipro Ltd', price: 452.80, change: -2.10, changePercent: -2.10, volume: 5600000, sector: 'IT', signal: 'REVERSAL', signalStrength: 'Medium', signalType: 'Bearish-to-Bullish reversal forming', reasons: ['Oversold bounce potential', 'RSI divergence'], catalyst: '', rsi: 32, pe: 17.8, marketCap: 235000000000, trend: 'bearish', sentiment: -28, macdBias: 'bearish', strength: 'Confidence 60%', entry: 456.2, target: 472.0, stopLoss: 441.5, rvol: 1.3, timeframe: '15M', chart: [480, 472, 465, 460, 455, 452] },
+  { id: 10, symbol: 'TATASTEEL', name: 'Tata Steel', price: 162.40, change: 0.80, changePercent: 0.80, volume: 14000000, sector: 'Metals', signal: 'SQUEEZE', signalStrength: 'Medium', signalType: 'Bollinger Band Squeeze', reasons: ['Volatility compression', 'Volume tapering at key level'], catalyst: '', rsi: 51, pe: 8.2, marketCap: 200000000000, trend: 'neutral', sentiment: 20, macdBias: 'bullish', strength: 'Confidence 58%', entry: 160.8, target: 168.5, stopLoss: 157.2, rvol: 2.8, timeframe: '15M', chart: [158, 160, 162, 162, 162, 162] },
+  { id: 11, symbol: 'SUNPHARMA', name: 'Sun Pharmaceutical', price: 1620.30, change: 1.90, changePercent: 1.90, volume: 3200000, sector: 'Pharma', signal: 'BREAKOUT', signalStrength: 'Strong', signalType: '52-week high breakout', reasons: ['52-week high breakout', 'Strong sector momentum'], catalyst: 'FDA Approval', rsi: 72, pe: 32.1, marketCap: 390000000000, trend: 'bullish', sentiment: 78, macdBias: 'bullish', strength: 'Confidence 87%', entry: 1608.4, target: 1672.0, stopLoss: 1580.6, rvol: 3.2, timeframe: '5M', chart: [1560, 1580, 1595, 1610, 1615, 1620] },
+  { id: 12, symbol: 'NTPC', name: 'NTPC Ltd', price: 364.70, change: -0.45, changePercent: -0.45, volume: 6800000, sector: 'Utilities', signal: 'PULLBACK', signalStrength: 'Low', signalType: 'Minor pullback in uptrend', reasons: ['Healthy pullback', 'Support at 20 EMA'], catalyst: '', rsi: 44, pe: 14.5, marketCap: 350000000000, trend: 'neutral', sentiment: -5, macdBias: 'bearish', strength: 'Confidence 55%', entry: 366.2, target: 378.0, stopLoss: 357.4, rvol: 1.1, timeframe: '1D', chart: [372, 370, 368, 367, 365, 364] },
+];
 
 const ScreenerPage = () => {
   const navigate = useNavigate();
@@ -38,6 +54,7 @@ const ScreenerPage = () => {
     minPe: '',
     maxPe: '',
     minMarketCap: '',
+    maxMarketCap: '',
     timeframe: 'all',
     showOnlySignals: true,
     trendType: 'all',
@@ -56,216 +73,6 @@ const ScreenerPage = () => {
   const contentRef = useRef(null);
   const noticeTimerRef = useRef(null);
 
-  const MOCK_STOCKS = [
-    {
-      id: 1,
-      symbol: 'INFY',
-      name: 'Infosys',
-      price: 1556.15,
-      change: 2.21,
-      changePercent: 2.21,
-      volume: 8500000,
-      sector: 'IT',
-      signal: 'BREAKOUT',
-      signalStrength: 'Strong',
-      signalType: 'SMA, EMA, GO',
-      reasons: ['Breakout above 20 EMA', 'Momentum building with MACD crossover', 'Volume spike (2.1x RVOL)'],
-      catalyst: 'Q4 Earnings Beat Expected',
-      rsi: 55,
-      pe: 25.3,
-      trend: 'bullish',
-      sentiment: 65,
-      strength: 'Confidence 85%',
-      entry: 1548.2,
-      target: 1602.6,
-      stopLoss: 1528.9,
-      rvol: 2.1,
-      timeframe: '5m',
-      chart: [1500, 1510, 1505, 1520, 1535, 1540, 1545, 1550, 1556],
-    },
-    {
-      id: 2,
-      symbol: 'HDFCBANK',
-      name: 'HDFC Bank',
-      price: 1689.20,
-      change: 1.48,
-      changePercent: 1.48,
-      volume: 7600000,
-      sector: 'Banking',
-      signal: 'MOMENTUM',
-      signalStrength: 'Strong',
-      signalType: 'MACD bullish crossover',
-      reasons: ['MACD Bullish Crossover', 'Trend continuation'],
-      catalyst: '',
-      rsi: 65,
-      pe: 22.1,
-      trend: 'bullish',
-      sentiment: 72,
-      strength: 'Confidence 78%',
-      entry: 1680.4,
-      target: 1725.8,
-      stopLoss: 1662.7,
-      rvol: 1.8,
-      timeframe: '5m',
-      chart: [1650, 1660, 1670, 1675, 1680, 1685, 1687, 1689],
-    },
-    {
-      id: 3,
-      symbol: 'TCS',
-      name: 'Tata Consultancy Services',
-      price: 3627.55,
-      change: 1.16,
-      changePercent: 1.16,
-      volume: 3100000,
-      sector: 'IT',
-      signal: 'MOMENTUM',
-      signalStrength: 'Strong',
-      signalType: 'Momentum building with MACD crossover',
-      reasons: ['Momentum acceleration', 'Strong IT sector breadth'],
-      catalyst: '',
-      rsi: 68,
-      pe: 28.5,
-      trend: 'bullish',
-      sentiment: 68,
-      strength: 'Confidence 82%',
-      entry: 3605.2,
-      target: 3715.6,
-      stopLoss: 3558.4,
-      rvol: 1.6,
-      timeframe: '1D',
-      chart: [3500, 3520, 3540, 3580, 3600, 3615, 3620, 3628],
-    },
-    {
-      id: 4,
-      symbol: 'RELIANCE',
-      name: 'Reliance Industries',
-      price: 2845.00,
-      change: 1.40,
-      changePercent: 1.40,
-      volume: 9900000,
-      sector: 'Energy',
-      signal: 'BREAKOUT',
-      signalStrength: 'Strong',
-      signalType: 'Range breakout, +2% volume',
-      reasons: ['Multi-week range breakout', 'Strong institutional buying'],
-      catalyst: 'AGM Meeting Tomorrow',
-      rsi: 58,
-      pe: 20.2,
-      trend: 'bullish',
-      sentiment: 75,
-      strength: 'Confidence 88%',
-      entry: 2830.4,
-      target: 2898.1,
-      stopLoss: 2796.2,
-      rvol: 2.3,
-      timeframe: '5m',
-      chart: [2800, 2810, 2820, 2830, 2835, 2840, 2843, 2845],
-    },
-    {
-      id: 5,
-      symbol: 'KOTANBANK',
-      name: 'Kotak Mahindra Bank',
-      price: 1850.50,
-      change: -4.70,
-      changePercent: -4.70,
-      volume: 2200000,
-      sector: 'Banking',
-      signal: 'PULLBACK',
-      signalStrength: 'Medium',
-      signalType: 'Pullback rebounding with strong volume shock',
-      reasons: ['Sharp pullback to support', 'Oversold RSI condition'],
-      catalyst: 'Management Transition Details',
-      rsi: 28,
-      pe: 19.8,
-      trend: 'bearish',
-      sentiment: -35,
-      strength: 'Confidence 64%',
-      entry: 1862.2,
-      target: 1910.4,
-      stopLoss: 1822.6,
-      rvol: 1.4,
-      timeframe: '1D',
-      chart: [1950, 1930, 1910, 1890, 1870, 1860, 1855, 1850],
-    },
-    {
-      id: 6,
-      symbol: 'SBIN',
-      name: 'State Bank of India',
-      price: 826.50,
-      change: -1.55,
-      changePercent: -1.55,
-      volume: 11200000,
-      sector: 'Banking',
-      signal: 'MOMENTUM',
-      signalStrength: 'Medium',
-      signalType: 'MACD showing weakness',
-      reasons: ['Bearish MACD cross', 'High relative volume distribution'],
-      catalyst: '',
-      rsi: 35,
-      pe: 18.4,
-      trend: 'bearish',
-      sentiment: -45,
-      strength: 'Confidence 61%',
-      entry: 832.6,
-      target: 856.2,
-      stopLoss: 812.4,
-      rvol: 1.9,
-      timeframe: '1D',
-      chart: [840, 835, 833, 831, 830, 829, 828, 826],
-    },
-    {
-      id: 7,
-      symbol: 'BAJAJ AUTO',
-      name: 'Bajaj Auto',
-      price: 9250.75,
-      change: 3.21,
-      changePercent: 3.21,
-      volume: 1800000,
-      sector: 'Auto',
-      signal: 'BREAKOUT',
-      signalStrength: 'Strong',
-      signalType: 'Range Breakout',
-      reasons: ['All-time high breakout', 'Sector outperformance'],
-      catalyst: '',
-      rsi: 78,
-      pe: 24.6,
-      trend: 'bullish',
-      sentiment: 82,
-      strength: 'Confidence 91%',
-      entry: 9202.4,
-      target: 9495.8,
-      stopLoss: 9068.3,
-      rvol: 2.6,
-      timeframe: '5m',
-      chart: [8900, 8950, 9000, 9100, 9150, 9200, 9230, 9251],
-    },
-    {
-      id: 8,
-      symbol: 'ITC',
-      name: 'ITC Limited',
-      price: 468.25,
-      change: 0.54,
-      changePercent: 0.54,
-      volume: 8400000,
-      sector: 'FMCG',
-      signal: 'MOMENTUM',
-      signalStrength: 'Low',
-      signalType: 'Consolidation zone',
-      reasons: ['Flat consolidation', 'Defensive sector flow'],
-      catalyst: '',
-      rsi: 48,
-      pe: 21.3,
-      trend: 'neutral',
-      sentiment: 12,
-      strength: 'Confidence 53%',
-      entry: 465.8,
-      target: 478.4,
-      stopLoss: 458.3,
-      rvol: 0.6,
-      timeframe: '1D',
-      chart: [460, 462, 464, 466, 467, 467, 468, 468],
-    },
-  ];
 
   // Live load on mount — replaces MOCK_STOCKS
   const fetchAndSet = useCallback(async (currentFilters) => {
@@ -287,6 +94,11 @@ const ScreenerPage = () => {
         // Technical filters
         if (currentFilters.minRsi > 0) apiFilters.minRsi = currentFilters.minRsi;
         if (currentFilters.maxRsi < 100) apiFilters.maxRsi = currentFilters.maxRsi;
+        if (currentFilters.minRvol !== '') apiFilters.minRvol = parseFloat(currentFilters.minRvol);
+        if (currentFilters.minVolume !== '') apiFilters.minVolume = parseFloat(currentFilters.minVolume);
+        if (currentFilters.signals?.length > 0) apiFilters.signals = currentFilters.signals;
+        if (currentFilters.trendType !== 'all') apiFilters.trendType = currentFilters.trendType;
+        if (currentFilters.timeframe && currentFilters.timeframe !== 'all') apiFilters.timeframe = currentFilters.timeframe;
       }
 
       let sortBy = 'change';
@@ -372,7 +184,7 @@ const ScreenerPage = () => {
           target: Number(s.target ?? (s.price ?? 0) * 1.04),
           stopLoss: Number(s.stopLoss ?? s.sl ?? (s.price ?? 0) * 0.985),
           rvol: rvolVal,
-          timeframe: s.timeframe || '1D',
+          timeframe: (s.timeframe || '1D').toUpperCase(),
           chart: s.chart || s.history || [],
         };
       });
@@ -486,19 +298,25 @@ const ScreenerPage = () => {
       result = result.filter((stock) => stock.trend === filters.trendType);
     }
 
-    // Timeframe
+    // Timeframe (case-insensitive)
     if (filters.timeframe && filters.timeframe !== 'all') {
-      result = result.filter((stock) => stock.timeframe === filters.timeframe);
+      result = result.filter((stock) => (stock.timeframe || '').toUpperCase() === filters.timeframe.toUpperCase());
     }
 
-    // EMA filter (client-side)
+    // EMA filter (client-side) — all 5 options handled
     if (filters.emaFilter && filters.emaFilter !== 'all') {
       result = result.filter((stock) => {
-        const ema20 = stock.ema20 || (stock.price * 0.95);
-        const ema50 = stock.ema50 || (stock.price * 0.90);
-        if (filters.emaFilter === 'above_ema20') return stock.price > ema20;
-        if (filters.emaFilter === 'below_ema20') return stock.price < ema20;
-        if (filters.emaFilter === 'above_ema50') return stock.price > ema50;
+        const price = stock.price;
+        const ema20 = stock.ema20 || (price * 0.95);
+        const ema50 = stock.ema50 || (price * 0.90);
+        if (filters.emaFilter === 'above_ema20') return price > ema20;
+        if (filters.emaFilter === 'below_ema20') return price < ema20;
+        if (filters.emaFilter === 'above_ema50') return price > ema50;
+        if (filters.emaFilter === 'below_ema50') return price < ema50;
+        // Golden cross: EMA20 > EMA50 (bullish alignment)
+        if (filters.emaFilter === 'ema20_above_ema50') return ema20 > ema50;
+        // Death cross: EMA20 < EMA50 (bearish alignment)
+        if (filters.emaFilter === 'ema20_below_ema50') return ema20 < ema50;
         return true;
       });
     }
@@ -515,9 +333,14 @@ const ScreenerPage = () => {
     const baseResult = [...result];
     setBaseFilteredStocks(baseResult);
 
-    // Signal tab filter
-    if (filters.showOnlySignals && activeSignalTab !== 'all') {
-      result = result.filter((stock) => stock.signal.toLowerCase() === activeSignalTab.toLowerCase());
+    // showOnlySignals: only show stocks that have a signal set (not empty/null)
+    if (filters.showOnlySignals) {
+      result = result.filter((stock) => stock.signal && stock.signal !== '' && stock.signal !== 'NONE');
+    }
+
+    // Signal tab filter (applied on top of showOnlySignals)
+    if (activeSignalTab !== 'all') {
+      result = result.filter((stock) => stock.signal?.toLowerCase() === activeSignalTab.toLowerCase());
     }
 
     setFilteredStocks(result);
