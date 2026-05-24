@@ -4,7 +4,8 @@ import { Bell, Trash2, WifiOff, ExternalLink } from 'lucide-react';
 import { compactNumber, currency, toPercent } from '../utils/formatters';
 
 const getSymbolGradient = (symbol) => {
-  const charCode = symbol.charCodeAt(0) || 0;
+  const safeSym = symbol || '';
+  const charCode = safeSym.charCodeAt(0) || 0;
   const gradients = [
     'from-cyan-500/20 to-blue-600/30 text-cyan-300 border-cyan-500/30',
     'from-emerald-500/20 to-teal-600/30 text-emerald-300 border-emerald-500/30',
@@ -17,7 +18,8 @@ const getSymbolGradient = (symbol) => {
 };
 
 const generateSparklinePoints = (symbol, chg) => {
-  const seed = (symbol.charCodeAt(0) * 3) + (symbol.charCodeAt(1) * 7) || 120;
+  const safeSym = symbol || '';
+  const seed = (safeSym.charCodeAt(0) * 3) + (safeSym.charCodeAt(1) * 7) || 120;
   const points = [];
   const current = 50;
   const isUp = chg >= 0;

@@ -55,7 +55,7 @@ const TraderResearchWatchlist = () => {
     const q = filterQuery.trim().toLowerCase();
     if (!q) return rows;
     return rows.filter(
-      (row) => row.symbol.toLowerCase().includes(q) || row.name.toLowerCase().includes(q),
+      (row) => (row.symbol || '').toLowerCase().includes(q) || (row.name || '').toLowerCase().includes(q),
     );
   }, [rows, filterQuery]);
 
