@@ -9,7 +9,7 @@ import {
   CheckCircle2,
   BarChart3,
 } from 'lucide-react';
-import { LineChart, Line, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, ResponsiveContainer, YAxis } from 'recharts';
 
 const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index }) => {
   const isPositive = stock.change >= 0;
@@ -203,6 +203,7 @@ const ScreenerStockCard = ({ stock, isSelected, onSelect, onOpenResearch, index 
         <div className="mb-4 h-12 -mx-4 px-0">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={chartData}>
+              <YAxis domain={['dataMin', 'dataMax']} hide />
               <Line
                 type="monotone"
                 dataKey="price"

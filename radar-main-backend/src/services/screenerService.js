@@ -177,8 +177,7 @@ const applyBaseFilters = (rows, filters) => rows.filter((row) => {
 
 // ── Attach live technical indicators ─────────────────────────────────────────
 const needsTechnicalData = (filters) => {
-    const techKeys = ['minRsi', 'maxRsi', 'minScore', 'maxScore', 'volumeStatus'];
-    return techKeys.some(k => filters[k] != null && filters[k] !== '');
+    return true; // Signal classification requires RSI, EMA20, and score even if not explicitly filtered
 };
 
 const attachTechnicals = async (rows, strictLive) => {
