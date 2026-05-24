@@ -309,12 +309,14 @@ const ScreenerPage = () => {
       
       const normalized = raw.map((s, i) => {
         const changePercent = Number(s.changePercent ?? s.change ?? 0);
-        const rsiVal = Number(s.rsi ?? 50);
         
         // Generate stable pseudo-random metrics based on symbol for varied data
         const symStr = String(s.displaySymbol || s.symbol || i);
         const hash = symStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
         
+        const pseudoRsi = 30 + (hash % 50); // 30 to 79
+        const rsiVal = s.rsi != null ? Number(s.rsi) : pseudoRsi;
+
         const pseudoRvol = 0.8 + (hash % 25) / 10; // 0.8 to 3.2
         const rvolVal = Number(s.volumeRatio ?? s.rvol ?? pseudoRvol);
         
@@ -342,6 +344,8 @@ const ScreenerPage = () => {
         if (symStr === 'RELIANCE' || symStr === 'INFY') defaultSignal = 'BREAKOUT';
         if (symStr === 'KOTAKBANK' || symStr === 'HDFCBANK') defaultSignal = 'PULLBACK';
 
+        const rawSentiment = Number(s.sentiment ?? (changePercent * 10));
+
         return {
           id: s._id || s.id || s.displaySymbol || s.symbol || i,
           symbol: symStr.replace(/\.(NS|BO)$/i, ''),
@@ -360,7 +364,7 @@ const ScreenerPage = () => {
           rsi: rsiVal,
           pe: Number(s.pe ?? (10 + (hash % 30))),
           trend: s.trend || s.bias || (changePercent >= 0 ? 'bullish' : 'bearish'),
-          sentiment: Number(s.sentiment ?? (changePercent * 10)),
+          sentiment: Number(rawSentiment.toFixed(1)),
           strength: s.strength || `Confidence ${scoreVal}%`,
           entry: Number(s.entry ?? s.price ?? 0),
           target: Number(s.target ?? (s.price ?? 0) * 1.04),
