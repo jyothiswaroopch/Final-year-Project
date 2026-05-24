@@ -281,6 +281,7 @@ const ScreenerPage = () => {
         if (currentFilters.minPe !== '') apiFilters.minPe = parseFloat(currentFilters.minPe);
         if (currentFilters.maxPe !== '') apiFilters.maxPe = parseFloat(currentFilters.maxPe);
         if (currentFilters.minMarketCap !== '') apiFilters.minMarketCap = parseFloat(currentFilters.minMarketCap);
+        if (currentFilters.maxMarketCap !== '') apiFilters.maxMarketCap = parseFloat(currentFilters.maxMarketCap);
         if (currentFilters.sector !== 'All') apiFilters.sectors = [currentFilters.sector];
         
         // Technical filters
@@ -363,6 +364,7 @@ const ScreenerPage = () => {
           riskFlags: flags,
           rsi: rsiVal,
           pe: Number(s.pe ?? (10 + (hash % 30))),
+          marketCap: Number(s.marketCap ?? (1000 + (hash * 10))),
           trend: s.trend || s.bias || (changePercent >= 0 ? 'bullish' : 'bearish'),
           sentiment: Number(rawSentiment.toFixed(1)),
           strength: s.strength || `Confidence ${scoreVal}%`,
@@ -477,6 +479,7 @@ const ScreenerPage = () => {
 
     // Market cap
     if (filters.minMarketCap) result = result.filter((stock) => (stock.marketCap ?? 0) >= parseFloat(filters.minMarketCap));
+    if (filters.maxMarketCap) result = result.filter((stock) => (stock.marketCap ?? 0) <= parseFloat(filters.maxMarketCap));
 
     // Trend type
     if (filters.trendType !== 'all') {
@@ -486,6 +489,18 @@ const ScreenerPage = () => {
     // Timeframe
     if (filters.timeframe && filters.timeframe !== 'all') {
       result = result.filter((stock) => stock.timeframe === filters.timeframe);
+    }
+
+    // EMA filter (client-side)
+    if (filters.emaFilter && filters.emaFilter !== 'all') {
+      result = result.filter((stock) => {
+        const ema20 = stock.ema20 || (stock.price * 0.95);
+        const ema50 = stock.ema50 || (stock.price * 0.90);
+        if (filters.emaFilter === 'above_ema20') return stock.price > ema20;
+        if (filters.emaFilter === 'below_ema20') return stock.price < ema20;
+        if (filters.emaFilter === 'above_ema50') return stock.price > ema50;
+        return true;
+      });
     }
 
     // MACD filter (client-side using macd field if present)
