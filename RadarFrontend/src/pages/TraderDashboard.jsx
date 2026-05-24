@@ -150,7 +150,21 @@ const formatNewsTime = (value) => {
   if (!value) return "Now";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  
+  const now = new Date();
+  const timeStr = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  
+  if (date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear()) {
+    return timeStr;
+  }
+  
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  if (date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear()) {
+    return `Yesterday, ${timeStr}`;
+  }
+  
+  return `${date.toLocaleDateString([], { month: "short", day: "numeric" })}, ${timeStr}`;
 };
 
 const NEWS_VIEW_MODES = ["Headline Stream", "Source Radar", "Catalyst Watch"];
@@ -2202,8 +2216,15 @@ const NewsFlash = ({ variant = "full" }) => {
       return `${item.source} ${item.title}`.toLowerCase().includes(term);
     })
     .sort((a, b) => {
-      const timeA = new Date(a.item?.publishedAt || 0).getTime() || 0;
-      const timeB = new Date(b.item?.publishedAt || 0).getTime() || 0;
+      const getT = (i) => {
+        if (!i) return 0;
+        let t = new Date(i.publishedAt || 0).getTime();
+        if (!Number.isNaN(t) && t > 0) return t;
+        if (i.datetime) return Number(i.datetime) * 1000;
+        return 0;
+      };
+      const timeA = getT(a.item);
+      const timeB = getT(b.item);
 
       if (activeNewsMode === "Source Radar") {
         const sourceA = String(a.item?.source || "Radar");
