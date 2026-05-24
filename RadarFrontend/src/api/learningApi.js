@@ -1,8 +1,7 @@
 import api from './api';
 
-// Returns the localStorage key scoped by mode so trader/investor progress is separate
 export const getProgressKey = (courseId, mode = '') => {
-    const prefix = mode ? `${mode}_` : '';
+    const prefix = mode ? `${mode.toLowerCase()}_` : '';
     return `radar_academy_progress_${prefix}${courseId}`;
 };
 
