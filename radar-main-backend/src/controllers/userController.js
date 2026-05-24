@@ -126,12 +126,18 @@ const googleAuth = asyncHandler(async (req, res) => {
         const sessionId = crypto.randomUUID();
 
         if (user) {
+            // Ensure authProvider is set to 'google' for existing users that signed in via Google
+            if (user.authProvider !== 'google') {
+                user.authProvider = 'google';
+                await user.save();
+            }
             const jwtToken = generateToken(user._id, sessionId);
             recordSession(user, req, sessionId);
             res.json({
                 _id: user._id,
                 username: user.username,
                 email: user.email,
+                authProvider: user.authProvider,
                 preferredMode: user.preferredMode,
                 token: jwtToken,
                 picture
@@ -141,7 +147,8 @@ const googleAuth = asyncHandler(async (req, res) => {
             user = await User.create({
                 username: name,
                 email: email,
-                password: randomPassword
+                password: randomPassword,
+                authProvider: 'google',  // Mark as Google account
             });
             const jwtToken = generateToken(user._id, sessionId);
             recordSession(user, req, sessionId);
@@ -149,6 +156,7 @@ const googleAuth = asyncHandler(async (req, res) => {
                 _id: user._id,
                 username: user.username,
                 email: user.email,
+                authProvider: user.authProvider,
                 preferredMode: user.preferredMode,
                 token: jwtToken,
                 picture
@@ -204,6 +212,7 @@ const getUserProfile = asyncHandler(async (req, res) => {
         _id:          u._id,
         username:     u.username,
         email:        u.email || null,
+        authProvider: u.authProvider || 'email',   // so frontend knows if Google user
         preferredMode: u.preferredMode,
         createdAt:    u.createdAt,
         joinedDate:   u.createdAt
@@ -224,37 +233,69 @@ const updateUserProfile = asyncHandler(async (req, res) => {
     const { username, email } = req.body;
     const user = req.user;
 
-    let targetUser = user;
-
-    if (username && username !== user.username) {
-        const taken = await User.findOne({ username, _id: { $ne: user._id } });
+    // --- Username uniqueness check ---
+    if (username && username.trim() !== user.username) {
+        const taken = await User.findOne({ username: username.trim(), _id: { $ne: user._id } });
         if (taken) {
-            targetUser = taken;
-            if (email && email.trim().toLowerCase() === user.email) {
-                user.email = `released_${Date.now()}_${user.email}`;
-                await user.save();
-            }
+            return res.status(400).json({ error: 'Username is already taken. Please choose a different one.' });
         }
+        user.username = username.trim();
     }
 
-    if (username) targetUser.username = username.trim();
+    // --- Email uniqueness check ---
     if (email) {
         const cleanEmail = email.trim().toLowerCase();
-        if (cleanEmail !== targetUser.email) {
-            const emailTaken = await User.findOne({ email: cleanEmail, _id: { $ne: targetUser._id } });
+        if (cleanEmail !== user.email) {
+            const emailTaken = await User.findOne({ email: cleanEmail, _id: { $ne: user._id } });
             if (emailTaken) {
-                emailTaken.email = `released_${Date.now()}_${emailTaken.email}`;
-                await emailTaken.save();
+                return res.status(400).json({ error: 'Email is already registered to another account.' });
             }
-            targetUser.email = cleanEmail;
+            user.email = cleanEmail;
         }
     }
 
-    await targetUser.save();
+    await user.save();
+    const token = generateToken(user._id, req.sessionId);
     res.json({
         success: true,
-        data: { username: targetUser.username, email: targetUser.email, token: generateToken(targetUser._id) }
+        data: { username: user.username, email: user.email, authProvider: user.authProvider, token }
     });
+});
+
+// Change / Set password
+// - Google users (authProvider='google'): no current password needed — they never had one they know
+// - Email users: must verify current password first
+const changePassword = asyncHandler(async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const user = req.user;
+
+    if (!newPassword || newPassword.length < 8) {
+        return res.status(400).json({ error: 'New password must be at least 8 characters.' });
+    }
+
+    const isGoogleUser = user.authProvider === 'google';
+
+    if (!isGoogleUser) {
+        // Email/password users must verify their current password
+        if (!currentPassword) {
+            return res.status(400).json({ error: 'Current password is required.' });
+        }
+        const match = await user.matchPassword(currentPassword);
+        if (!match) {
+            return res.status(401).json({ error: 'Current password is incorrect.' });
+        }
+    }
+
+    user.password = newPassword;  // pre-save hook will bcrypt it
+    await user.save();
+
+    // If Google user is setting a password, allow them to also log in with email+password
+    if (isGoogleUser) {
+        user.authProvider = 'email';  // They now have a real password — promote to email auth
+        await user.save();
+    }
+
+    res.json({ success: true, message: isGoogleUser ? 'Password set successfully. You can now log in with email and password.' : 'Password updated successfully.' });
 });
 
 const saveInvestorDNA = asyncHandler(async (req, res) => {
@@ -553,4 +594,6 @@ module.exports = {
     getSessions,
     revokeSession,
     revokeOtherSessions,
+    changePassword,
 };
+

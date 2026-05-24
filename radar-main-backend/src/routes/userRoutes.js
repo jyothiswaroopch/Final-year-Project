@@ -3,6 +3,7 @@ const router = express.Router();
 const { 
     getUserProfile,
     updateUserProfile,
+    changePassword,
     saveInvestorDNA,
     updateNotificationPreferences,
     getMode, 
@@ -22,6 +23,7 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 
 router.get('/profile', authMiddleware, getUserProfile);
 router.patch('/profile', authMiddleware, updateUserProfile);
+router.put('/password', authMiddleware, changePassword);   // change or set password
 router.post('/dna', authMiddleware, saveInvestorDNA);
 router.patch('/notifications', authMiddleware, updateNotificationPreferences);
 router.get('/mode', authMiddleware, getMode);

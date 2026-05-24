@@ -1662,40 +1662,95 @@ export function SettingsPage() {
             )}
 
             {/* B. SECURE PASSWORD CHANGE MODAL */}
-            {isPasswordModalOpen && (
+            {isPasswordModalOpen && (() => {
+                const isGoogleUser = profile?.authProvider === 'google';
+                return (
                 <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsPasswordModalOpen(false)} />
                     <div className="relative w-full max-w-md bg-white rounded-[32px] shadow-2xl p-10 border border-blue-50 animate-in zoom-in-95 duration-200">
                         <div className="flex justify-between items-center mb-8">
                             <div>
-                                <h3 className="text-lg font-black text-slate-800">Change Password</h3>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Strengthen your account</p>
+                                <h3 className="text-lg font-black text-slate-800">
+                                    {isGoogleUser ? 'Set a Password' : 'Change Password'}
+                                </h3>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                    {isGoogleUser ? 'Add password login to your account' : 'Strengthen your account'}
+                                </p>
                             </div>
                             <button onClick={() => setIsPasswordModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-slate-600">✕</button>
                         </div>
-                        
-                        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); setIsPasswordModalOpen(false); setStatus('Password Updated!'); setTimeout(() => setStatus(''), 3000); }}>
-                            <div className="space-y-1.5">
-                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Current Password</label>
-                                <input type="password" placeholder="••••••••" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
+
+                        {isGoogleUser && (
+                            <div className="mb-6 p-4 bg-blue-50 border border-blue-100 rounded-2xl flex items-start gap-3">
+                                <span className="text-blue-500 text-lg mt-0.5">ℹ</span>
+                                <p className="text-xs font-bold text-blue-700 leading-relaxed">
+                                    You signed in with Google. Set a password to also be able to log in with your email and password directly.
+                                </p>
                             </div>
+                        )}
+                        
+                        <form className="space-y-6" onSubmit={async (e) => {
+                            e.preventDefault();
+                            const fd = new FormData(e.target);
+                            const currentPassword = fd.get('currentPassword');
+                            const newPassword = fd.get('newPassword');
+                            const confirmPassword = fd.get('confirmPassword');
+
+                            if (newPassword !== confirmPassword) {
+                                setStatus('Passwords do not match.'); setTimeout(() => setStatus(''), 3000); return;
+                            }
+                            if (newPassword.length < 8) {
+                                setStatus('Password must be at least 8 characters.'); setTimeout(() => setStatus(''), 3000); return;
+                            }
+
+                            try {
+                                const payload = isGoogleUser
+                                    ? { newPassword }
+                                    : { currentPassword, newPassword };
+                                await api.put('/user/password', payload);
+                                // If Google user just set a password, update local authProvider
+                                if (isGoogleUser) {
+                                    setProfile(prev => ({ ...prev, authProvider: 'email' }));
+                                }
+                                setIsPasswordModalOpen(false);
+                                setStatus(isGoogleUser ? 'Password set! You can now log in with email.' : 'Password updated!');
+                                setTimeout(() => setStatus(''), 4000);
+                            } catch (err) {
+                                const msg = err.response?.data?.error || 'Failed to update password.';
+                                setStatus(msg); setTimeout(() => setStatus(''), 4000);
+                            }
+                        }}>
+                            {!isGoogleUser && (
+                                <div className="space-y-1.5">
+                                    <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Current Password</label>
+                                    <input type="password" name="currentPassword" placeholder="••••••••" required className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
+                                </div>
+                            )}
                             <div className="space-y-1.5">
                                 <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">New Password</label>
-                                <input type="password" placeholder="Min. 8 characters" className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
+                                <input type="password" name="newPassword" placeholder="Min. 8 characters" required className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
+                            </div>
+                            <div className="space-y-1.5">
+                                <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Confirm New Password</label>
+                                <input type="password" name="confirmPassword" placeholder="Re-enter new password" required className="w-full px-5 py-4 rounded-2xl bg-slate-50 border border-slate-100 text-xs font-bold text-slate-800 outline-none focus:border-blue-500 transition-all" />
                             </div>
 
                             <div className="p-4 bg-slate-50 rounded-xl border border-dotted border-slate-200">
-                                <p className="text-[10px] text-slate-400 font-bold leading-tight">Must contain at least 8 characters, one number, and one special symbol.</p>
+                                <p className="text-[10px] text-slate-400 font-bold leading-tight">Must be at least 8 characters.</p>
                             </div>
 
                             <div className="pt-4 flex gap-3">
                                 <button type="button" onClick={() => setIsPasswordModalOpen(false)} className="flex-1 py-4 rounded-2xl border border-slate-200 text-xs font-black text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
-                                <button type="submit" className="flex-1 py-4 rounded-2xl bg-blue-600 text-white text-xs font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">Update</button>
+                                <button type="submit" className="flex-1 py-4 rounded-2xl bg-blue-600 text-white text-xs font-black shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">
+                                    {isGoogleUser ? 'Set Password' : 'Update Password'}
+                                </button>
                             </div>
                         </form>
                     </div>
                 </div>
-            )}
+                );
+            })()}
+
 
             {/* C. MANAGE SESSIONS MODAL */}
             {isSessionsModalOpen && (
