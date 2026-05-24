@@ -1,4 +1,5 @@
 import { Suspense, lazy, useEffect } from 'react';
+import ErrorBoundary from './components/ErrorBoundary';
 import { BrowserRouter as Router, Routes, Route, Link, Navigate, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { AssetProvider } from './context/AssetContext';
 import { WatchlistProvider } from './context/WatchlistContext';
@@ -166,6 +167,7 @@ function App() {
           <WatchlistProvider>
             <Router>
               <Suspense fallback={<AppLoader />}>
+                <ErrorBoundary>
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/dashboard" element={<DashboardRedirect />} />
@@ -246,6 +248,7 @@ function App() {
               <Route path="/500" element={<RouteStatusPage title="500 - Server Error" message="Something went wrong while processing your request. Please try again." actionTo="/" actionLabel="Return Home" />} />
               <Route path="*" element={<Navigate to="/404" replace />} />
             </Routes>
+                </ErrorBoundary>
           </Suspense>
         </Router>
       </WatchlistProvider>
