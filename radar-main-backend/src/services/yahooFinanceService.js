@@ -1,4 +1,5 @@
-const yf = require('yahoo-finance2').default;
+const YahooFinance = require('yahoo-finance2').default;
+const yf = new YahooFinance({ suppressNotices: ['yahooSurvey'] });
 const logger = require('../config/logger');
 
 // Suppress yahoo-finance2's own validation warnings cleanly (removed as it's not supported in v3)
@@ -27,6 +28,8 @@ const toYahooSymbol = (symbol) => {
 
     if (BSE_ONLY.has(s)) return `${s}.NS`;
 
+    if (s.startsWith('^')) return s;
+
     return `${s}.NS`; // Default to NSE
 };
 
@@ -43,9 +46,27 @@ class YahooFinanceService {
         try {
             logger.info(`[Yahoo] Fetching ${interval}/${range} for ${ticker}`);
 
+            const getPeriod1 = (r) => {
+                const now = new Date();
+                switch (r) {
+                    case '1d': return new Date(now.setDate(now.getDate() - 1));
+                    case '5d': return new Date(now.setDate(now.getDate() - 5));
+                    case '1mo': return new Date(now.setMonth(now.getMonth() - 1));
+                    case '3mo': return new Date(now.setMonth(now.getMonth() - 3));
+                    case '6mo': return new Date(now.setMonth(now.getMonth() - 6));
+                    case '1y': return new Date(now.setFullYear(now.getFullYear() - 1));
+                    case '2y': return new Date(now.setFullYear(now.getFullYear() - 2));
+                    case '5y': return new Date(now.setFullYear(now.getFullYear() - 5));
+                    case '10y': return new Date(now.setFullYear(now.getFullYear() - 10));
+                    case 'ytd': return new Date(now.getFullYear(), 0, 1);
+                    case 'max': return new Date('1970-01-01');
+                    default: return new Date(now.setFullYear(now.getFullYear() - 1));
+                }
+            };
+
             const result = await yf.chart(ticker, {
                 interval,
-                range,
+                period1: getPeriod1(range),
                 includePrePost: false,
             });
 
