@@ -1,8 +1,7 @@
 const yf = require('yahoo-finance2').default;
 const logger = require('../config/logger');
 
-// Suppress yahoo-finance2's own validation warnings cleanly
-yf.setGlobalConfig({ validation: { logErrors: false } });
+// Suppress yahoo-finance2's own validation warnings cleanly (removed as it's not supported in v3)
 
 // Map plain NSE/BSE symbols to Yahoo Finance ticker format
 const toYahooSymbol = (symbol) => {
