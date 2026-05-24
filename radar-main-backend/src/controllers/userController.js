@@ -8,9 +8,63 @@ const sendEmail = require('../services/mailService');
 const logger = require('../config/logger');
 
 
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
+const generateToken = (id, sessionId) => {
+    const payload = sessionId ? { id, sessionId } : { id };
+    return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '30d' });
 };
+
+// --- Session helpers ---
+
+/** Parse a human-readable device name from the User-Agent string */
+const parseDevice = (ua = '') => {
+    if (!ua) return 'Unknown Device';
+    let os = 'Unknown OS';
+    let browser = 'Browser';
+    if (/iPhone/i.test(ua))       os = 'iPhone';
+    else if (/iPad/i.test(ua))    os = 'iPad';
+    else if (/Android/i.test(ua)) os = 'Android';
+    else if (/Windows/i.test(ua)) os = 'Windows';
+    else if (/Mac OS X/i.test(ua)) os = 'macOS';
+    else if (/Linux/i.test(ua))   os = 'Linux';
+    if (/Edg\//i.test(ua))        browser = 'Edge';
+    else if (/Chrome/i.test(ua))  browser = 'Chrome';
+    else if (/Firefox/i.test(ua)) browser = 'Firefox';
+    else if (/Safari/i.test(ua))  browser = 'Safari';
+    return `${browser} on ${os}`;
+};
+
+/** Free IP geolocation — no API key needed. Falls back to IP string on error. */
+const lookupLocation = async (ip) => {
+    if (!ip || ip === '::1' || ip === '127.0.0.1') return 'Local / Development';
+    try {
+        const axios = require('axios');
+        const resp = await axios.get(`http://ip-api.com/json/${ip}?fields=city,country,status`, { timeout: 3000 });
+        if (resp.data?.status === 'success') {
+            return `${resp.data.city || ''}, ${resp.data.country || ''}`.replace(/^, /, '').trim() || ip;
+        }
+        return ip;
+    } catch { return ip; }
+};
+
+/** Append a new session record to the user document, keep latest 10 */
+const recordSession = async (user, req, sessionId) => {
+    try {
+        const ip = (req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '').split(',')[0].trim();
+        const device   = parseDevice(req.headers['user-agent']);
+        const location = await lookupLocation(ip);
+        if (!user.sessions) user.sessions = [];
+        user.sessions.push({ sessionId, device, ip, location, createdAt: new Date(), lastActive: new Date() });
+        // Keep only the 10 most recent sessions
+        if (user.sessions.length > 10) {
+            user.sessions = user.sessions.slice(-10);
+        }
+        user.markModified('sessions');
+        await user.save();
+    } catch (err) {
+        logger.warn('Failed to record session', { error: err.message });
+    }
+};
+
 
 const normalizeIdentifier = (value) => String(value || '').trim().toLowerCase();
 
@@ -37,12 +91,16 @@ const registerUser = asyncHandler(async (req, res) => {
         });
 
         if (user) {
+            const sessionId = crypto.randomUUID();
+            const token = generateToken(user._id, sessionId);
+            // Record session in background (don't block response)
+            recordSession(user, req, sessionId);
             res.status(201).json({
                 _id: user._id,
                 username: user.username,
                 email: user.email || null,
                 preferredMode: user.preferredMode,
-                token: generateToken(user._id)
+                token
             });
         }
     } catch (error) {
@@ -65,32 +123,35 @@ const googleAuth = asyncHandler(async (req, res) => {
         const { name, email, picture } = ticket.getPayload();
 
         let user = await User.findOne({ email });
+        const sessionId = crypto.randomUUID();
 
         if (user) {
+            const jwtToken = generateToken(user._id, sessionId);
+            recordSession(user, req, sessionId);
             res.json({
                 _id: user._id,
                 username: user.username,
                 email: user.email,
                 preferredMode: user.preferredMode,
-                token: generateToken(user._id),
-                picture: picture
+                token: jwtToken,
+                picture
             });
         } else {
-            
             const randomPassword = crypto.randomBytes(16).toString('hex');
             user = await User.create({
                 username: name,
                 email: email,
                 password: randomPassword
             });
-
+            const jwtToken = generateToken(user._id, sessionId);
+            recordSession(user, req, sessionId);
             res.status(201).json({
                 _id: user._id,
                 username: user.username,
                 email: user.email,
                 preferredMode: user.preferredMode,
-                token: generateToken(user._id),
-                picture: picture
+                token: jwtToken,
+                picture
             });
         }
     } catch (error) {
@@ -118,12 +179,15 @@ const loginUser = asyncHandler(async (req, res) => {
         });
 
         if (user && (await user.matchPassword(password))) {
+            const sessionId = crypto.randomUUID();
+            const token = generateToken(user._id, sessionId);
+            recordSession(user, req, sessionId);
             res.json({
                 _id: user._id,
                 username: user.username,
                 email: user.email || null,
                 preferredMode: user.preferredMode,
-                token: generateToken(user._id)
+                token
             });
         } else {
             res.status(401).json({ error: 'Invalid username or password' });
@@ -431,6 +495,43 @@ const resetPassword = asyncHandler(async (req, res) => {
     });
 });
 
+/** GET /api/user/sessions — return all sessions, marking the current one */
+const getSessions = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id).select('sessions');
+    const currentSessionId = req.sessionId; // attached by authMiddleware
+    const sessions = (user?.sessions || []).map(s => ({
+        id:          s._id,
+        sessionId:   s.sessionId,
+        device:      s.device,
+        ip:          s.ip,
+        location:    s.location,
+        createdAt:   s.createdAt,
+        lastActive:  s.lastActive,
+        current:     s.sessionId === currentSessionId,
+    })).reverse(); // newest first
+    res.json({ success: true, data: sessions });
+});
+
+/** DELETE /api/user/sessions/others — revoke every session except the current one */
+const revokeOtherSessions = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    const currentSessionId = req.sessionId;
+    user.sessions = user.sessions.filter(s => s.sessionId === currentSessionId);
+    user.markModified('sessions');
+    await user.save();
+    res.json({ success: true, message: 'All other sessions revoked' });
+});
+
+/** DELETE /api/user/sessions/:sessionId — revoke a specific session */
+const revokeSession = asyncHandler(async (req, res) => {
+    const user = await User.findById(req.user._id);
+    const { sessionId } = req.params;
+    user.sessions = user.sessions.filter(s => s.sessionId !== sessionId);
+    user.markModified('sessions');
+    await user.save();
+    res.json({ success: true, message: 'Session revoked' });
+});
+
 module.exports = { 
     registerUser, 
     loginUser, 
@@ -443,11 +544,13 @@ module.exports = {
     updateNotificationPreferences,
     getMode, 
     updateMode, 
-    googleAuth,
     getUserPortfolio,
     getUserPerformance,
     getUserHoldings,
     getUserInsights,
     getUserNews,
-    getUserEvents
+    getUserEvents,
+    getSessions,
+    revokeSession,
+    revokeOtherSessions,
 };

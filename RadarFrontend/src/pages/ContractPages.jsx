@@ -1106,16 +1106,69 @@ export function SettingsPage() {
     const [selectedImage, setSelectedImage] = useState(() => localStorage.getItem('profileImage'));
     const fileInputRef = useRef(null);
 
-    const [sessions, setSessions] = useState([
-        { id: 1, device: 'Chrome on Windows', location: 'Hyderabad, IN (Current)', active: 'Active Now', current: true, icon: <Monitor size={14} /> },
-        { id: 2, device: 'Safari on iPhone 15', location: 'Bangalore, IN', active: 'Active 2h ago', current: false, icon: <Smartphone size={14} /> }
-    ]);
+    const [sessions, setSessions] = useState([]);
+    const [sessionsLoading, setSessionsLoading] = useState(false);
+
     
     const [notifications, setNotifications] = useState({
         priceAlerts: { enabled: true },
         earningsUpdates: { enabled: true },
         importantNews: { enabled: true }
     });
+
+    // Fetch real sessions from backend
+    const fetchSessions = async () => {
+        setSessionsLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/user/sessions`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            const json = await res.json();
+            if (json.success) setSessions(json.data);
+        } catch (e) {
+            console.warn('Could not fetch sessions:', e.message);
+        } finally {
+            setSessionsLoading(false);
+        }
+    };
+
+    // Revoke a single session
+    const revokeSession = async (sessionId) => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/user/sessions/${sessionId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            await fetchSessions();
+            setStatus('Device signed out successfully');
+            setTimeout(() => setStatus(''), 3000);
+        } catch (e) { console.warn('Revoke session failed:', e.message); }
+    };
+
+    // Revoke all sessions except current
+    const revokeAllOtherSessions = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api'}/user/sessions/others`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setIsSessionsModalOpen(false);
+            setStatus('Logged out from all other devices');
+            setTimeout(() => setStatus(''), 3000);
+            await fetchSessions();
+        } catch (e) { console.warn('Revoke others failed:', e.message); }
+    };
+
+    // Fetch sessions whenever modal opens
+    const openSessionsModal = () => { setIsSessionsModalOpen(true); fetchSessions(); };
+
+    // Also fetch on mount so the summary card shows the real count
+    React.useEffect(() => { fetchSessions(); }, []);
+
 
     const [preferences, setPreferences] = useState({
         sectors: ['Technology', 'Financials'],
@@ -1393,7 +1446,7 @@ export function SettingsPage() {
                                         </div>
                                     </div>
                                     <button 
-                                        onClick={() => setIsSessionsModalOpen(true)}
+                                        onClick={openSessionsModal}
                                         className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-[10px] font-black text-slate-600 hover:bg-slate-100 transition-all"
                                     >
                                         Manage Sessions
@@ -1652,43 +1705,67 @@ export function SettingsPage() {
                         <div className="flex justify-between items-center mb-8">
                             <div>
                                 <h3 className="text-lg font-black text-slate-800">Manage Active Sessions</h3>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Logged In Devices ({sessions.length})</p>
+                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                    {sessionsLoading ? 'Loading...' : `${sessions.length} Device${sessions.length !== 1 ? 's' : ''} Logged In`}
+                                </p>
                             </div>
                             <button onClick={() => setIsSessionsModalOpen(false)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-50 text-slate-400 hover:text-slate-600">✕</button>
                         </div>
                         
-                        <div className="space-y-4">
-                            {sessions.map(s => (
-                                <div key={s.id} className="p-5 rounded-2xl border border-slate-100 flex items-center justify-between group hover:border-blue-100 transition-all">
-                                    <div className="flex items-center gap-4">
-                                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.current ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'}`}>
-                                            {s.icon}
-                                        </div>
-                                        <div>
-                                            <p className="text-sm font-black text-slate-800 flex items-center gap-2">
-                                                {s.device}
-                                                {s.current && <span className="bg-emerald-50 text-emerald-600 text-[8px] px-1.5 py-0.5 rounded uppercase">Active Now</span>}
-                                            </p>
-                                            <p className="text-xs text-slate-400 font-medium">
-                                                {s.location} • {s.active}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    {!s.current && (
-                                        <button 
-                                            onClick={() => setSessions(sessions.filter(sess => sess.id !== s.id))}
-                                            className="text-[10px] font-black text-red-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
-                                        >
-                                            Sign Out
-                                        </button>
-                                    )}
+                        <div className="space-y-4 max-h-80 overflow-y-auto pr-1">
+                            {sessionsLoading ? (
+                                <div className="py-8 flex justify-center">
+                                    <div className="w-6 h-6 border-2 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
                                 </div>
-                            ))}
+                            ) : sessions.length === 0 ? (
+                                <p className="text-sm text-slate-400 text-center py-8">No active sessions found. Try logging in again.</p>
+                            ) : sessions.map(s => {
+                                const lastActive = s.current ? 'Active Now' :
+                                    s.lastActive ? (() => {
+                                        const diff = Date.now() - new Date(s.lastActive).getTime();
+                                        const mins = Math.floor(diff / 60000);
+                                        const hours = Math.floor(mins / 60);
+                                        const days = Math.floor(hours / 24);
+                                        if (days > 0) return `${days}d ago`;
+                                        if (hours > 0) return `${hours}h ago`;
+                                        if (mins > 0) return `${mins}m ago`;
+                                        return 'Just now';
+                                    })() : 'Unknown';
+                                const isPhone = /iPhone|Android|iPad/i.test(s.device || '');
+                                return (
+                                    <div key={s.sessionId || s.id} className="p-5 rounded-2xl border border-slate-100 flex items-center justify-between group hover:border-blue-100 transition-all">
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${s.current ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'}`}>
+                                                {isPhone ? <Smartphone size={14} /> : <Monitor size={14} />}
+                                            </div>
+                                            <div>
+                                                <p className="text-sm font-black text-slate-800 flex items-center gap-2">
+                                                    {s.device || 'Unknown Device'}
+                                                    {s.current && <span className="bg-emerald-50 text-emerald-600 text-[8px] px-1.5 py-0.5 rounded uppercase font-black">This Device</span>}
+                                                </p>
+                                                <p className="text-xs text-slate-400 font-medium">
+                                                    {s.location || 'Unknown Location'} • {lastActive}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        {!s.current && (
+                                            <button 
+                                                onClick={() => revokeSession(s.sessionId)}
+                                                className="text-[10px] font-black text-red-500 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity hover:underline"
+                                            >
+                                                Sign Out
+                                            </button>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
 
-                            <div className="pt-8 border-t border-slate-50 flex flex-col gap-4">
+                        <div className="pt-8 border-t border-slate-50 flex flex-col gap-4 mt-6">
                                 <button 
-                                    onClick={() => { setSessions(sessions.filter(s => s.current)); setIsSessionsModalOpen(false); setStatus('Logged out from other devices'); setTimeout(() => setStatus(''), 3000); }}
-                                    className="w-full py-4 rounded-2xl bg-slate-100 text-slate-600 text-xs font-black hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
+                                    onClick={revokeAllOtherSessions}
+                                    disabled={sessions.filter(s => !s.current).length === 0}
+                                    className="w-full py-4 rounded-2xl bg-slate-100 text-slate-600 text-xs font-black hover:bg-slate-200 transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed"
                                 >
                                     <LogOut size={14} /> Sign Out from All Other Devices
                                 </button>

@@ -94,6 +94,16 @@ const UserSchema = new mongoose.Schema({
         importantNews:   { type: Boolean, default: true }
     },
 
+    // Active login sessions — one entry per device/browser login
+    sessions: [{
+        sessionId:  { type: String, required: true },   // unique per login (crypto.randomUUID)
+        device:     { type: String, default: 'Unknown Device' }, // parsed from User-Agent
+        ip:         { type: String, default: '' },
+        location:   { type: String, default: 'Unknown Location' },
+        createdAt:  { type: Date, default: Date.now },
+        lastActive: { type: Date, default: Date.now },
+    }],
+
     resetPasswordToken: String,
     resetPasswordExpire: Date
 });

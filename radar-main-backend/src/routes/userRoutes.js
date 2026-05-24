@@ -12,7 +12,10 @@ const {
     getUserHoldings,
     getUserInsights,
     getUserNews,
-    getUserEvents
+    getUserEvents,
+    getSessions,
+    revokeSession,
+    revokeOtherSessions,
 } = require('../controllers/userController');
 const { getSettings, updateSettings } = require('../controllers/settingsController');
 const { authMiddleware } = require('../middleware/authMiddleware');
@@ -26,6 +29,11 @@ router.patch('/mode', authMiddleware, updateMode);
 router.get('/settings', authMiddleware, getSettings);
 router.post('/settings', authMiddleware, updateSettings);
 
+// Session management routes
+router.get('/sessions', authMiddleware, getSessions);
+router.delete('/sessions/others', authMiddleware, revokeOtherSessions);  // must be before /:sessionId
+router.delete('/sessions/:sessionId', authMiddleware, revokeSession);
+
 // Investor Dashboard APIs
 router.get('/portfolio', authMiddleware, getUserPortfolio);
 router.get('/performance', authMiddleware, getUserPerformance);
@@ -35,3 +43,4 @@ router.get('/news', authMiddleware, getUserNews);
 router.get('/events', authMiddleware, getUserEvents);
 
 module.exports = router;
+

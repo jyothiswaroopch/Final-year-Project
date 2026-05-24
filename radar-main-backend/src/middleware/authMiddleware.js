@@ -18,70 +18,61 @@ const getOrCreateDevUser = async () => {
 
 const authMiddleware = async (req, res, next) => {
     let token;
-
-    // Check for development bypass
     const isBypassEnabled = process.env.DEV_BYPASS_AUTH === 'true';
 
-    if (
-        req.headers.authorization &&
-        req.headers.authorization.startsWith('Bearer')
-    ) {
-        try {
-            token = req.headers.authorization.split(' ')[1];
-            const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    // Extract token from Authorization header or legacy x-auth-token
+    if (req.headers.authorization?.startsWith('Bearer')) {
+        token = req.headers.authorization.split(' ')[1];
+    } else if (req.headers['x-auth-token']) {
+        token = req.headers['x-auth-token'];
+    }
 
-            req.user = await User.findById(decoded.id);
+    if (!token) {
+        if (isBypassEnabled) {
+            req.user = await getOrCreateDevUser();
+            if (req.user) return next();
+        }
+        return res.status(401).json({ error: 'Not authorized, no token' });
+    }
 
-            if (!req.user) {
-                if (isBypassEnabled) {
-                    req.user = await getOrCreateDevUser();
-                    return next();
-                }
-                return res.status(401).json({ error: 'Not authorized, user not found' });
-            }
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id);
 
-            next();
-        } catch (error) {
+        if (!user) {
             if (isBypassEnabled) {
                 req.user = await getOrCreateDevUser();
                 return next();
             }
-            const reason = error?.name === 'JsonWebTokenError' ? 'invalid signature' : error?.message || 'unknown';
-            console.warn(`[auth] Token rejected (${reason}) — client should re-login`);
-            res.status(401).json({ error: 'Not authorized, token failed' });
+            return res.status(401).json({ error: 'Not authorized, user not found' });
         }
-    } else {
-        // Support legacy x-auth-token header
-        if (req.headers['x-auth-token']) {
-            try {
-                token = req.headers['x-auth-token'];
-                const decoded = jwt.verify(token, process.env.JWT_SECRET);
-                req.user = await User.findById(decoded.id);
-                if (!req.user) {
-                    if (isBypassEnabled) {
-                        req.user = await getOrCreateDevUser();
-                        return next();
-                    }
-                    return res.status(401).json({ error: 'Not authorized, user not found' });
-                }
-                next();
-            } catch (error) {
-                if (isBypassEnabled) {
-                    req.user = await getOrCreateDevUser();
-                    return next();
-                }
-                res.status(401).json({ error: 'Not authorized, token failed' });
+
+        // Session validation — only enforced when the JWT carries a sessionId.
+        // Old tokens without sessionId are allowed through for backward compatibility.
+        if (decoded.sessionId) {
+            const sessionExists = user.sessions?.some(s => s.sessionId === decoded.sessionId);
+            if (!sessionExists) {
+                return res.status(401).json({ error: 'Session expired or revoked. Please log in again.' });
             }
-        } else {
-            if (isBypassEnabled) {
-                req.user = await getOrCreateDevUser();
-                if (req.user) {
-                    return next();
-                }
-                return res.status(401).json({ error: 'Not authorized, no users in DB to bypass' });
-            }
-            res.status(401).json({ error: 'Not authorized, no token' });
+            // Attach sessionId to request so controllers can reference it
+            req.sessionId = decoded.sessionId;
+            // Update lastActive in background — don't block the request
+            User.updateOne(
+                { _id: user._id, 'sessions.sessionId': decoded.sessionId },
+                { $set: { 'sessions.$.lastActive': new Date() } }
+            ).catch(() => {});
         }
+
+        req.user = user;
+        next();
+    } catch (error) {
+        if (isBypassEnabled) {
+            req.user = await getOrCreateDevUser();
+            return next();
+        }
+        const reason = error?.name === 'JsonWebTokenError' ? 'invalid signature' : error?.message || 'unknown';
+        console.warn(`[auth] Token rejected (${reason}) — client should re-login`);
+        res.status(401).json({ error: 'Not authorized, token failed' });
     }
 };
 
