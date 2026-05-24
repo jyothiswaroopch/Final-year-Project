@@ -1830,7 +1830,6 @@ export function SettingsPage() {
                                     Close Window
                                 </button>
                             </div>
-                        </div>
                     </div>
                 </div>
             )}
