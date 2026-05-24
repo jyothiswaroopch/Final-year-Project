@@ -1109,6 +1109,8 @@ export function SettingsPage() {
     const [sessions, setSessions] = useState([]);
     const [sessionsLoading, setSessionsLoading] = useState(false);
 
+    const isGoogleUser = profile?.authProvider === 'google';
+
     
     const [notifications, setNotifications] = useState({
         priceAlerts: { enabled: true },
@@ -1662,9 +1664,7 @@ export function SettingsPage() {
             )}
 
             {/* B. SECURE PASSWORD CHANGE MODAL */}
-            {isPasswordModalOpen && (() => {
-                const isGoogleUser = profile?.authProvider === 'google';
-                return (
+            {isPasswordModalOpen && (
                 <div className="fixed inset-0 z-[1000] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onClick={() => setIsPasswordModalOpen(false)} />
                     <div className="relative w-full max-w-md bg-white rounded-[32px] shadow-2xl p-10 border border-blue-50 animate-in zoom-in-95 duration-200">
@@ -1748,8 +1748,7 @@ export function SettingsPage() {
                         </form>
                     </div>
                 </div>
-                );
-            })()}
+            )}
 
 
             {/* C. MANAGE SESSIONS MODAL */}
