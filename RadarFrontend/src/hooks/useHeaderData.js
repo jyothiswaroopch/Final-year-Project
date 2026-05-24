@@ -72,10 +72,16 @@ export const useHeaderData = () => {
 
         try {
             const response = await fetchUserProfile();
+
+            // Always sync localStorage with the real DB username to prevent stale values
+            if (response?.username) {
+                localStorage.setItem('username', response.username);
+            }
+
             const mergedProfile = {
                 ...fallbackProfile,
                 ...response,
-                email: fallbackProfile.email
+                email: response?.email || fallbackProfile.email
             };
 
             setProfile(mergedProfile);

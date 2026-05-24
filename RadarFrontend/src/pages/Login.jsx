@@ -27,6 +27,7 @@ export default function Login() {
       const res = await api.post('/auth/google', { token: tokenResponse.credential || tokenResponse.access_token, isSignup: false });
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userEmail', res.data.email || '');
+      localStorage.setItem('username', res.data.username || '');  // sync username key
       localStorage.setItem('user', JSON.stringify({ username: res.data.username, email: res.data.email }));
       window.location.href = '/dashboard';
       } catch (error) {
@@ -61,6 +62,7 @@ export default function Login() {
 
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('userEmail', res.data.email || identifier);
+      localStorage.setItem('username', res.data.username || '');  // sync username key
       localStorage.setItem('user', JSON.stringify({ username: res.data.username, email: res.data.email || identifier }));
       window.location.href = '/dashboard';
     } catch (error) {
