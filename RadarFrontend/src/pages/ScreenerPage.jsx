@@ -122,70 +122,65 @@ const ScreenerPage = () => {
       
       const normalized = raw.map((s, i) => {
         const changePercent = Number(s.changePercent ?? s.change ?? 0);
-        
-        // Generate stable pseudo-random metrics based on symbol for varied data
-        const symStr = String(s.displaySymbol || s.symbol || i);
-        const hash = symStr.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
-        
-        const pseudoRsi = 30 + (hash % 50); // 30 to 79
-        const rsiVal = s.rsi != null ? Number(s.rsi) : pseudoRsi;
+        const symStr = String(s.displaySymbol || s.symbol || i).replace(/\.(NS|BO)$/i, '');
+        // ── Real data from backend (trusted) ──────────────────────────
+        const rsiVal   = s.rsi  != null ? Number(s.rsi)  : 50;
+        const rvolVal  = s.rvol != null ? Number(s.rvol) : (s.volumeRatio != null ? Number(s.volumeRatio) : 1);
+        const scoreVal = s.score != null ? Number(s.score) : 60;
 
-        const pseudoRvol = 0.8 + (hash % 25) / 10; // 0.8 to 3.2
-        const rvolVal = Number(s.volumeRatio ?? s.rvol ?? pseudoRvol);
-        
-        const pseudoScore = 60 + (hash % 35); // 60 to 94
-        const scoreVal = Number(s.confidence ?? s.score ?? pseudoScore);
-        
-        let derivedReasons = s.reasons || [];
-        if (derivedReasons.length === 0) {
-          if (changePercent > 1.5) derivedReasons.push(`Strong price momentum (${changePercent.toFixed(1)}%)`);
-          if (rvolVal > 1.5) derivedReasons.push(`Volume surge (${rvolVal.toFixed(1)}x RVOL)`);
-          if (rsiVal > 60 && rsiVal < 70) derivedReasons.push('Entering bullish RSI zone');
-          if (derivedReasons.length === 0) derivedReasons.push('Standard technical continuation');
-        }
+        // Signal — backend classifies; client fallback as safety net only
+        const signal = s.signal || (
+          changePercent > 1.5 && rvolVal >= 1.5 ? 'BREAKOUT' :
+          rsiVal < 35 && changePercent > 0 ? 'REVERSAL' :
+          rsiVal < 40 ? 'PULLBACK' : 'MOMENTUM'
+        );
+        const signalStrength = s.signalStrength || (scoreVal > 80 ? 'Strong' : scoreVal > 65 ? 'Medium' : 'Low');
+        const trend    = s.trend    || s.bias || (changePercent >= 0.5 ? 'bullish' : changePercent <= -0.5 ? 'bearish' : 'neutral');
+        const macdBias = s.macdBias || s.bias || (changePercent >= 0 ? 'bullish' : 'bearish');
 
-        let flags = s.riskFlags || [];
-        if (rsiVal > 70) flags.push('⚠️ Overbought (RSI > 70)');
+        const derivedReasons = (s.reasons && s.reasons.length > 0) ? s.reasons : [
+          changePercent > 1.5 ? `Strong momentum (+${changePercent.toFixed(1)}%)` : null,
+          rvolVal > 1.5 ? `Volume surge (${rvolVal.toFixed(1)}x RVOL)` : null,
+          rsiVal > 60 && rsiVal < 70 ? 'RSI in bullish zone' : null,
+          'Technical continuation',
+        ].filter(Boolean).slice(0, 3);
+
+        const flags = [];
+        if (rsiVal > 75) flags.push('⚠️ Overbought (RSI > 75)');
         if (rsiVal < 30) flags.push('⚠️ Oversold (RSI < 30)');
         if (rvolVal < 0.8) flags.push('⚠️ Low Volume');
 
-        // Determine Signal reliably
-        let defaultSignal = 'MOMENTUM';
-        if (changePercent > 1.5 || rsiVal > 65) defaultSignal = 'BREAKOUT';
-        else if (rsiVal < 40 || s.bias === 'bearish') defaultSignal = 'PULLBACK';
-        
-        if (symStr === 'RELIANCE' || symStr === 'INFY') defaultSignal = 'BREAKOUT';
-        if (symStr === 'KOTAKBANK' || symStr === 'HDFCBANK') defaultSignal = 'PULLBACK';
-
         const rawSentiment = Number(s.sentiment ?? (changePercent * 10));
 
+        const price = Number(s.price ?? 0);
         return {
-          id: s._id || s.id || s.displaySymbol || s.symbol || i,
-          symbol: symStr.replace(/\.(NS|BO)$/i, ''),
-          name: s.name || s.displaySymbol || s.symbol || '',
-          price: Number(s.price ?? 0),
-          change: changePercent,
-          changePercent: changePercent,
-          volume: Number(s.volume ?? (hash * 100000)),
-          sector: s.sector || 'Equity',
-          signal: s.signal || defaultSignal,
-          signalStrength: s.signalStrength || (scoreVal > 80 ? 'Strong' : 'Medium'),
-          signalType: s.signalType || s.why || '',
-          reasons: derivedReasons,
-          catalyst: s.catalyst || '',
-          riskFlags: flags,
-          rsi: rsiVal,
-          pe: Number(s.pe ?? (10 + (hash % 30))),
-          marketCap: Number(s.marketCap ?? (1000 + (hash * 10))),
-          trend: s.trend || s.bias || (changePercent >= 0 ? 'bullish' : 'bearish'),
-          sentiment: Number(rawSentiment.toFixed(1)),
-          strength: s.strength || `Confidence ${scoreVal}%`,
-          entry: Number(s.entry ?? s.price ?? 0),
-          target: Number(s.target ?? (s.price ?? 0) * 1.04),
-          stopLoss: Number(s.stopLoss ?? s.sl ?? (s.price ?? 0) * 0.985),
-          rvol: rvolVal,
-          timeframe: (s.timeframe || '1D').toUpperCase(),
-          chart: s.chart || s.history || [],
+          id:            s._id || s.id || symStr || i,
+          symbol:        symStr,
+          name:          s.name || symStr,
+          price,
+          change:        changePercent,
+          changePercent,
+          volume:        Number(s.volume ?? 0),
+          sector:        s.sector || 'Equity',
+          signal,
+          signalStrength,
+          signalType:    s.signalType || `${signal} — ${trend} bias`,
+          reasons:       derivedReasons,
+          catalyst:      s.catalyst || '',
+          riskFlags:     flags,
+          rsi:           rsiVal,
+          pe:            s.pe != null ? Number(s.pe) : null,
+          marketCap:     s.marketCap != null ? Number(s.marketCap) : null,
+          trend,
+          macdBias,
+          sentiment:     Number(rawSentiment.toFixed(1)),
+          strength:      s.strength || `Confidence ${scoreVal}%`,
+          entry:         Number(s.entry   ?? price),
+          target:        Number(s.target  ?? price * 1.04),
+          stopLoss:      Number(s.stopLoss ?? s.sl ?? price * 0.985),
+          rvol:          rvolVal,
+          timeframe:     (s.timeframe || '1D').toUpperCase(),
+          chart:         s.chart || (s.sparklineData ? s.sparklineData.map(p => p.value) : []),
         };
       });
 
