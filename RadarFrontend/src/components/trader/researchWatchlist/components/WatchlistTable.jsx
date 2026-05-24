@@ -105,7 +105,7 @@ const WatchlistTable = ({ rows, selectedSymbol, onSelect, onOpen, onRemove, onAl
                         {row.symbol}
                       </span>
                       <span className="text-[10px] font-black tracking-widest text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded uppercase">
-                        {row.type === 'CRYPTO' ? 'CRYPTO' : (row.exchange || 'NSE')}
+                        {(row.type === 'CRYPTO' || /BTC|ETH|SOL|DOGE|USDT/i.test(row.symbol)) ? 'CRYPTO' : (row.exchange || 'NSE')}
                       </span>
                       {row.sector && (
                         <span className="text-[10px] font-black tracking-wider text-cyan-400/90 bg-cyan-950/20 border border-cyan-900/30 px-2 py-0.5 rounded uppercase truncate max-w-[120px]">
@@ -114,7 +114,7 @@ const WatchlistTable = ({ rows, selectedSymbol, onSelect, onOpen, onRemove, onAl
                       )}
                     </div>
                     <span className="text-sm font-semibold text-slate-450 truncate mt-2 leading-none">
-                      {row.name || (row.type === 'CRYPTO' ? 'Cryptocurrency' : 'Equity Asset')}
+                      {row.name || ((row.type === 'CRYPTO' || /BTC|ETH|SOL|DOGE|USDT/i.test(row.symbol)) ? 'Cryptocurrency' : 'Equity Asset')}
                     </span>
                   </div>
                 </div>

@@ -52,7 +52,8 @@ const addToWatchlist = async (req, res) => {
         const watchlist = await Watchlist.findOne({ _id: id, userId: req.user._id });
         if (!watchlist) return res.status(404).json({ error: "Watchlist not found" });
 
-        const exists = watchlist.items.some(item => item.symbol === symbol.toUpperCase());
+        const norm = (s) => String(s || '').toUpperCase().replace(/\.(NS|BO)$/i, '');
+        const exists = watchlist.items.some(item => norm(item.symbol) === norm(symbol));
         if (exists) return res.status(400).json({ error: "Stock already in watchlist" });
 
         watchlist.items.push({ symbol: symbol.toUpperCase() });
@@ -71,7 +72,8 @@ const removeFromWatchlist = async (req, res) => {
         const watchlist = await Watchlist.findOne({ _id: id, userId: req.user._id });
         if (!watchlist) return res.status(404).json({ error: "Watchlist not found" });
 
-        watchlist.items = watchlist.items.filter(item => item.symbol !== symbol.toUpperCase());
+        const norm = (s) => String(s || '').toUpperCase().replace(/\.(NS|BO)$/i, '');
+        watchlist.items = watchlist.items.filter(item => norm(item.symbol) !== norm(symbol));
         await watchlist.save();
         res.json(watchlist);
     } catch (error) {
@@ -148,7 +150,8 @@ const getWatchlistData = async (req, res) => {
                         technicalSignal: ind?.signal || (rsi !== null ? `RSI ${Math.round(rsi)}` : 'Live'),
                         source: rawQuote?.source || q?.priceSource || q?.provider || 'yahoo',
                         sector: q?.sector || q?.industry || 'Equity',
-                        exchange: 'NSE',
+                        exchange: q?.exchange || (sym.includes('-USD') ? 'CRYPTO' : 'NSE'),
+                        type: q?.assetType || q?.type || (sym.includes('-USD') ? 'CRYPTO' : 'STOCK'),
                         indicatorsReady: rsi !== null && macd !== null,
                         // No .error field = the frontend will show price normally
                     };
