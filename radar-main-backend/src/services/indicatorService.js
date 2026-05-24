@@ -1,8 +1,7 @@
-const { calculateRSI, calculateMACD, calculateEMA, calculateBollinger, getVolumeStatus } = require('../utils/indicators');
+const { calculateRSI, calculateMACD, calculateEMA, getVolumeStatus } = require('../utils/indicators');
 const { fetchStockHistory } = require('./stockService');
 const { fetchCryptoHistory } = require('./cryptoService');
 const { fetchForexHistory } = require('./forexService');
-const ohlcService = require('./ohlcService');
 
 const getTechnicalIndicators = async (assetType, symbol, interval = '1D', options = {}) => {
     const { strictLive = false } = options;
@@ -22,7 +21,6 @@ const getTechnicalIndicators = async (assetType, symbol, interval = '1D', option
         return {
             rsi: null,
             macd: null,
-            bollinger: null,
             ema20: null,
             volumeStatus: 'average',
             lastPrice: history?.length ? history[history.length - 1].price : null,
@@ -42,17 +40,13 @@ const getTechnicalIndicators = async (assetType, symbol, interval = '1D', option
         signal: validMacd[validMacd.length - 1].signal
     } : null;
 
-    const prices = history.map(h => h.price);
-    const bollingerRaw = calculateBollinger(history, 20);
-    const latestBollinger = bollingerRaw.length > 0 ? bollingerRaw[bollingerRaw.length - 1] : null;
-    const latestPriceForBollinger = prices[prices.length - 1];
-    const bollingerRange = latestBollinger ? latestBollinger.upper - latestBollinger.lower : 0;
-    const bollinger = latestBollinger && bollingerRange > 0 ? {
-        ...latestBollinger,
-        percentB: parseFloat(((latestPriceForBollinger - latestBollinger.lower) / bollingerRange).toFixed(3))
-    } : null;
+    //const prices = history.map(h => h.price);
+    const closes = history.map(h => h.close);
 
-    const emaRaw = calculateEMA(prices, 20);
+    const highs = history.map(h => h.high);
+    const lows = history.map(h => h.low);
+    const volumes = history.map(h => h.volume);
+    const emaRaw = calculateEMA(closes, 20);
     const ema20 = emaRaw.length > 0 ? parseFloat(emaRaw[emaRaw.length - 1].toFixed(2)) : null;
 
     let support = null;
@@ -91,7 +85,6 @@ const getTechnicalIndicators = async (assetType, symbol, interval = '1D', option
     return {
         rsi,
         macd,
-        bollinger,
         ema20,
         support,
         resistance,
@@ -131,146 +124,4 @@ const getTrendMatrix = async (assetType, symbol, options = {}) => {
     return trendMatrix;
 };
 
-/**
- * Calculate technical indicators from seeded OHLC data (database-backed, fast)
- * Preferred for screeners and bulk calculations using our Nifty 50 universe
- */
-const getTechnicalIndicatorsFromOHLC = async (symbol, exchange = 'NSE', timeframe = '1d', limit = 365) => {
-    try {
-        // Fetch OHLC data from database
-        const ohlcResult = await ohlcService.getOHLCData({
-            symbol: symbol.toUpperCase(),
-            exchange: exchange.toUpperCase(),
-            timeframe,
-            limit,
-        });
-
-        if (!ohlcResult.success || !ohlcResult.data || ohlcResult.data.length < 26) {
-            return {
-                rsi: null,
-                macd: null,
-                bollinger: null,
-                ema20: null,
-                support: null,
-                resistance: null,
-                volumeStatus: 'average',
-                atr: null,
-                lastPrice: ohlcResult.data?.length ? ohlcResult.data[ohlcResult.data.length - 1].close : null,
-                previousPrice: ohlcResult.data?.length > 1 ? ohlcResult.data[ohlcResult.data.length - 2].close : null,
-                lastChangePercent: null,
-                lastUpdatedAt: ohlcResult.data?.length ? ohlcResult.data[ohlcResult.data.length - 1].timestamp : null,
-                status: 'insufficient_data',
-                source: 'ohlc_db',
-            };
-        }
-
-        // Convert OHLC records to history format for indicator calculation
-        const history = ohlcResult.data.map(candle => ({
-            date: candle.timestamp,
-            price: candle.close,
-            open: candle.open,
-            high: candle.high,
-            low: candle.low,
-            volume: candle.volume,
-        }));
-
-        // Calculate indicators
-        const rsiRaw = calculateRSI(history, 14);
-        const rsi = rsiRaw.length > 0 ? rsiRaw[rsiRaw.length - 1].value : null;
-
-        const macdRaw = calculateMACD(history);
-        const validMacd = macdRaw.filter(m => m.value != null && !isNaN(m.value));
-        const macd = validMacd.length > 0 ? {
-            value: validMacd[validMacd.length - 1].value,
-            signal: validMacd[validMacd.length - 1].signal,
-        } : null;
-
-        const prices = history.map(h => h.price);
-        const bollingerRaw = calculateBollinger(history, 20);
-        const latestBollinger = bollingerRaw.length > 0 ? bollingerRaw[bollingerRaw.length - 1] : null;
-        const latestPriceForBollinger = prices[prices.length - 1];
-        const bollingerRange = latestBollinger ? latestBollinger.upper - latestBollinger.lower : 0;
-        const bollinger = latestBollinger && bollingerRange > 0 ? {
-            ...latestBollinger,
-            percentB: parseFloat(((latestPriceForBollinger - latestBollinger.lower) / bollingerRange).toFixed(3))
-        } : null;
-
-        const emaRaw = calculateEMA(prices, 20);
-        const ema20 = emaRaw.length > 0 ? parseFloat(emaRaw[emaRaw.length - 1].toFixed(2)) : null;
-
-        // Support and resistance
-        let support = null;
-        let resistance = null;
-        if (prices.length >= 20) {
-            const recent20 = prices.slice(-20);
-            support = parseFloat(Math.min(...recent20).toFixed(2));
-            resistance = parseFloat(Math.max(...recent20).toFixed(2));
-        }
-
-        // Volume status
-        const volumeStatus = getVolumeStatus(history, 20);
-
-        // ATR (Average True Range)
-        let atr = null;
-        if (prices.length >= 14) {
-            let trSum = 0;
-            let count = 0;
-            for (let i = prices.length - 14; i < prices.length; i++) {
-                if (i > 0) {
-                    trSum += Math.abs(prices[i] - prices[i - 1]);
-                    count++;
-                }
-            }
-            if (count > 0) {
-                atr = parseFloat((trSum / count).toFixed(2));
-            }
-        }
-
-        const lastCandle = history[history.length - 1];
-        const previousCandle = history[history.length - 2];
-        const lastPrice = Number(lastCandle?.price);
-        const previousPrice = Number(previousCandle?.price);
-        const lastChangePercent = Number.isFinite(lastPrice) && Number.isFinite(previousPrice) && previousPrice > 0
-            ? Number((((lastPrice - previousPrice) / previousPrice) * 100).toFixed(2))
-            : null;
-
-        return {
-            rsi,
-            macd,
-            bollinger,
-            ema20,
-            support,
-            resistance,
-            volumeStatus,
-            atr,
-            lastPrice: Number.isFinite(lastPrice) ? lastPrice : null,
-            previousPrice: Number.isFinite(previousPrice) ? previousPrice : null,
-            lastChangePercent,
-            lastUpdatedAt: lastCandle?.date || null,
-            status: 'success',
-            source: 'ohlc_db',
-            dataPoints: ohlcResult.data.length,
-        };
-    } catch (error) {
-        console.error(`Error calculating indicators from OHLC for ${symbol}:`, error);
-        return {
-            rsi: null,
-            macd: null,
-            bollinger: null,
-            ema20: null,
-            support: null,
-            resistance: null,
-            volumeStatus: 'average',
-            atr: null,
-            lastPrice: null,
-            previousPrice: null,
-            lastChangePercent: null,
-            lastUpdatedAt: null,
-            status: 'error',
-            source: 'ohlc_db',
-            error: error.message,
-        };
-    }
-};
-
-module.exports = { getTechnicalIndicators, getTrendMatrix, getTechnicalIndicatorsFromOHLC };
+module.exports = { getTechnicalIndicators, getTrendMatrix };

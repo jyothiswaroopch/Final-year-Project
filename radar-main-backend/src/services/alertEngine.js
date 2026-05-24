@@ -4,37 +4,49 @@ const Notification = require('../models/Notification');
 const { fetchStockData } = require('./stockService');
 const logger = require('../config/logger');
 
-const User = require('../models/User');
-const UserSettings = require('../models/UserSettings');
-const AlertRule = require('../models/AlertRule');
-const { evaluateRules } = require('./alertRulesService');
-
 let alertInterval = null;
 let alertEventEmitter = null;
-const userCheckTimestamps = new Map(); // Track last check per user
-
-/**
- * Parse refresh rate string to milliseconds
- * Supports: '1s', '5s', '1m', '5m', '15m', '30m', '1h'
- */
-const parseRefreshRate = (rate = '5s') => {
-    const str = String(rate).toLowerCase().trim();
-    const match = str.match(/^(\d+)([smh])$/);
-    if (!match) return 5000; // Default 5s
-    
-    const [, value, unit] = match;
-    const num = parseInt(value, 10);
-    
-    switch (unit) {
-        case 's': return num * 1000;
-        case 'm': return num * 60 * 1000;
-        case 'h': return num * 60 * 60 * 1000;
-        default: return 5000;
-    }
-};
 
 const isDatabaseReady = () => mongoose.connection.readyState === 1;
 
+const calculateRSI = (prices, period = 14) => {
+    if (prices.length < period + 1) return null;
+    let gains = 0;
+    let losses = 0;
+    for (let i = 1; i <= period; i++) {
+        const diff = prices[i] - prices[i - 1];
+        if (diff > 0) gains += diff;
+        else losses -= diff;
+    }
+    let avgGain = gains / period;
+    let avgLoss = losses / period;
+    const recentPrices = prices.slice(-period - 1); 
+    gains = 0;
+    losses = 0;
+    for (let i = 1; i < recentPrices.length; i++) {
+        const diff = recentPrices[i] - recentPrices[i - 1];
+        if (diff > 0) gains += diff;
+        else losses -= diff;
+    }
+    avgGain = gains / period;
+    avgLoss = losses / period;
+    if (avgLoss === 0) return 100;
+    const rs = avgGain / avgLoss;
+    return 100 - (100 / (1 + rs));
+};
+const checkCondition = (value, condition, threshold) => {
+    switch (condition) {
+        case 'PRICE_ABOVE': return value > threshold;
+        case 'PRICE_BELOW': return value < threshold;
+        case 'RSI_ABOVE': return value > threshold;
+        case 'RSI_BELOW': return value < threshold;
+        case 'PE_BELOW': return value < threshold;
+        case 'PE_ABOVE': return value > threshold;
+        case 'EPS_GROWTH_ABOVE': return value > threshold;
+        case 'MARKET_CAP_BELOW': return value < threshold; 
+        default: return false;
+    }
+};
 
 const emitAlertTriggered = (payload) => {
     if (typeof alertEventEmitter === 'function') {
@@ -45,178 +57,79 @@ const emitAlertTriggered = (payload) => {
     }
 };
 
-/**
- * Evaluate all rules for a specific user with their alert frequency settings
- */
-const evaluateUserRules = async (userId) => {
-    try {
-        const result = await evaluateRules(userId);
-        return result;
-    } catch (error) {
-        logger.warn(`Error evaluating rules for user ${userId}:`, error.message);
-        return { evaluated: 0, triggeredCount: 0, triggered: [] };
-    }
-};
-
-/**
- * Check simple price alerts (Alert model) for a user against live prices.
- * Creates a Notification and marks the alert as triggered when price crosses target.
- */
-const checkPriceAlerts = async (userId) => {
-    try {
-        const alerts = await Alert.find({
-            $or: [{ userId }, { user: userId }],
-            isActive: true,
-            targetPrice: { $exists: true, $ne: null },
-            $or: [{ status: 'ACTIVE' }, { status: { $exists: false } }]
-        }).lean();
-
-        if (!alerts.length) return;
-
-        // Group by symbol to batch-fetch live prices
-        const symbols = [...new Set(alerts.map(a => String(a.symbol).toUpperCase()))];
-        const quotes = await fetchStockData(symbols).catch(() => []);
-        const priceMap = new Map(
-            (Array.isArray(quotes) ? quotes : []).map(q => [
-                String(q.symbol).toUpperCase().replace(/\.(NS|BO)$/i, ''),
-                Number(q.price)
-            ])
-        );
-
-        for (const alert of alerts) {
-            const cleanSym = String(alert.symbol).toUpperCase().replace(/\.(NS|BO)$/i, '');
-            const livePrice = priceMap.get(cleanSym);
-            if (!livePrice || livePrice <= 0) continue;
-
-            const target = Number(alert.targetPrice ?? alert.threshold ?? alert.value);
-            if (!target || target <= 0) continue;
-
-            // Cooldown: skip if triggered in the last 4 hours
-            const lastTriggered = alert.lastEvaluatedAt ? new Date(alert.lastEvaluatedAt).getTime() : 0;
-            if (Date.now() - lastTriggered < 4 * 60 * 60 * 1000) continue;
-
-            const direction = alert.condition || (target > livePrice ? 'crosses_above' : 'crosses_below');
-            const triggered =
-                (direction === 'crosses_above' && livePrice >= target) ||
-                (direction === 'crosses_below' && livePrice <= target);
-
-            if (!triggered) continue;
-
-            const ownerUserId = alert.userId ?? alert.user;
-            if (!ownerUserId) continue;
-
-            // Create notification
-            await Notification.create({
-                user: ownerUserId,
-                type: 'price_alert',
-                title: 'Price Alert Triggered',
-                message: `${cleanSym} ${direction === 'crosses_above' ? 'rose above' : 'dropped below'} your target of ₹${target.toLocaleString('en-IN')}. Current price: ₹${livePrice.toLocaleString('en-IN')}.`,
-                relatedId: cleanSym,
-            });
-
-            // Mark alert as evaluated (cooldown)
-            await Alert.updateOne(
-                { _id: alert._id },
-                { $set: { lastEvaluatedAt: new Date() } }
-            );
-
-            logger.info(`Price alert triggered: ${cleanSym} for user ${ownerUserId} (target ₹${target}, live ₹${livePrice})`);
-
-            emitAlertTriggered({
-                userId: ownerUserId,
-                symbol: cleanSym,
-                targetPrice: target,
-                livePrice,
-                direction,
-            });
-        }
-    } catch (err) {
-        logger.warn(`checkPriceAlerts error: ${err.message}`);
-    }
-};
-
-/**
- * Main alert checking function - evaluates all active users' rules
- * respecting their individual refresh rate settings
- */
 const checkAlerts = async () => {
     if (!isDatabaseReady()) return;
 
     try {
-        // Fetch only users who have at least one active alert rule
-        const activeRules = await AlertRule.find({ active: true }).distinct('user').lean();
-        if (!activeRules.length) return;
-        const users = activeRules.map(id => ({ _id: id }));
+        const activeAlerts = await Alert.find({ isActive: true });
+        if (activeAlerts.length === 0) return;
+
+        logger.info(`Checking ${activeAlerts.length} active alerts...`);
         
-        // For each user, check if it's time to evaluate their rules
-        for (const user of users) {
-            const userId = String(user._id);
-            const userSettings = await UserSettings.findOne({ user: user._id }).lean();
-            
-            // Get user's alert refresh rate from settings (default: 5s)
-            const alertRefreshRate = userSettings?.data?.quoteUpdateFreq || '5s';
-            const checkIntervalMs = parseRefreshRate(alertRefreshRate);
-            
-            // Track last check time for this user
-            const lastCheckTime = userCheckTimestamps.get(userId) || 0;
-            const timeSinceLastCheck = Date.now() - lastCheckTime;
-            
-            // Only evaluate if enough time has passed
-            if (timeSinceLastCheck < checkIntervalMs) {
-                continue;
+        // Get unique symbols to fetch data efficiently
+        const symbols = [...new Set(activeAlerts.map(a => a.symbol))];
+        const stockData = await fetchStockData(symbols);
+        const priceMap = new Map(stockData.map(s => [s.symbol, s.price]));
+
+        for (const alert of activeAlerts) {
+            const currentPrice = priceMap.get(alert.symbol);
+            if (!currentPrice) continue;
+
+            let triggered = false;
+            if (alert.type === 'price') {
+                // Simplified: trigger if price crosses the target
+                // For a more robust system, we'd need to know if it's "Above" or "Below"
+                // But following user's minimal schema, we'll assume targetPrice is the threshold
+                // and we'll trigger if currentPrice >= targetPrice (Price Above logic as default)
+                if (currentPrice >= alert.targetPrice) {
+                    triggered = true;
+                }
+            } else if (alert.type === 'percentage') {
+                // Percentage logic would need a base price, but user didn't provide one
+                // We'll skip or use a default base for now
             }
-            
-            // 1. Evaluate AlertRule (custom multi-condition rules)
-            const result = await evaluateUserRules(user._id);
-            if (result.triggeredCount > 0) {
-                logger.info(`User ${userId}: ${result.triggeredCount} rule(s) triggered (${result.evaluated} evaluated)`);
-                result.triggered.forEach(trigger => {
-                    emitAlertTriggered({
-                        userId: user._id,
-                        ruleId: trigger.ruleId,
-                        ruleName: trigger.name,
-                        symbol: trigger.symbol,
-                        triggeredAt: trigger.triggeredAt,
+
+            if (triggered) {
+                logger.info(`Alert Triggered: ${alert.symbol} at ${currentPrice}`);
+                
+                // 1. Notification
+                if (alert.delivery === 'app' || alert.delivery === 'both') {
+                    await Notification.create({
+                        userId: alert.userId,
+                        type: 'PRICE_ALERT',
+                        title: `Price Alert: ${alert.symbol}`,
+                        message: `${alert.symbol} reached target price of ${alert.targetPrice} (Current: ${currentPrice})`,
+                        metadata: { symbol: alert.symbol, targetPrice: alert.targetPrice, currentPrice }
                     });
+                }
+
+                // 2. Email (Simulated for architecture)
+                if (alert.delivery === 'email' || alert.delivery === 'both') {
+                    logger.info(`Sending email alert to user ${alert.userId} for ${alert.symbol}`);
+                }
+
+                // 3. Mark as inactive to avoid multiple triggers
+                alert.isActive = false;
+                await alert.save();
+
+                // 4. Emit to Socket.io
+                emitAlertTriggered({
+                    alertId: alert._id,
+                    userId: alert.userId,
+                    symbol: alert.symbol,
+                    currentPrice
                 });
             }
-
-            // Update last check timestamp
-            userCheckTimestamps.set(userId, Date.now());
         }
-
-        // 2. Check simple price alerts (Alert model) — runs every cycle for all users
-        const allPriceAlertUsers = await Alert.find({
-            isActive: true,
-            targetPrice: { $exists: true, $ne: null },
-        }).distinct('userId').lean();
-
-        const extraUsers = await Alert.find({
-            isActive: true,
-            targetPrice: { $exists: true, $ne: null },
-        }).distinct('user').lean();
-
-        const uniquePriceAlertUserIds = [...new Set([
-            ...allPriceAlertUsers.map(String),
-            ...extraUsers.map(String)
-        ])].filter(Boolean);
-
-        for (const uid of uniquePriceAlertUserIds) {
-            await checkPriceAlerts(uid);
-        }
-
     } catch (error) {
         logger.error(`Error in Alert Engine: ${error.message}`);
     }
 };
 
-
-
 const startAlertEngine = () => {
     if (alertInterval) return;
     logger.info("Starting Advanced Alert Engine...");
-    // Check alerts every 5 seconds (respect individual user refresh rates)
-    alertInterval = setInterval(checkAlerts, 5000);
+    alertInterval = setInterval(checkAlerts, 30000); // Check every 30s
 };
 
 const stopAlertEngine = () => {
@@ -231,10 +144,4 @@ const setAlertEventEmitter = (emitter) => {
     alertEventEmitter = emitter;
 };
 
-module.exports = { 
-    startAlertEngine, 
-    stopAlertEngine, 
-    setAlertEventEmitter,
-    evaluateUserRules,
-    parseRefreshRate,
-};
+module.exports = { startAlertEngine, stopAlertEngine, setAlertEventEmitter };

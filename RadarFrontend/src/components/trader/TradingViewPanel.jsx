@@ -1,10 +1,25 @@
 import { useEffect, useId, useRef, useState } from 'react';
 
 const symbolCandidates = {
-  SENSEX: ['BSE:SENSEX'],
-  'S&P 500 CFD': ['OANDA:SPX500USD'],
-  'NASDAQ CFD': ['OANDA:NAS100USD'],
-  'BTC/USDT': ['BINANCE:BTCUSDT'],
+  // Indian indices — NSE is blocked, use BSE equivalents
+  'NIFTY 50':     ['BSE:SENSEX', 'BSESN'],
+  'NIFTY50':      ['BSE:SENSEX', 'BSESN'],
+  'NIFTY':        ['BSE:SENSEX', 'BSESN'],
+  '^NSEI':        ['BSE:SENSEX', 'BSESN'],
+  'BANKNIFTY':    ['BSE:BANKEX'],
+  '^NSEBANK':     ['BSE:BANKEX'],
+  'SENSEX':       ['BSE:SENSEX', 'BSESN'],
+  '^BSESN':       ['BSE:SENSEX', 'BSESN'],
+  'FINNIFTY':     ['BSE:FINEX'], // fallback
+  'MIDCPNIFTY':   ['BSE:MIDCAP'],
+  'NIFTY IT':     ['BSE:IT'],
+  'NIFTY AUTO':   ['BSE:AUTO'],
+  // Global
+  'S&P 500':      ['SP:SPX', 'OANDA:SPX500USD'],
+  'S&P 500 CFD':  ['OANDA:SPX500USD', 'SP:SPX'],
+  'NASDAQ CFD':   ['OANDA:NAS100USD'],
+  'BTC/USDT':     ['BINANCE:BTCUSDT', 'CRYPTO:BTCUSDT'],
+  'BTCUSDT':      ['BINANCE:BTCUSDT'],
 };
 
 function buildCandidates(symbol) {
@@ -17,17 +32,23 @@ function buildCandidates(symbol) {
   if (direct && Array.isArray(direct)) candidates.push(...direct);
   if (!direct) {
     const stripped = upper.replace(/^\^/, '').replace(/\.(NS|BO)$/i, '').replace(/\s+/g, '');
-    candidates.push(`NSE:${stripped}`, `BSE:${stripped}`);
+    candidates.push(`BSE:${stripped}`); // Exclusively use BSE since NSE is blocked
   }
 
   return [...new Set(candidates.filter(Boolean))];
 }
 
 function buildSrcFor(tvSym, frameId, interval) {
+  let finalInterval = interval;
+  // BSE indices and stocks only allow Daily+ intervals on TradingView free tier
+  if (tvSym.startsWith('BSE:') && !['D', 'W', 'M'].includes(interval)) {
+    finalInterval = 'D';
+  }
+
   const params = new URLSearchParams({
     frameElementId: frameId,
     symbol: tvSym,
-    interval,
+    interval: finalInterval,
     hidesidetoolbar: '1',
     symboledit: '0',
     saveimage: '0',
@@ -35,7 +56,7 @@ function buildSrcFor(tvSym, frameId, interval) {
     studies: '[]',
     theme: 'dark',
     style: '1',
-    timezone: 'Etc/UTC',
+    timezone: 'Asia/Kolkata',
     withdateranges: '1',
     hideideas: '1',
     locale: 'en',
@@ -44,7 +65,7 @@ function buildSrcFor(tvSym, frameId, interval) {
   return `https://s.tradingview.com/widgetembed/?${params.toString()}`;
 }
 
-const TradingViewPanel = ({ symbol, fallback = null, candidateTimeout = 3000, onStatusChange = null }) => {
+const TradingViewPanel = ({ symbol, interval = '15', fallback = null, candidateTimeout = 3000, onStatusChange = null }) => {
   const [src, setSrc] = useState('');
   const [activeIdx, setActiveIdx] = useState(0);
   const [failed, setFailed] = useState(false);
@@ -86,10 +107,7 @@ const TradingViewPanel = ({ symbol, fallback = null, candidateTimeout = 3000, on
 
       const tvSym = candidates[index];
       onStatusChangeRef.current?.('trying');
-      const needsDaily = /SENSEX/i.test(tvSym) || /BSE:/i.test(tvSym);
-      const interval = needsDaily ? 'D' : '60';
       const finalSrc = buildSrcFor(tvSym, id, interval);
-      console.log('[TradingViewPanel] trying candidate', index, tvSym, finalSrc);
       setActiveIdx(index);
       setSrc(finalSrc);
 
@@ -109,13 +127,10 @@ const TradingViewPanel = ({ symbol, fallback = null, candidateTimeout = 3000, on
       timersRef.current.forEach(t => clearTimeout(t));
       timersRef.current = [];
     };
-  }, [symbol, candidateTimeout, containerId]);
+  }, [symbol, interval, candidateTimeout, containerId]);
 
   return (
     <div className="h-full w-full rounded-xl overflow-hidden bg-[#0F172A] relative">
-      {failed ? (
-        fallback ? (
-          <div className="h-full w-full">{fallback}</div>
         ) : (
           <div className="h-full flex items-center justify-center text-xs text-slate-400">No widget available</div>
         )

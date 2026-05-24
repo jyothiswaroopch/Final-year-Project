@@ -1,36 +1,20 @@
 const Watchlist = require('../models/Watchlist');
 const { evaluateRecentChanges } = require('../services/recentChangesEngine');
-
-const profileCache = require('../services/profileCache');
-
-// Normalizes a raw symbol to include an exchange suffix for Indian equities.
-// Symbols from search results (e.g. "RELIANCE") get .NS appended so they work
-// in Yahoo Finance / Tiingo / etc. Suffixed symbols and indices are left unchanged.
-const normalizeSymbolForStorage = (sym) => {
-    let s = String(sym || '').trim().toUpperCase();
-    if (!s) return s;
-    
-    // Known Cryptos -> append -USD for Yahoo Finance, and clean up accidental .NS
-    const knownCryptos = ['BTC', 'ETH', 'SOL', 'ADA', 'XRP', 'DOGE', 'DOT', 'BNB', 'MATIC', 'AVAX', 'LINK', 'LTC'];
-    const bareSymbol = s.replace(/\.(NS|BO)$/i, '');
-    if (knownCryptos.includes(bareSymbol) || bareSymbol.endsWith('-USD')) {
-        return bareSymbol.endsWith('-USD') ? bareSymbol : `${bareSymbol}-USD`;
-    }
-
-    if (s.includes('.')) return s; // already has a suffix
-    if (s.startsWith('^') || s.includes('NIFTY') || s.includes('SENSEX')) return s;
-    return `${s}.NS`;
-};
+const freeApiAggregator = require('../services/freeApiAggregator');
+const { getTechnicalIndicators } = require('../services/indicatorService');
 
 const getWatchlists = async (req, res) => {
     try {
-        // Optional ?mode=trader|investor query param.
-        // If omitted, return ALL watchlists for the user (backward compat).
-        const query = { userId: req.user._id };
-        if (req.query.mode) {
-            query.mode = String(req.query.mode).toLowerCase();
+        let watchlists = await Watchlist.find({ userId: req.user._id });
+        if (watchlists.length === 0) {
+            const defaultWatchlist = new Watchlist({
+                userId: req.user._id,
+                name: 'My Watchlist',
+                items: []
+            });
+            await defaultWatchlist.save();
+            watchlists = [defaultWatchlist];
         }
-        const watchlists = await Watchlist.find(query).sort({ createdAt: 1 });
         res.json(watchlists);
     } catch (error) {
         console.error("Watchlist GET Error:", error);
@@ -39,34 +23,19 @@ const getWatchlists = async (req, res) => {
 };
 
 const createWatchlist = async (req, res) => {
-    const { name, mode } = req.body;
+    const { name } = req.body;
     if (!name) return res.status(400).json({ error: "Name is required" });
-
-    const validMode = ['trader', 'investor'].includes(String(mode || '').toLowerCase())
-        ? String(mode).toLowerCase()
-        : null;
 
     try {
         const watchlist = new Watchlist({
             userId: req.user._id,
             name,
-            mode: validMode,
             items: []
         });
         await watchlist.save();
-        try { await profileCache.invalidate(req.user._id); } catch (_) {}
         res.status(201).json(watchlist);
     } catch (error) {
         if (error.code === 11000) {
-            // Already exists — return the existing one instead of erroring
-            try {
-                const existing = await Watchlist.findOne({
-                    userId: req.user._id,
-                    name,
-                    mode: validMode ?? null,
-                });
-                if (existing) return res.status(200).json(existing);
-            } catch (_) {}
             return res.status(400).json({ error: "Watchlist with this name already exists" });
         }
         res.status(500).json({ error: "Failed to create watchlist" });
@@ -75,23 +44,19 @@ const createWatchlist = async (req, res) => {
 
 const addToWatchlist = async (req, res) => {
     const { id } = req.params;
-    const { symbol: rawSymbol } = req.body;
+    const { symbol } = req.body;
 
-    if (!rawSymbol) return res.status(400).json({ error: "Symbol is required" });
-
-    // Normalize: plain tickers (e.g. "RELIANCE") → "RELIANCE.NS"
-    const symbol = normalizeSymbolForStorage(rawSymbol);
+    if (!symbol) return res.status(400).json({ error: "Symbol is required" });
 
     try {
         const watchlist = await Watchlist.findOne({ _id: id, userId: req.user._id });
         if (!watchlist) return res.status(404).json({ error: "Watchlist not found" });
 
-        const exists = watchlist.items.some(item => item.symbol === symbol);
+        const exists = watchlist.items.some(item => item.symbol === symbol.toUpperCase());
         if (exists) return res.status(400).json({ error: "Stock already in watchlist" });
 
-        watchlist.items.push({ symbol });
+        watchlist.items.push({ symbol: symbol.toUpperCase() });
         await watchlist.save();
-        try { await profileCache.invalidate(req.user._id); } catch (_) {}
         res.json(watchlist);
     } catch (error) {
         res.status(500).json({ error: "Failed to add to watchlist" });
@@ -99,20 +64,14 @@ const addToWatchlist = async (req, res) => {
 };
 
 const removeFromWatchlist = async (req, res) => {
-    const { id, symbol: rawSymbol } = req.params;
-    // Accept either "RELIANCE" or "RELIANCE.NS" from the frontend
-    const normalized = normalizeSymbolForStorage(rawSymbol);
-    const plain = String(rawSymbol || '').trim().toUpperCase();
+    const { id, symbol } = req.params;
 
     try {
         const watchlist = await Watchlist.findOne({ _id: id, userId: req.user._id });
         if (!watchlist) return res.status(404).json({ error: "Watchlist not found" });
 
-        watchlist.items = watchlist.items.filter(item =>
-            item.symbol !== normalized && item.symbol !== plain
-        );
+        watchlist.items = watchlist.items.filter(item => item.symbol !== symbol.toUpperCase());
         await watchlist.save();
-        try { await profileCache.invalidate(req.user._id); } catch (_) {}
         res.json(watchlist);
     } catch (error) {
         res.status(500).json({ error: "Failed to remove from watchlist" });
@@ -130,4 +89,86 @@ const getRecentChanges = async (req, res) => {
     }
 };
 
-module.exports = { getWatchlists, createWatchlist, addToWatchlist, removeFromWatchlist, getRecentChanges };
+// GET /api/watchlist/data?symbols=TCS,INFY,RELIANCE
+// Returns live quote + indicators for each symbol for the Research Watchlist
+const getWatchlistData = async (req, res) => {
+    try {
+        const raw = String(req.query.symbols || '');
+        const symbols = raw.split(',').map(s => s.trim().toUpperCase()).filter(Boolean);
+        if (!symbols.length) return res.json({ success: true, data: [] });
+
+        const results = await Promise.allSettled(
+            symbols.map(async (sym) => {
+                try {
+                    const nseSym = sym.includes('.') ? sym : `${sym}.NS`;
+                    // Fetch quote and indicators in parallel
+                    const [quote, indicators] = await Promise.allSettled([
+                        freeApiAggregator.getQuote(nseSym),
+                        getTechnicalIndicators(sym),
+                    ]);
+
+                    const q = quote.status === 'fulfilled' ? quote.value : null;
+                    const ind = indicators.status === 'fulfilled' ? indicators.value : {};
+
+                    const price = Number(q?.price ?? q?.ltp ?? q?.close ?? 0) || null;
+                    const changePercent = Number(q?.changePercent ?? q?.percentChange ?? 0) || 0;
+                    const rsi = ind?.rsi ?? null;
+                    const macd = ind?.macd ?? null;
+
+                    // Derive trend label from RSI
+                    let trend = 'Neutral';
+                    if (rsi !== null) {
+                        if (rsi > 60) trend = 'Bullish';
+                        else if (rsi < 40) trend = 'Bearish';
+                    }
+
+                    // Derive signals
+                    const signals = [];
+                    if (ind?.volumeStatus === 'spike') signals.push('Volume Spike');
+                    if (rsi !== null && rsi < 30) signals.push('Oversold');
+                    if (rsi !== null && rsi > 70) signals.push('Overbought');
+                    if (ind?.breakoutReady) signals.push('Breakout Ready');
+
+                    return {
+                        symbol: sym,
+                        name: q?.name || q?.shortName || q?.companyName || sym,
+                        price,
+                        changePercent,
+                        volume: q?.volume ?? null,
+                        rsi,
+                        macd,
+                        ema20: ind?.ema20 ?? null,
+                        trend,
+                        signals,
+                        sentiment: trend,
+                        technicalSignal: ind?.signal || (rsi !== null ? `RSI ${Math.round(rsi)}` : 'Live'),
+                        source: q?.priceSource || q?.provider || q?.source || 'yahoo',
+                        sector: q?.sector || q?.industry || 'Equity',
+                        exchange: 'NSE',
+                        indicatorsReady: rsi !== null && macd !== null,
+                    };
+                } catch (err) {
+                    return {
+                        symbol: sym,
+                        name: sym,
+                        price: null,
+                        changePercent: null,
+                        rsi: null,
+                        macd: null,
+                        trend: 'Neutral',
+                        signals: [],
+                        error: 'Feed error',
+                    };
+                }
+            })
+        );
+
+        const data = results.map(r => r.status === 'fulfilled' ? r.value : { symbol: '?', price: null, error: 'Failed' });
+        return res.json({ success: true, data });
+    } catch (error) {
+        console.error('getWatchlistData Error:', error);
+        return res.status(500).json({ success: false, error: 'Failed to fetch watchlist data', details: error.message });
+    }
+};
+
+module.exports = { getWatchlists, createWatchlist, addToWatchlist, removeFromWatchlist, getRecentChanges, getWatchlistData };

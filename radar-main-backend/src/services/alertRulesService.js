@@ -1,6 +1,6 @@
 const AlertRule = require('../models/AlertRule');
 const { fetchStockData } = require('./stockService');
-const { getTechnicalIndicators, getTechnicalIndicatorsFromOHLC } = require('./indicatorService');
+const { getTechnicalIndicators } = require('./indicatorService');
 const Notification = require('../models/Notification');
 
 const normalizeSymbol = (value) => String(value || '').trim().toUpperCase();
@@ -22,48 +22,11 @@ const evaluateCondition = (actual, operator, expected) => {
     }
 };
 
-/**
- * Build field map for rule evaluation using OHLC-backed indicators (primary)
- * Falls back to live API if OHLC data insufficient
- */
 const buildFieldMap = async (symbol) => {
     const stocks = await fetchStockData();
     const stock = (Array.isArray(stocks) ? stocks : []).find((row) => normalizeSymbol(row.symbol) === normalizeSymbol(symbol));
-    
-    if (!stock) {
-        return {
-            price: NaN,
-            change: NaN,
-            pe: NaN,
-            marketCap: '',
-            sector: '',
-            rsi: NaN,
-            volumeStatus: '',
-            ema20: NaN,
-            support: NaN,
-            resistance: NaN,
-            atr: NaN,
-        };
-    }
-    
-    // Try OHLC first (faster, no API calls)
-    let indicators = null;
-    let source = 'api';
-    
-    try {
-        const ohlcIndicators = await getTechnicalIndicatorsFromOHLC(stock.symbol, 'NSE', '1d', 365);
-        if (ohlcIndicators.status === 'success' && ohlcIndicators.dataPoints >= 26) {
-            indicators = ohlcIndicators;
-            source = 'ohlc_db';
-        } else {
-            // Fall back to live API
-            indicators = await getTechnicalIndicators('stock', stock.symbol, '1D').catch(() => null);
-        }
-    } catch (err) {
-        // Fall back to live API on error
-        indicators = await getTechnicalIndicators('stock', stock.symbol, '1D').catch(() => null);
-    }
-    
+    const indicators = stock ? await getTechnicalIndicators('stock', stock.symbol, '1D').catch(() => null) : null;
+
     return {
         price: toNumber(stock?.price, NaN),
         change: toNumber(stock?.change, NaN),
@@ -72,11 +35,6 @@ const buildFieldMap = async (symbol) => {
         sector: stock?.details?.sector || '',
         rsi: toNumber(indicators?.rsi, NaN),
         volumeStatus: indicators?.volumeStatus || '',
-        ema20: toNumber(indicators?.ema20, NaN),
-        support: toNumber(indicators?.support, NaN),
-        resistance: toNumber(indicators?.resistance, NaN),
-        atr: toNumber(indicators?.atr, NaN),
-        indicatorSource: source,
     };
 };
 
@@ -133,10 +91,13 @@ const evaluateRules = async (userId) => {
 
             await Notification.create({
                 user: userId,
-                type: 'price_alert',
-                title: `Alert Triggered: ${rule.name}`,
-                message: `${rule.symbol} matched your alert conditions (${rule.logic} rules met).`,
-                relatedId: rule.symbol,
+                type: 'PRICE_ALERT',
+                title: `Rule triggered: ${rule.name}`,
+                message: `${rule.symbol} matched ${rule.logic} conditions.`,
+                metadata: new Map([
+                    ['ruleId', String(rule._id)],
+                    ['symbol', rule.symbol],
+                ]),
             });
 
             triggered.push({

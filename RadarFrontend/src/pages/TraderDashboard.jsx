@@ -2252,7 +2252,29 @@ const NewsFlash = ({ variant = "full" }) => {
                 <div className="mt-0.5 text-[10px] uppercase tracking-[0.22em] text-slate-400">Desk feed</div>
               </div>
             </div>
+            {/* Region toggle — always visible in header */}
+            <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 p-1 shrink-0">
+              <button
+                type="button"
+                onClick={() => handleRegionChange('IN')}
+                className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] transition-all ${region === 'IN'
+                  ? "bg-amber-400/25 text-amber-200 shadow-[0_0_8px_rgba(251,191,36,0.2)]"
+                  : "text-slate-400 hover:text-slate-200"}`}
+              >
+                🇮🇳 IN
+              </button>
+              <button
+                type="button"
+                onClick={() => handleRegionChange('GLOBAL')}
+                className={`rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.14em] transition-all ${region === 'GLOBAL'
+                  ? "bg-cyan-400/25 text-cyan-200 shadow-[0_0_8px_rgba(34,211,238,0.2)]"
+                  : "text-slate-400 hover:text-slate-200"}`}
+              >
+                🌐 GL
+              </button>
+            </div>
           </div>
+
 
           <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
             <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-slate-200">

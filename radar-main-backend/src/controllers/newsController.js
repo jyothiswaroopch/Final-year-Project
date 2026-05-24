@@ -3,29 +3,29 @@ const logger = require('../utils/logger');
 
 const getMarketNews = async (req, res) => {
     try {
-        const symbol = String(req.query.symbol || '').trim();
-        const limit = Number.parseInt(req.query.limit || '15', 10);
-
-        // Accept region from frontend: 'india' → IN, 'global' → GLOBAL
-        const regionRaw = String(req.query.region || '').toLowerCase().trim();
-        const region = regionRaw === 'global' ? 'GLOBAL' : (regionRaw === 'india' ? 'IN' : null);
-
-        // Accept assetClass from frontend: 'crypto' → crypto news, 'stocks' → business/equity news
-        const assetClass = String(req.query.assetClass || '').toLowerCase().trim();
-        let category;
+        let category = String(req.query.category || 'business').toLowerCase();
+        const assetClass = String(req.query.assetClass || '').toLowerCase();
+        
+        // Map asset class to category for Finnhub
         if (assetClass === 'crypto') {
-            category = 'crypto';                  // Finnhub crypto feed
-        } else if (req.query.category && req.query.category !== 'all') {
-            category = String(req.query.category); // explicit category override
-        } else {
-            category = 'business';                // default: equity/business news
+            category = 'crypto';
+        } else if (category === 'all') {
+            category = 'general';
         }
+
+        const symbol = String(req.query.symbol || '').trim();
+        const limit = Number.parseInt(req.query.limit || '60', 10);
+        const region = String(req.query.region || '').toLowerCase();
+        
+        // Pass region as search query to force relevance
+        const q = region === 'india' ? 'india' : '';
 
         const news = await fetchMarketNews(category, {
             symbol: symbol || undefined,
-            limit: Number.isFinite(limit) ? limit : 6,
-            region,    // null = use server env default
-            assetClass,
+            limit: Number.isFinite(limit) ? limit : 60,
+            q: q || undefined,
+            region: region || undefined,
+            assetClass: assetClass || undefined,
         });
         res.json(news);
 

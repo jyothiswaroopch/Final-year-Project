@@ -1,6 +1,5 @@
 const asyncHandler = require('express-async-handler');
 const Alert = require('../models/Alert');
-const profileCache = require('../services/profileCache');
 
 const createAlert = asyncHandler(async (req, res) => {
     const { symbol, targetPrice, type, delivery } = req.body;
@@ -19,7 +18,6 @@ const createAlert = asyncHandler(async (req, res) => {
         isActive: true
     });
 
-    try { await profileCache.invalidate(req.user._id); } catch (_) {}
     res.status(201).json(alert);
 });
 
@@ -41,7 +39,6 @@ const deleteAlert = asyncHandler(async (req, res) => {
     }
 
     await alert.deleteOne();
-    try { await profileCache.invalidate(req.user._id); } catch (_) {}
     res.json({ id: req.params.id, message: "Alert deleted" });
 });
 

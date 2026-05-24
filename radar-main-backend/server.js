@@ -17,7 +17,6 @@ const { startAlertEngine, stopAlertEngine, setAlertEventEmitter } = require('./s
 const { notFound, errorHandler } = require('./src/middleware/errorMiddleware');
 const dataUpdateCron = require('./src/services/dataUpdateCron');
 const smartRefreshService = require('./src/services/smartRefreshService');
-const { startFundamentalsRefreshCron } = require('./src/crons/fundamentalsRefreshCron');
 
 const app = express();
 const server = http.createServer(app);
@@ -187,16 +186,11 @@ app.get('/', (req, res) => {
     });
 });
 app.use('/api/auth',          require('./src/routes/authRoutes'));
-app.use('/api/stock',         require('./src/routes/stockAggregatorRoutes'));
 app.use('/api/stocks',        require('./src/routes/ohlcRoutes'));
 app.use('/api/user',          require('./src/routes/userRoutes'));
-app.use('/api/user/settings', require('./src/routes/userSettingsRoutes'));
 app.use('/api/market',        require('./src/routes/marketRoutes'));
-app.use('/api/news',          require('./src/routes/newsRoutes'));
-app.use('/api/search',        require('./src/routes/searchStatsRoutes'));
-app.use('/api',               require('./src/routes/searchStatsRoutes'));
+app.use('/api/news',          require('./src/routes/marketRoutes')); // alias: /api/news → same handlers as /api/market/news
 
-app.use('/api/market/universe', require('./src/routes/marketUniverseRoutes'));
 app.use('/api/watchlist',     require('./src/routes/watchlistRoutes'));
 app.use('/api/portfolio',     require('./src/routes/portfolioRoutes'));
 app.use('/api/alerts',        require('./src/routes/alertRoutes'));
@@ -208,7 +202,6 @@ app.use('/api/calendar',      require('./src/routes/calendarRoutes'));
 app.use('/api/earnings',      require('./src/routes/earningsRoutes'));
 app.use('/api/notifications', require('./src/routes/notificationRoutes'));
 app.use('/api/ticker',        require('./src/routes/tickerRoutes'));
-app.use('/api/catalysts',     require('./src/routes/catalystRoutes'));
 app.use('/api/sectors',       require('./src/routes/sectorRoutes'));
 app.use('/api/learning',      require('./src/routes/learningRoutes'));
 app.use('/api/ohlc',          require('./src/routes/ohlcRoutes'));
@@ -222,8 +215,6 @@ app.use('/api/stocks',        require('./src/routes/stocksRoutes'));
 app.use('/api/options',       require('./src/routes/optionsRoutes'));
 app.use('/api/backtest',      require('./src/routes/backtestRoutes'));
 app.use('/api/signals',       require('./src/routes/signalsRoutes'));
-app.use('/api/trader',        require('./src/routes/traderProfileRoutes'));
-app.use('/api/support',       require('./src/routes/supportRoutes'));
 app.use('/api/health',        require('./src/routes/healthRoutes'));
 app.use('/api/notes',         require('./src/routes/noteRoutes'));
 app.use('/api',               require('./src/routes/contractRoutes'));
@@ -269,14 +260,6 @@ const startServer = async () => {
             logger.info('Smart refresh service initialized');
         } catch (error) {
             logger.error('Failed to start smart refresh:', error);
-        }
-
-        // Start fundamentals refresh cron (seeds DB on first boot, nightly thereafter)
-        try {
-            await startFundamentalsRefreshCron();
-            logger.info('Fundamentals refresh cron initialized');
-        } catch (error) {
-            logger.error('Failed to start fundamentals cron:', error);
         }
     } else {
         logger.warn('Skipping Alert Engine startup until MongoDB becomes available.');

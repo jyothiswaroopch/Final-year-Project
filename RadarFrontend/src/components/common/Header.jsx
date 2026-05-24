@@ -62,6 +62,8 @@ const Header = ({ activeModule, setActiveModule, onToggleMode }) => {
     const [showSearchDropdown, setShowSearchDropdown] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
     const searchContainerRef = useRef(null);
+    const notificationsRef = useRef(null);
+    const profileRef = useRef(null);
 
     const handleLogout = () => {
         localStorage.removeItem("token");
@@ -107,6 +109,12 @@ const Header = ({ activeModule, setActiveModule, onToggleMode }) => {
             if (searchContainerRef.current && !searchContainerRef.current.contains(e.target)) {
                 setShowSearchDropdown(false);
                 setHighlightedIndex(-1);
+            }
+            if (notificationsRef.current && !notificationsRef.current.contains(e.target)) {
+                setIsNotificationsOpen(false);
+            }
+            if (profileRef.current && !profileRef.current.contains(e.target)) {
+                setIsProfileOpen(false);
             }
         };
         document.addEventListener('mousedown', handleOutsideClick);
@@ -264,8 +272,8 @@ const Header = ({ activeModule, setActiveModule, onToggleMode }) => {
 
                     {/* Notification & Profile Buttons */}
                     <div className="flex items-center gap-2 border-l border-blue-100/30 pl-4">
-                        <div className="relative" onMouseEnter={() => setIsNotificationsOpen(true)} onMouseLeave={() => setIsNotificationsOpen(false)}>
-                            <button className="relative w-9 h-9 flex items-center justify-center hover:bg-blue-50 rounded-full text-[#3E84F6]">
+                        <div className="relative" ref={notificationsRef}>
+                            <button onClick={() => setIsNotificationsOpen(!isNotificationsOpen)} className="relative w-9 h-9 flex items-center justify-center hover:bg-blue-50 rounded-full text-[#3E84F6] cursor-pointer">
                                 <Bell size={20} />
                                 {unreadCount > 0 && <span className="absolute top-1 right-1 min-w-[16px] h-[16px] bg-rose-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold px-1">{unreadCount}</span>}
                             </button>
@@ -300,7 +308,7 @@ const Header = ({ activeModule, setActiveModule, onToggleMode }) => {
                             )}
                         </div>
 
-                        <div className="relative">
+                        <div className="relative" ref={profileRef}>
                             <div onClick={() => setIsProfileOpen(!isProfileOpen)} className="w-9 h-9 rounded-full bg-[#3E84F6] text-white flex items-center justify-center text-xs font-black cursor-pointer hover:scale-110 transition-all shadow-lg shadow-blue-500/20 overflow-hidden">
                                 {userImage ? <img src={userImage} alt="Profile" className="w-full h-full object-cover" /> : userInitial}
                             </div>

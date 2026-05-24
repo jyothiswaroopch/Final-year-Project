@@ -3,8 +3,6 @@ const router = express.Router();
 const { 
     getUserProfile,
     updateUserProfile,
-    updatePassword,
-    setPassword,
     saveInvestorDNA,
     updateNotificationPreferences,
     getMode, 
@@ -21,14 +19,11 @@ const { authMiddleware } = require('../middleware/authMiddleware');
 
 router.get('/profile', authMiddleware, getUserProfile);
 router.patch('/profile', authMiddleware, updateUserProfile);
-router.patch('/password', authMiddleware, updatePassword);
-router.post('/set-password', authMiddleware, setPassword);
 router.post('/dna', authMiddleware, saveInvestorDNA);
 router.patch('/notifications', authMiddleware, updateNotificationPreferences);
 router.get('/mode', authMiddleware, getMode);
 router.patch('/mode', authMiddleware, updateMode);
 router.get('/settings', authMiddleware, getSettings);
-router.patch('/settings', authMiddleware, updateSettings);
 router.post('/settings', authMiddleware, updateSettings);
 
 // Investor Dashboard APIs

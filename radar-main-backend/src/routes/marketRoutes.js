@@ -11,34 +11,16 @@ const {
 } = require('../controllers/marketController');
 const { getHistory } = require('../controllers/historyController');
 const { getOrderBook } = require('../controllers/depthController');
+const { getStatus } = require('../controllers/statusController');
 const { getMarketNews, getNewsInsight } = require('../controllers/newsController');
-const { getStatus, getProviderHealth } = require('../controllers/statusController');
 const { authMiddleware } = require('../middleware/authMiddleware');
 const { getMarketData: getUnifiedData } = require('../services/marketDataService');
 const { validateRequest, validateSymbolParam } = require('../middleware/validationMiddleware');
 const freeApiAggregator = require('../services/freeApiAggregator');
-const { fetchQuotesWithFallback } = require('../services/priceRouter');
 const { getFundamentals } = require('../services/fundamentalsEnrichmentService');
 const logger = require('../config/logger');
 
-const { getActiveSymbols } = require('../utils/symbolRegistry');
-
 router.get('/', getMarketData);
-router.get('/health', getProviderHealth);
-
-// GET /api/market/universe
-// Returns the active symbol universe (bare tickers, no suffix).
-// Used by the frontend universeService to seed the local cache on startup.
-router.get('/universe', async (req, res) => {
-    try {
-        const symbols = await getActiveSymbols();
-        return res.json({ success: true, data: { universe: symbols } });
-    } catch (err) {
-        logger.error('[/market/universe] Error:', err.message);
-        return res.status(500).json({ success: false, message: 'Failed to fetch universe' });
-    }
-});
-
 
 router.get('/search/trending', getTrendingSearches);
 router.post('/search/log', logSearchEndpoint);
@@ -266,77 +248,25 @@ router.get('/quotes', async (req, res) => {
         const priceResults = await Promise.all(
             symbols.map(sym => getStockQuoteAndSparkline(sym))
         );
-        // Try the primary price router first (TwelveData → Marketstack → Tiingo)
-        let priceMap = new Map();
-        let providerName = 'freeApiAggregator';
-        try {
-            const priceFetch = await fetchQuotesWithFallback(symbols);
-            providerName = priceFetch.provider || 'unknown';
-            const priceArray = Array.isArray(priceFetch.data) ? priceFetch.data : [];
-            priceArray.forEach(p => {
-                const key = String(p.symbol || '').toUpperCase().replace(/\.(NS|BO)$/i, '');
-                priceMap.set(key, p);
-            });
-        } catch (priceErr) {
-            logger.warn('[/market/quotes] Primary price router failed, using per-symbol aggregator:', priceErr.message);
-        }
 
-        // Build enriched responses, falling back to freeApiAggregator per-symbol for Indian stocks
+        // Build enriched responses
         const enriched = await Promise.all(
             priceResults.map(async (resObj, i) => {
                 const sym = symbols[i];
-                const key = String(sym).toUpperCase().replace(/\.(NS|BO)$/i, '');
-                let priceDataRaw = priceMap.get(key) || {};
-                let priceData = priceDataRaw.raw || priceDataRaw;
-                let priceValue = Number(priceDataRaw.price ?? priceData?.price ?? priceData?.close ?? priceData?.ltp ?? 0);
-                let changePercent = Number(priceData?.changePercent ?? priceData?.change ?? 0);
+                const changePercent = resObj.percentChange;
 
-                // Fallback to freeApiAggregator for Indian symbols when price is missing/zero.
-                // Handles both HDFCBANK.NS (with suffix) and HDFCBANK (bare, stored by DB without suffix).
-                const isIndian = /\.(NS|BO)$/i.test(sym);
-                const isBareIndian = !isIndian && /^[A-Z0-9&-]{2,20}$/.test(sym.trim());
-                if ((!priceValue || priceValue === 0) && (isIndian || isBareIndian)) {
-                    // Try with .NS suffix if bare symbol (DB stores without suffix)
-                    const querySymbol = isIndian ? sym : `${sym}.NS`;
-                    try {
-                        const aggResult = await freeApiAggregator.getQuote(querySymbol);
-                        if (aggResult?.success && aggResult.data) {
-                            const d = aggResult.data;
-                            priceValue    = Number(d.current ?? d.price ?? d.close ?? 0);
-                            changePercent = Number(d.changePercent ?? d.change ?? 0);
-                            priceData     = d;
-                            providerName  = aggResult.source || 'aggregator';
-                            logger.info(`[/market/quotes] Aggregator fallback succeeded for ${querySymbol}: ₹${priceValue}`);
-                        }
-                        // If .NS failed, try .BO
-                        if (!priceValue && isBareIndian) {
-                            const bseSymbol = `${sym}.BO`;
-                            const bseResult = await freeApiAggregator.getQuote(bseSymbol);
-                            if (bseResult?.success && bseResult.data) {
-                                const d = bseResult.data;
-                                priceValue    = Number(d.current ?? d.price ?? d.close ?? 0);
-                                changePercent = Number(d.changePercent ?? d.change ?? 0);
-                                priceData     = d;
-                                providerName  = bseResult.source || 'aggregator';
-                                logger.info(`[/market/quotes] BSE fallback succeeded for ${bseSymbol}: ₹${priceValue}`);
-                            }
-                        }
-                    } catch (aggErr) {
-                        logger.warn(`[/market/quotes] Aggregator fallback failed for ${querySymbol}:`, aggErr.message);
-                    }
-                }
-
-                const fundamentals = await getFundamentals(sym, changePercent || resObj.percentChange || 0);
+                // Fetch fundamentals (6h cached — safe to call for every request)
+                const fundamentals = await getFundamentals(sym, changePercent);
 
                 return {
                     symbol:        sym,
-                    price:         priceValue,
-                    changePercent,
-                    change:        changePercent,
-                    high:          priceData?.high  ?? null,
-                    low:           priceData?.low   ?? null,
-                    open:          priceData?.open  ?? null,
-                    volume:        priceData?.volume ?? null,
+                    price:         resObj.currentPrice,
+                    changePercent: resObj.percentChange,
+                    change:        resObj.percentChange,
+                    high:          resObj.high,
+                    low:           resObj.low,
+                    open:          resObj.open,
+                    volume:        resObj.volume,
                     // New STEP 5 explicit fields
                     currentPrice:  resObj.currentPrice,
                     percentChange: resObj.percentChange,
@@ -369,13 +299,17 @@ router.get('/quotes', async (req, res) => {
                     dividendYield: fundamentals.dividendYield,
                     bookValue:     fundamentals.bookValue,
                     valStatus:     fundamentals.valStatus,
+                    industryPeAvg: fundamentals.industryPeAvg,
+                    industryRoeAvg: fundamentals.industryRoeAvg,
+                    industryMarginAvg: fundamentals.industryMarginAvg,
+                    industryGrowthAvg: fundamentals.industryGrowthAvg,
                     // Crypto-native fields
-                    category:      priceData?.category || fundamentals.sector || 'Equity',
-                    layer:         priceData?.layer || null,
-                    consensus:     priceData?.consensus || null,
-                    tradeCount:    priceData?.tradeCount || null,
+                    category:      fundamentals.sector || 'Equity',
+                    layer:         null,
+                    consensus:     null,
+                    tradeCount:    null,
                     // Source metadata
-                    priceSource:   providerName,
+                    priceSource:   resObj.priceSource,
                     fundamentalSource: 'yahoo-finance2',
                     timestamp:     resObj.lastUpdated,
                 };
@@ -390,3 +324,4 @@ router.get('/quotes', async (req, res) => {
 });
 
 module.exports = router;
+

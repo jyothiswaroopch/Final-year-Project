@@ -452,3 +452,103 @@
     padding: 1.25rem;
   }
 }
+/* ============================================
+   INVESTOR THEME OVERRIDES
+   ============================================ */
+.investor-settings-theme {
+  background: #f0f9ff;
+  color: #1e293b;
+}
+
+.investor-settings-theme .settings-gradient-bg {
+  background: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 80%, rgba(14, 165, 233, 0.08) 0%, transparent 50%);
+}
+
+.investor-settings-theme .settings-title {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.investor-settings-theme .settings-subtitle {
+  color: #64748b;
+}
+
+.investor-settings-theme .settings-back-btn {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.3);
+  color: #2563eb;
+}
+
+.investor-settings-theme .settings-back-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.2);
+}
+
+.investor-settings-theme .settings-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(14, 165, 233, 0.2);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+}
+
+.investor-settings-theme .settings-card-title,
+.investor-settings-theme .settings-sub-title {
+  color: #0f172a;
+  border-bottom-color: rgba(15, 23, 42, 0.1);
+}
+
+.investor-settings-theme .form-label,
+.investor-settings-theme .settings-switch-label {
+  color: #334155;
+}
+
+.investor-settings-theme .form-input,
+.investor-settings-theme .form-select {
+  background: rgba(248, 250, 252, 0.8);
+  border-color: rgba(14, 165, 233, 0.3);
+  color: #0f172a;
+}
+
+.investor-settings-theme .form-select option {
+  background-color: #ffffff;
+  color: #0f172a;
+}
+
+.investor-settings-theme .settings-switch-item {
+  background: rgba(248, 250, 252, 0.6);
+  border-color: rgba(14, 165, 233, 0.2);
+}
+
+.investor-settings-theme .settings-switch-item:hover {
+  background: rgba(248, 250, 252, 0.9);
+  border-color: rgba(14, 165, 233, 0.4);
+}
+
+.investor-settings-theme .settings-switch-track {
+  background: rgba(203, 213, 225, 0.8);
+}
+
+.investor-settings-theme .settings-switch-item.active .settings-switch-track {
+  background: linear-gradient(135deg, #3b82f6, #0ea5e9);
+}
+
+.investor-settings-theme .settings-switch-item.active .settings-switch-thumb {
+  background: #ffffff;
+}
+
+.investor-settings-theme .settings-submit-btn {
+  background: linear-gradient(135deg, #2563eb, #3b82f6);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+}
+
+.investor-settings-theme .settings-reset-link {
+  color: #64748b;
+}
+
+.investor-settings-theme .settings-reset-link:hover {
+  color: #2563eb;
+}

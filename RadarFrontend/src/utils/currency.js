@@ -46,7 +46,7 @@ export const getCurrencySymbol = (type, symbol = '') => {
  */
 export const formatPrice = (price, type, symbol = '') => {
   const num = Number(price);
-  if (!Number.isFinite(num)) return '—';
+  if (!Number.isFinite(num)) return '--';
   const prefix = getCurrencySymbol(type, symbol);
   const isCrypto = isCryptoAsset(type, symbol);
   // Crypto: show more decimals for small coins

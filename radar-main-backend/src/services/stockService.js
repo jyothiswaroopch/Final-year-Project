@@ -349,22 +349,13 @@ const buildFallbackQuotes = (symbols) => symbols.map((symbol, index) => {
     };
 });
 
-const hasEnoughLiveData = (quotes, expectedCount = 0) => {
-    if (!Array.isArray(quotes)) {
+const hasEnoughLiveData = (quotes) => {
+    if (!Array.isArray(quotes) || quotes.length === 0) {
         return false;
     }
 
     const validPriced = quotes.filter((quote) => Number(quote.price) > 0).length;
-    
-    if (expectedCount > 0 && expectedCount < 6) {
-        return validPriced >= Math.max(1, Math.floor(expectedCount * 0.5));
-    }
-
-    if (quotes.length < 6) {
-        return false;
-    }
-
-    return validPriced >= Math.max(4, Math.floor(quotes.length * 0.5));
+    return validPriced >= Math.max(1, Math.floor(quotes.length * 0.5));
 };
 
 const buildStockDetails = (symbol, marketCap, sector, longName, peRatio, dividendYield) => {
@@ -433,7 +424,7 @@ const normalizeStooqSymbol = (stooqSymbol) => {
 const toMarketstackSymbol = (symbol) => {
     const normalized = String(symbol || '').toUpperCase().trim();
     if (normalized.endsWith('.NS') || normalized.endsWith('.BO')) {
-        return normalized;
+        return normalized.split('.')[0];
     }
     if (normalized.includes('.')) {
         return normalized.split('.')[0];
@@ -595,7 +586,9 @@ const fetchTiingoQuotes = async (symbols) => {
     }
 
     const requests = normalizedSymbols.map(async (symbol) => {
-        const ticker = symbol;
+        const ticker = symbol.endsWith('.NS') || symbol.endsWith('.BO')
+            ? symbol.split('.')[0]
+            : symbol;
 
         try {
             const response = await axios.get(`${TIINGO_BASE_URL}/daily/${encodeURIComponent(ticker)}/prices`, {
@@ -644,7 +637,9 @@ const fetchTiingoHistory = async (symbol, interval = '1D') => {
     }
 
     const normalized = String(symbol || '').toUpperCase();
-    const ticker = normalized;
+    const ticker = normalized.endsWith('.NS') || normalized.endsWith('.BO')
+        ? normalized.split('.')[0]
+        : normalized;
 
     const daysByInterval = {
         '5M': 5,
@@ -693,7 +688,10 @@ const fetchFinnhubQuotes = async (symbols) => {
     }
 
     const requests = normalizedSymbols.map(async (symbol) => {
-        const ticker = symbol;
+        // const ticker = symbol.endsWith('.NS') || symbol.endsWith('.BO')
+        //     ? symbol.split('.')[0]
+        //     : symbol;
+        let ticker = symbol;
 
         if (symbol.endsWith('.NS')) {
             ticker = `NSE:${symbol.split('.')[0]}`;
@@ -804,7 +802,17 @@ const fetchFinnhubHistory = async (symbol, interval = '1D') => {
     }
 
     const normalized = String(symbol || '').toUpperCase();
-    const ticker = normalized;
+    //const ticker = normalized.endsWith('.NS') || normalized.endsWith('.BO')
+    //? normalized.split('.')[0]
+    //: normalized;
+    let ticker = normalized;
+
+    if (normalized.endsWith('.NS')) {
+        ticker = `NSE:${normalized.split('.')[0]}`;
+    }
+    else if (normalized.endsWith('.BO')) {
+        ticker = `BSE:${normalized.split('.')[0]}`;
+    }
     const resolutionMap = {
         '5M': { resolution: '5', days: 7 },
         '15M': { resolution: '15', days: 15 },
@@ -844,7 +852,7 @@ const fetchFinnhubHistory = async (symbol, interval = '1D') => {
 const toPolygonTicker = (symbol) => {
     const normalized = String(symbol || '').toUpperCase();
     if (normalized.endsWith('.NS') || normalized.endsWith('.BO')) {
-        return normalized;
+        return null;
     }
 
     if (normalized.includes('.')) {
@@ -1111,12 +1119,7 @@ const fetchStooqQuotes = async (symbols) => {
 
     const result = response.data?.chart?.result?.[0];
     const timestamps = result?.timestamp || [];
-    const quote = result?.indicators?.quote?.[0] || {};
-    const closes = quote.close || [];
-    const opens = quote.open || [];
-    const highs = quote.high || [];
-    const lows = quote.low || [];
-    const volumes = quote.volume || [];
+    const closes = result?.indicators?.quote?.[0]?.close || [];
 
     return timestamps
         .map((timestamp, index) => {
@@ -1129,11 +1132,6 @@ const fetchStooqQuotes = async (symbols) => {
                 timestamp: timestamp * 1000,
                 date: new Date(timestamp * 1000).toISOString(),
                 price: close,
-                open: Number(opens[index]) || close,
-                high: Number(highs[index]) || close,
-                low: Number(lows[index]) || close,
-                close: close,
-                volume: Number(volumes[index]) || 0
             };
         })
         .filter(Boolean);
@@ -1163,7 +1161,7 @@ const fetchStockData = async (customSymbols = null) => {
                 yahooError = error;
             }
 
-            if (!hasEnoughLiveData(yahooQuotes, symbols.length)) {
+            if (!hasEnoughLiveData(yahooQuotes)) {
                 try {
 
                     const existingSymbols = new Set(
@@ -1215,7 +1213,7 @@ const fetchStockData = async (customSymbols = null) => {
                 }
             }
 
-            if (hasEnoughLiveData(yahooQuotes, symbols.length)) {
+            if (hasEnoughLiveData(yahooQuotes)) {
                 clearProviderFailure('yahoo');
                 data = yahooQuotes;
             } else {
@@ -1233,7 +1231,7 @@ const fetchStockData = async (customSymbols = null) => {
         if (!data && !isProviderBlocked('tiingo')) {
             try {
                 const tiingoQuotes = await fetchTiingoQuotes(symbols);
-                if (hasEnoughLiveData(tiingoQuotes, symbols.length)) {
+                if (hasEnoughLiveData(tiingoQuotes)) {
                     clearProviderFailure('tiingo');
                     data = tiingoQuotes;
                 } else {
@@ -1252,7 +1250,7 @@ const fetchStockData = async (customSymbols = null) => {
         if (!data && !isProviderBlocked('finnhub')) {
             try {
                 const finnhubQuotes = await fetchFinnhubQuotes(symbols);
-                if (hasEnoughLiveData(finnhubQuotes, symbols.length)) {
+                if (hasEnoughLiveData(finnhubQuotes)) {
                     clearProviderFailure('finnhub');
                     data = finnhubQuotes;
                 } else {
@@ -1271,7 +1269,7 @@ const fetchStockData = async (customSymbols = null) => {
         if (!data && !isProviderBlocked('polygon')) {
             try {
                 const polygonQuotes = await fetchPolygonQuotes(symbols);
-                if (hasEnoughLiveData(polygonQuotes, symbols.length)) {
+                if (hasEnoughLiveData(polygonQuotes)) {
                     clearProviderFailure('polygon');
                     data = polygonQuotes;
                 } else {
@@ -1290,7 +1288,7 @@ const fetchStockData = async (customSymbols = null) => {
         if (!data && !isProviderBlocked('marketstack')) {
             try {
                 const marketstackQuotes = await fetchMarketstackQuotes(symbols);
-                if (hasEnoughLiveData(marketstackQuotes, symbols.length)) {
+                if (hasEnoughLiveData(marketstackQuotes)) {
                     clearProviderFailure('marketstack');
                     data = marketstackQuotes;
                 } else {
@@ -1309,7 +1307,7 @@ const fetchStockData = async (customSymbols = null) => {
         if (!data && !isProviderBlocked('stooq')) {
             try {
                 const stooqQuotes = await fetchStooqQuotes(symbols);
-                if (hasEnoughLiveData(stooqQuotes, symbols.length)) {
+                if (hasEnoughLiveData(stooqQuotes)) {
                     clearProviderFailure('stooq');
                     data = stooqQuotes;
                 } else {
@@ -1327,34 +1325,17 @@ const fetchStockData = async (customSymbols = null) => {
 
         // Persist the fresh payload as last-known-good
         if (data) {
-            if (!customSymbols || !lastKnownGoodQuotes) {
-                lastKnownGoodQuotes = data;
-            } else {
-                // Merge custom fetches into the existing fallback cache
-                const incomingSet = new Set(data.map(q => String(q.symbol).toUpperCase()));
-                lastKnownGoodQuotes = [
-                    ...lastKnownGoodQuotes.filter(q => !incomingSet.has(String(q.symbol).toUpperCase())),
-                    ...data
-                ];
-            }
+            lastKnownGoodQuotes = data;
         }
 
         if (!data) {
             if (lastKnownGoodQuotes) {
                 logger.warn(`All live quote providers failed. Serving stale cache for ${symbols.length} symbols.`);
-                if (customSymbols) {
-                    const customSet = new Set(customSymbols.map(s => String(s).toUpperCase()));
-                    const filtered = lastKnownGoodQuotes.filter(q => customSet.has(String(q.symbol).toUpperCase()));
-                    if (filtered.length > 0) {
-                        return filtered;
-                    }
-                    // If cache doesn't contain these symbols, fall through to mock fallback
-                } else {
-                    return lastKnownGoodQuotes;
-                }
+                return lastKnownGoodQuotes;
             }
-            logger.error(`Live quotes unavailable for ${symbols.slice(0, 5).join(', ')}${symbols.length > 5 ? '...' : ''} — using mock fallback data.`);
-            return buildFallbackQuotes(symbols);
+            // Truly nothing available — log but don't crash; return empty so caller degrades gracefully
+            logger.error(`Live quotes unavailable for ${symbols.slice(0, 5).join(', ')}${symbols.length > 5 ? '...' : ''} — no stale fallback either.`);
+            return [];
         }
 
         if (!customSymbols) {

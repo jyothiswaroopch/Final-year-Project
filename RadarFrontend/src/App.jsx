@@ -20,6 +20,8 @@ import {
   ReportsExportPage,
   HelpSupportPage,
   InvestorFilingsPage,
+  SettingsPage as InvestorSettingsPage,
+  ProfilePage as InvestorProfilePage,
 } from './pages/ContractPages';
 import InvestorAdvancedCharts from './pages/InvestorAdvancedCharts';
 import TraderHelpSupportPage from './pages/support/HelpSupportPage';
@@ -200,7 +202,7 @@ function App() {
               <Route path="/investor/alerts" element={<AlertsPage />} />
               <Route path="/investor/reports/export" element={<ReportsExportPage />} />
               <Route path="/investor/profile" element={<Navigate to="/investor/dashboard/profile" replace />} />
-              <Route path="/investor/settings" element={<SettingsPage />} />
+              <Route path="/investor/settings" element={<InvestorSettingsPage />} />
               <Route path="/investor/support" element={<HelpSupportPage dashboardPath="/investor/dashboard" />} />
               <Route path="/investor/advanced-charts" element={<InvestorAdvancedCharts />} />
 

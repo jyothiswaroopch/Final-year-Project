@@ -33,6 +33,7 @@ const {
     getStockEarningsCalendar,
     getStockNewsSentiment,
 } = require('../services/stockInsightsService');
+const { evaluateAlertProximity } = require('../services/alertProximityEngine');
 
 const router = express.Router();
 
@@ -284,8 +285,6 @@ router.post('/user/portfolio/transactions', ...ensureAuth(async (req, res) => {
     const total = quantity * price;
     const idx = portfolio.holdings.findIndex((row) => normalizeSymbol(row.symbol) === symbol);
 
-    let entryPrice = price;
-
     if (side === 'BUY') {
         if (Number(portfolio.cashBalance || 0) < total) {
             return sendError(res, 400, 'Insufficient funds');
@@ -313,7 +312,6 @@ router.post('/user/portfolio/transactions', ...ensureAuth(async (req, res) => {
             return sendError(res, 400, 'Holding not found');
         }
         const current = portfolio.holdings[idx];
-        entryPrice = Number(current.avgBuyPrice || price);
         const existingQty = Number(current.quantity || 0);
         if (existingQty < quantity) {
             return sendError(res, 400, 'Not enough quantity to sell');
@@ -371,17 +369,6 @@ router.get('/user/portfolio/analytics', ...ensureAuth(async (req, res) => {
                 .slice(0, 5),
         },
     });
-            recordTrade({
-                userId: req.user._id,
-                symbol,
-                side,
-                quantity,
-                price,
-                assetType,
-                entryPrice,
-                executedAt: nowIso(),
-                source: 'contract/portfolio',
-            }).catch(() => null);
 }));
 
 router.get('/user/watchlists', ...ensureAuth(async (req, res) => {

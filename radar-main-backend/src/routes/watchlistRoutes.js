@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { getWatchlists, createWatchlist, addToWatchlist, removeFromWatchlist, getRecentChanges } = require('../controllers/watchlistController');
+const { getWatchlists, createWatchlist, addToWatchlist, removeFromWatchlist, getRecentChanges, getWatchlistData } = require('../controllers/watchlistController');
 const { authMiddleware } = require('../middleware/authMiddleware');
+
+// Public market-data aggregation — no auth required
+router.get('/data', getWatchlistData);
 
 router.use(authMiddleware);
 

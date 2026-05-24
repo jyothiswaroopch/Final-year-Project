@@ -1,5 +1,10 @@
-const { fetchStockData } = require('./stockService');
-const { getTechnicalIndicators, getTechnicalIndicatorsFromOHLC } = require('./indicatorService');
+//const { fetchStockData } = require('./stockService');
+const {
+    fetchStockData,
+    fetchTwelveDataQuotes,
+    fetchYahooFundamentals
+} = require('./stockService');
+const { getTechnicalIndicators } = require('./indicatorService');
 const { getInstrumentScore } = require('./scoringService');
 const yahooFinanceService = require('./yahooFinanceService');
 
@@ -34,16 +39,13 @@ const toNumber = (value, fallback = NaN) => {
 
 const isFiniteNumber = (value) => Number.isFinite(Number(value));
 
-// Returns true if the value is within [min, max].
-// If NEITHER bound is specified, the check is skipped entirely (pass-through),
-// so rows with NaN field values are still included in unfiltered results.
 const inRange = (value, min, max) => {
     const hasMin = isFiniteNumber(min);
     const hasMax = isFiniteNumber(max);
-    // No constraint at all — always pass
-    if (!hasMin && !hasMax) return true;
-    // Value must be finite when a bound IS specified
-    if (!isFiniteNumber(value)) return false;
+    if (!hasMin && !hasMax) return true; // No filter applied for this field
+    
+    if (!isFiniteNumber(value)) return false; // Filter is applied, but value is missing
+    
     if (hasMin && Number(value) < Number(min)) return false;
     if (hasMax && Number(value) > Number(max)) return false;
     return true;
@@ -150,36 +152,10 @@ const sortRows = (rows, sortBy, sortOrder) => {
 const attachTechnicals = async (rows, strictLive) => {
     return Promise.all(rows.map(async (row) => {
         try {
-            // Prefer OHLC database for stock screeners (fast, reliable)
-            // Only use live API if strictLive flag is set or OHLC has insufficient data
-            let indicators;
-            let source = 'api';
-
-            if (!strictLive) {
-                try {
-                    const ohlcIndicators = await getTechnicalIndicatorsFromOHLC(
-                        row.symbol,
-                        'NSE',
-                        '1d',
-                        365
-                    );
-                    if (ohlcIndicators.status === 'success' && ohlcIndicators.dataPoints >= 26) {
-                        indicators = ohlcIndicators;
-                        source = 'ohlc_db';
-                    } else {
-                        // Fall back to live API
-                        indicators = await getTechnicalIndicators('stock', row.symbol, '1D', { strictLive: false });
-                    }
-                } catch (_err) {
-                    // Fall back to live API on OHLC error
-                    indicators = await getTechnicalIndicators('stock', row.symbol, '1D', { strictLive: false });
-                }
-            } else {
-                // Use live API only when explicitly requested
-                indicators = await getTechnicalIndicators('stock', row.symbol, '1D', { strictLive: true });
-            }
-
-            const score = await getInstrumentScore('stock', row.symbol, { strictLive });
+            const [indicators, score] = await Promise.all([
+                getTechnicalIndicators('stock', row.symbol, '1D', { strictLive }),
+                getInstrumentScore('stock', row.symbol, { strictLive }),
+            ]);
 
             return {
                 ...row,
@@ -187,8 +163,7 @@ const attachTechnicals = async (rows, strictLive) => {
                 volumeStatus: indicators?.volumeStatus || null,
                 score: toNumber(score?.score, NaN),
                 bias: score?.bias || 'neutral',
-                technicalLive: source === 'api',
-                technicalSource: source,
+                technicalLive: true,
             };
         } catch (_error) {
             return {
@@ -198,7 +173,6 @@ const attachTechnicals = async (rows, strictLive) => {
                 score: 60,
                 bias: 'neutral',
                 technicalLive: false,
-                technicalSource: 'error',
             };
         }
     }));
@@ -220,7 +194,8 @@ const buildRow = (stock) => ({
     score: NaN,
     bias: 'neutral',
     technicalLive: false,
-    technicalSource: 'pending',
+    roe: toNumber(stock.details?.roe, NaN),
+    dividendYield: toNumber(stock.details?.dividend_yield, NaN),
 });
 
 const getValidFundamental = (yahooVal, fallbackVal) => {
@@ -292,31 +267,44 @@ const runScreener = async (payload = {}) => {
 
     const filteredRows = applyTechnicalFilters(enrichedRows, filters);
     const sorted = sortRows(filteredRows, sortBy, sortOrder);
-    const results = sorted.slice(0, limit).map((row) => ({
-        symbol: row.symbol,
-        displaySymbol: row.displaySymbol,
-        name: row.name,
-        price: Number.isFinite(row.price) ? Number(row.price.toFixed(2)) : 0,
-        change: Number.isFinite(row.change) ? Number(row.change.toFixed(2)) : 0,
-        sector: row.sector !== 'Unknown' ? row.sector : (row.details?.sector || 'Equity'),
-        pe: Number.isFinite(row.pe) ? Number(row.pe.toFixed(2)) : null,
-        marketCap: row.marketCap,
-        marketCapNumeric: row.marketCapNumeric,
-        rsi: Number.isFinite(row.rsi) ? Number(row.rsi.toFixed(2)) : null,
-        score: Number.isFinite(row.score) ? Number(row.score.toFixed(0)) : 75,
-        bias: row.bias,
-        volumeStatus: row.volumeStatus,
-        technicalLive: row.technicalLive,
-        technicalSource: row.technicalSource,
-        // Helpful for frontend display
-        signal: row.bias === 'bullish' ? 'BULLISH' : row.bias === 'bearish' ? 'BEARISH' : 'NEUTRAL',
-        why: row.bias === 'bullish'
-            ? 'Bullish momentum detected based on technical scoring.'
-            : row.bias === 'bearish'
-                ? 'Bearish pressure detected. Risk elevated above benchmark.'
-                : 'Stock matched screener criteria. No directional signal.',
-        tags: [row.sector || 'Equity', row.bias || 'neutral'].filter(Boolean),
-        confidence: Number.isFinite(row.score) ? Math.min(99, Math.max(50, row.score)) : 75,
+    console.log("DEBUG: enrichedBaseRows length:", enrichedBaseRows.length);
+    console.log("DEBUG: sorted length:", sorted.length);
+    const finalRows = sorted.length > 0 ? sorted : sortRows(enrichedBaseRows, sortBy, sortOrder);
+    console.log("DEBUG: finalRows length:", finalRows.length);
+    
+    const results = await Promise.all(finalRows.slice(0, limit).map(async (row) => {
+        let sparklineData = null;
+        try {
+            // Fetch real-time trend data for the top matched stocks for the last 30 days
+            const hist = await yahooFinanceService.fetchHistoricalData(row.symbol, '1d', '1mo');
+            if (hist.success && hist.data) {
+                // Plot 1 day candle for a history of 15 days
+                sparklineData = hist.data.slice(-15).map(c => ({ value: c.close || c.adjustedClose }));
+            } else {
+                console.log('Sparkline fetch failed for', row.symbol, hist.error);
+            }
+        } catch (e) {
+            console.log('Sparkline catch block:', row.symbol, e.message);
+        }
+
+        return {
+            symbol: row.symbol,
+            displaySymbol: row.displaySymbol,
+            name: row.name,
+            price: Number.isFinite(row.price) ? Number(row.price.toFixed(2)) : null,
+            change: Number.isFinite(row.change) ? Number(row.change.toFixed(2)) : null,
+            sector: row.sector,
+            pe: Number.isFinite(row.pe) ? Number(row.pe.toFixed(2)) : null,
+            marketCap: row.marketCap,
+            rsi: Number.isFinite(row.rsi) ? Number(row.rsi.toFixed(2)) : null,
+            score: Number.isFinite(row.score) ? Number(row.score.toFixed(0)) : null,
+            bias: row.bias,
+            volumeStatus: row.volumeStatus,
+            technicalLive: row.technicalLive,
+            roe: Number.isFinite(row.roe) ? Number(row.roe.toFixed(2)) : null,
+            dividendYield: Number.isFinite(row.dividendYield) ? Number(row.dividendYield.toFixed(2)) : null,
+            sparklineData
+        };
     }));
 
     return {

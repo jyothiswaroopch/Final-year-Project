@@ -17,11 +17,6 @@ const normalizeIdentifier = (value) => String(value || '').trim().toLowerCase();
 const registerUser = asyncHandler(async (req, res) => {
     const { username, password, email, identifier } = req.body;
 
-    const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters long and contain a mix of letters, numbers, and symbols.' });
-    }
-
     try {
         const normalizedUsername = String(username || '').trim();
         const normalizedEmail = normalizeIdentifier(email || identifier || '');
@@ -60,60 +55,33 @@ const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); 
 
 const googleAuth = asyncHandler(async (req, res) => {
-    const { token, isSignup } = req.body;
+    const { token } = req.body;
 
     try {
-        let name, email, picture;
-
-        // An ID token (JWT) has 3 parts separated by dots. An access token usually does not.
-        if (token.split('.').length === 3) {
-            const ticket = await client.verifyIdToken({
-                idToken: token,
-                audience: process.env.GOOGLE_CLIENT_ID,
-            });
-            const payload = ticket.getPayload();
-            name = payload.name;
-            email = payload.email;
-            picture = payload.picture;
-        } else {
-            // It's an access token from useGoogleLogin
-            const axios = require('axios');
-            const response = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            name = response.data.name;
-            email = response.data.email;
-            picture = response.data.picture;
-        }
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const { name, email, picture } = ticket.getPayload();
 
         let user = await User.findOne({ email });
 
         if (user) {
-            // Retroactively stamp authProvider for users created before this field existed
-            if (!user.authProvider || user.authProvider === 'email') {
-                user.authProvider = 'google';
-                await user.save();
-            }
             res.json({
                 _id: user._id,
                 username: user.username,
                 email: user.email,
                 preferredMode: user.preferredMode,
                 token: generateToken(user._id),
-                picture: picture,
-                isNewUser: false
+                picture: picture
             });
         } else {
-            if (!isSignup) {
-                return res.status(404).json({ error: 'Account not found. Please sign up first.' });
-            }
             
             const randomPassword = crypto.randomBytes(16).toString('hex');
             user = await User.create({
                 username: name,
                 email: email,
-                password: randomPassword,
-                authProvider: 'google'
+                password: randomPassword
             });
 
             res.status(201).json({
@@ -122,8 +90,7 @@ const googleAuth = asyncHandler(async (req, res) => {
                 email: user.email,
                 preferredMode: user.preferredMode,
                 token: generateToken(user._id),
-                picture: picture,
-                isNewUser: true
+                picture: picture
             });
         }
     } catch (error) {
@@ -185,87 +152,45 @@ const getUserProfile = asyncHandler(async (req, res) => {
             priceAlerts: true,
             earningsUpdates: true,
             importantNews: true
-        },
-        authProvider: u.authProvider || 'email'
+        }
     });
 });
 
 const updateUserProfile = asyncHandler(async (req, res) => {
     const { username, email } = req.body;
-    logger.info(`[updateUserProfile] Received: username=${username}, email=${email}, userId=${req.user?._id}`);
-
-    const user = await User.findById(req.user._id);
-    if (!user) {
-        logger.error('[updateUserProfile] User not found in DB for id:', req.user._id);
-        return res.status(404).json({ error: 'User not found' });
-    }
+    const user = req.user;
 
     let targetUser = user;
 
     if (username && username !== user.username) {
         const taken = await User.findOne({ username, _id: { $ne: user._id } });
-        if (taken) return res.status(400).json({ error: 'Username already taken' });
-        user.username = username.trim();
-    }
-    if (email && email !== user.email) {
-        const normalizedEmail = email.trim().toLowerCase();
-        const taken = await User.findOne({ email: normalizedEmail, _id: { $ne: user._id } });
-        if (taken) return res.status(400).json({ error: 'Email already taken' });
-        user.email = normalizedEmail;
-    }
-
-    try {
-        await user.save();
-        logger.info('[updateUserProfile] Saved successfully for user:', user._id);
-    } catch (saveErr) {
-        logger.error('[updateUserProfile] Save FAILED:', saveErr.message, saveErr.errors);
-        return res.status(500).json({ error: 'Failed to save profile', details: saveErr.message });
+        if (taken) {
+            targetUser = taken;
+            if (email && email.trim().toLowerCase() === user.email) {
+                user.email = `released_${Date.now()}_${user.email}`;
+                await user.save();
+            }
+        }
     }
 
+    if (username) targetUser.username = username.trim();
+    if (email) {
+        const cleanEmail = email.trim().toLowerCase();
+        if (cleanEmail !== targetUser.email) {
+            const emailTaken = await User.findOne({ email: cleanEmail, _id: { $ne: targetUser._id } });
+            if (emailTaken) {
+                emailTaken.email = `released_${Date.now()}_${emailTaken.email}`;
+                await emailTaken.save();
+            }
+            targetUser.email = cleanEmail;
+        }
+    }
+
+    await targetUser.save();
     res.json({
         success: true,
         data: { username: targetUser.username, email: targetUser.email, token: generateToken(targetUser._id) }
     });
-});
-
-const updatePassword = asyncHandler(async (req, res) => {
-    const { currentPassword, newPassword } = req.body;
-
-    if (!currentPassword || !newPassword) {
-        return res.status(400).json({ error: 'Current password and new password are required' });
-    }
-
-    if (String(newPassword).length < 8) {
-        return res.status(400).json({ error: 'New password must be at least 8 characters' });
-    }
-
-    const user = await User.findById(req.user._id);
-    if (!user || !(await user.matchPassword(currentPassword))) {
-        return res.status(401).json({ error: 'Current password is incorrect' });
-    }
-
-    user.password = newPassword;
-    await user.save();
-
-    res.json({ success: true, message: 'Password updated successfully' });
-});
-
-// For Google users who never set a password — no current password required
-const setPassword = asyncHandler(async (req, res) => {
-    const { newPassword } = req.body;
-
-    if (!newPassword || String(newPassword).length < 8) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters' });
-    }
-
-    const user = await User.findById(req.user._id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    user.password = newPassword;
-    user.authProvider = 'email'; // They now have a real password
-    await user.save();
-
-    res.json({ success: true, message: 'Password set successfully' });
 });
 
 const saveInvestorDNA = asyncHandler(async (req, res) => {
@@ -275,7 +200,7 @@ const saveInvestorDNA = asyncHandler(async (req, res) => {
         hybridLine, confidence, metrics
     } = req.body;
 
-    const user = await User.findById(req.user._id);
+    const user = req.user;
     user.investorDNA = {
         dominant,
         personaName,
@@ -299,7 +224,7 @@ const saveInvestorDNA = asyncHandler(async (req, res) => {
 
 const updateNotificationPreferences = asyncHandler(async (req, res) => {
     const { priceAlerts, earningsUpdates, importantNews } = req.body;
-    const user = await User.findById(req.user._id);
+    const user = req.user;
 
     if (!user.notificationPreferences) {
         user.notificationPreferences = {};
@@ -322,7 +247,7 @@ const getMode = asyncHandler(async (req, res) => {
 const updateMode = asyncHandler(async (req, res) => {
     const { mode } = req.body;
     
-    const user = await User.findById(req.user._id);
+    const user = req.user;
 
     user.preferredMode = mode;
     await user.save();
@@ -514,8 +439,6 @@ module.exports = {
     resetPassword,
     getUserProfile,
     updateUserProfile,
-    updatePassword,
-    setPassword,
     saveInvestorDNA,
     updateNotificationPreferences,
     getMode, 

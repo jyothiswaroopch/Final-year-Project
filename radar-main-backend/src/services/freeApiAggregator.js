@@ -135,31 +135,36 @@ class FreeApiAggregator {
         case 'yahoo':
         default:
           this.stats.yahooHits++;
+          // 1️⃣ Try yahoo-finance2 live quote first
+          try {
+            const yqResult = await yahooFinanceService.getLiveQuote(symbol);
+            if (yqResult.success && yqResult.data?.current) {
+              return { success: true, source: 'yahoo-finance2', data: yqResult.data };
+            }
+          } catch (yqErr) {
+            logger.warn(`[Aggregator] yahoo-finance2 failed for ${symbol}: ${yqErr.message}`);
+          }
+          // 2️⃣ Fall back to OHLC cache
           const latest = await ohlcService.getLatest(symbol.replace('.NS', '').replace('.BO', ''), '1d');
           if (latest.success && latest.data) {
             return {
               success: true,
               source: 'yahoo-cache',
               data: {
-                symbol: symbol,
-                current: latest.data.close,
-                high: latest.data.high,
-                low: latest.data.low,
-                open: latest.data.open,
+                symbol,
+                current:       latest.data.close,
+                high:          latest.data.high,
+                low:           latest.data.low,
+                open:          latest.data.open,
                 previousClose: null,
-                change: null,
+                change:        null,
                 changePercent: null,
-                timestamp: latest.data.timestamp,
-                volume: latest.data.volume,
+                timestamp:     latest.data.timestamp,
+                volume:        latest.data.volume,
               },
             };
           }
-          
-          return {
-            success: false,
-            message: 'No cached data available',
-            source: 'yahoo',
-          };
+          return { success: false, message: 'Yahoo Finance and cache both unavailable', source: 'yahoo' };
       }
     } catch (error) {
       logger.error(`Error with source ${source}:`, error.message);

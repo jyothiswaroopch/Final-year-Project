@@ -1375,29 +1375,29 @@ const Watchlist = () => {
                                     </div>
 
                                     {/* Recent Changes */}
-                                    <div className="lg:w-[40%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 flex flex-col min-h-[340px]">
-                                        <h3 className="text-[15px] font-black text-slate-800 mb-5 flex items-center gap-2">
+                                    <div className="lg:w-[35%] bg-white rounded-[20px] shadow-sm border border-slate-100 p-6 md:p-8 flex flex-col h-full min-h-[380px]">
+                                        <h3 className="text-[16px] font-black text-slate-800 mb-6 flex items-center gap-2">
                                             <Activity size={18} className="text-blue-500" />
                                             Recent Changes
-                                            <TooltipInfo text="Significant indicator events for your watchlist stocks — MACD crossovers, RSI extremes, Bollinger %B breakouts, EMA crosses, volume spikes, and more." />
+                                            <TooltipInfo text="A chronological activity log of objective, factual indicator events affecting the stocks on your watchlist." />
                                         </h3>
-                                        <div className="flex-grow space-y-4">
+                                        <div className="flex-grow space-y-6">
                                             {dynamicRecentChanges.length > 0 ? dynamicRecentChanges.map((change, i) => (
-                                                <div key={i} className="flex gap-3 relative">
-                                                    <div className="mt-1 flex flex-col items-center flex-shrink-0">
-                                                        <div className={`w-2.5 h-2.5 rounded-full relative z-10 ring-4 ${
+                                                <div key={i} className="flex gap-4 relative">
+                                                    <div className="mt-1.5 flex flex-col items-center">
+                                                        <div className={`w-3 h-3 rounded-full relative z-10 ring-4 ${
                                                             change.type === 'positive' ? 'bg-blue-500 ring-blue-50' :
                                                             change.type === 'negative' ? 'bg-rose-500 ring-rose-50' :
                                                             'bg-amber-500 ring-amber-50'
                                                         }`} />
                                                         {i !== dynamicRecentChanges.length - 1 && (
-                                                            <div className="w-px flex-grow bg-slate-100 mt-1" style={{ minHeight: 20 }} />
+                                                            <div className="w-px flex-grow bg-slate-100 mt-1" style={{ minHeight: 24 }} />
                                                         )}
                                                     </div>
-                                                    <div className="pb-3 w-full min-w-0">
+                                                    <div className="pb-2 w-full min-w-0">
                                                         <div className="flex justify-between items-start gap-2">
-                                                            <div className="text-[13px] font-bold text-slate-800 leading-snug">{change.title}</div>
-                                                            <div className="text-[9px] font-bold text-slate-400 tracking-wide whitespace-nowrap flex-shrink-0 mt-0.5">{change.date}, {change.time}</div>
+                                                            <div className="text-[14px] font-bold text-slate-800 leading-snug">{change.title}</div>
+                                                            <div className="text-[10px] font-bold text-slate-400 tracking-wide whitespace-nowrap flex-shrink-0 mt-0.5">{change.date}, {change.time}</div>
                                                         </div>
                                                         {change.indicator && (
                                                             <span className={`inline-block mt-1 text-[9px] font-bold px-1.5 py-0.5 rounded border ${
@@ -1406,7 +1406,7 @@ const Watchlist = () => {
                                                                 'bg-amber-50 text-amber-600 border-amber-100'
                                                             }`}>{change.indicator}</span>
                                                         )}
-                                                        <div className="text-[11px] font-medium text-slate-500 leading-relaxed mt-1">{change.desc}</div>
+                                                        <div className="text-[12px] font-medium text-slate-500 leading-relaxed mt-1.5 pr-2">{change.desc}</div>
                                                     </div>
                                                 </div>
                                             )) : (
@@ -1420,14 +1420,8 @@ const Watchlist = () => {
                                                 </div>
                                             )}
                                         </div>
-                                        {dynamicRecentChanges.length > 0 && (
-                                            <div className="mt-4 pt-4 border-t border-slate-100">
-                                                <button className="w-full text-[12px] font-bold text-blue-600 hover:text-blue-800 transition-colors">
-                                                    View Full Activity Log
-                                                </button>
-                                            </div>
-                                        )}
                                     </div>
+
                                 </div>
 
                                 {/* Watchlist Holdings grid */}

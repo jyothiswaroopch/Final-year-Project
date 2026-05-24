@@ -48,17 +48,19 @@ const parseDateToYYYYMMDD = (dateStr) => {
   return str;
 };
 
-const mapIntervalToPeriod = (interval) => {
+
+// Maps frontend timeframe button label → { daysBack, interval } for /api/chart/:symbol
+const mapIntervalToParams = (interval) => {
   const map = {
-    '1D': '1d',
-    '5D': '5d',
-    '1M': '1m',
-    '3M': '3m',
-    '6M': '6m',
-    '1Y': '1y',
-    '5Y': '5y'
+    '1D':  { daysBack: 1,    interval: '1h'  },  // 1 day of hourly candles
+    '5D':  { daysBack: 5,    interval: '1h'  },  // 5 days of hourly candles
+    '1M':  { daysBack: 30,   interval: '1d'  },  // 1 month of daily candles
+    '3M':  { daysBack: 90,   interval: '1d'  },  // 3 months of daily candles
+    '6M':  { daysBack: 180,  interval: '1d'  },  // 6 months of daily candles
+    '1Y':  { daysBack: 365,  interval: '1d'  },  // 1 year of daily candles
+    '5Y':  { daysBack: 1825, interval: '1wk' },  // 5 years of weekly candles
   };
-  return map[String(interval).toUpperCase()] || '1y';
+  return map[String(interval).toUpperCase()] || { daysBack: 365, interval: '1d' };
 };
 
 export const useCandles = (symbol, interval = '1D') => {
@@ -115,48 +117,53 @@ export const useCandles = (symbol, interval = '1D') => {
     setLoading(true);
     setError(null);
     try {
-      const periodParam = mapIntervalToPeriod(interval);
-      // Use raw axios to bypass the api.js response interceptor
-      // which strips .NS/.BO suffixes and can corrupt date strings
+      const { daysBack, interval: yInterval } = mapIntervalToParams(interval);
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
       const res = await axios.get(`/api/chart/${encodeURIComponent(symbol)}`, {
-        params: { period: periodParam },
+        params: { daysBack, interval: yInterval },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         timeout: 12000,
       });
 
-      if (res && Array.isArray(res.data) && res.data.length > 0) {
-        const mapped = res.data.map(c => {
+      const rawData = Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.data) ? res.data.data : [];
+
+      if (rawData.length > 0) {
+        const mapped = rawData.map(c => {
+          // Backend returns Unix timestamp in seconds (shifted for IST)
           const rawTime = c.time || c.timestamp || '';
-          const timeVal = parseDateToYYYYMMDD(rawTime);
+          let timeVal;
+          if (typeof rawTime === 'number' && rawTime > 1e9) {
+            // Unix epoch seconds → YYYY-MM-DD
+            const d = new Date(rawTime * 1000);
+            timeVal = d.toISOString().split('T')[0];
+          } else {
+            timeVal = parseDateToYYYYMMDD(String(rawTime));
+          }
           return {
             time: timeVal,
-            open: Number(c.open || c.close),
-            high: Number(c.high || c.close),
-            low: Number(c.low || c.close),
-            close: Number(c.close),
-            volume: Number(c.volume || 0)
+            open:   Number(c.open  || c.close || 0),
+            high:   Number(c.high  || c.close || 0),
+            low:    Number(c.low   || c.close || 0),
+            close:  Number(c.close || 0),
+            volume: Number(c.volume || 0),
           };
-        }).sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+        }).filter(c => c.time && c.close > 0)
+          .sort((a, b) => a.time.localeCompare(b.time));
 
-        // De-duplicate dates to satisfy lightweight-charts constraint
+        // De-duplicate dates
         const unique = [];
         const seen = new Set();
         for (const item of mapped) {
-          if (!seen.has(item.time)) {
-            seen.add(item.time);
-            unique.push(item);
-          }
+          if (!seen.has(item.time)) { seen.add(item.time); unique.push(item); }
         }
-
         setCandles(unique);
       } else {
-        // Backend returned empty – use fallback so chart is always visible
         console.warn(`[useCandles] Empty response for ${symbol}, using fallback candles`);
         setCandles(generateFallbackCandles(symbol));
       }
     } catch (err) {
-      // Backend unreachable – show fallback candles so chart is never blank
       console.warn(`[useCandles] Backend unavailable for ${symbol}, using fallback candles:`, err.message);
       setCandles(generateFallbackCandles(symbol));
     } finally {

@@ -2,14 +2,14 @@ import { useEffect, useRef, useId } from "react";
 
 // ── Symbol map to TradingView format ─────────────────────────────────────────
 const TV_SYMBOL_MAP = {
-  "NIFTY 50":  "NSE:NIFTY50",
-  BANKNIFTY:   "NSE:BANKNIFTY",
+  "NIFTY 50":  "BSE:SENSEX", // NSE indices are blocked, route to closest BSE equivalent
+  BANKNIFTY:   "BSE:BANKEX",
   SENSEX:      "BSE:SENSEX",
-  "NIFTY IT":  "NSE:CNXIT",
-  RELIANCE:    "NSE:RELIANCE",
-  HDFCBANK:    "NSE:HDFCBANK",
-  TCS:         "NSE:TCS",
-  INFY:        "NSE:INFY",
+  "NIFTY IT":  "BSE:IT",     // BSE IT index
+  RELIANCE:    "BSE:RELIANCE",
+  HDFCBANK:    "BSE:HDFCBANK",
+  TCS:         "BSE:TCS",
+  INFY:        "BSE:INFY",
   "S&P 500":   "OANDA:SPX500USD",
   NASDAQ:      "OANDA:NAS100USD",
   "BTC/USDT":  "BINANCE:BTCUSDT",
@@ -36,7 +36,12 @@ const TVWidget = ({ title, timeframe }) => {
     el.id = containerId;
 
     const symbol   = TV_SYMBOL_MAP[title] || `NSE:${title}`;
-    const interval = TF_MAP[timeframe] || "15";
+    let interval = TF_MAP[timeframe] || "15";
+
+    // Bypass TV intraday restrictions for BSE indices by forcing Daily interval
+    if (symbol.startsWith("BSE:") && !["D", "W", "M"].includes(interval)) {
+      interval = "D";
+    }
 
     // Load TV script once globally
     const existingScript = document.querySelector('script[src*="tradingview.com/tv.js"]');
@@ -137,7 +142,7 @@ const MultiChartGrid = ({
   showGridLines    = true,
   layout           = "4-grid",
 }) => {
-  const ALL    = ["SENSEX", "NIFTY 50", "S&P 500", "BTC/USDT"];
+  const ALL    = ["SENSEX", "GOLD", "S&P 500", "BTC/USDT"];
   const charts = layout === "1-grid" ? [ALL[0]] : layout === "2-grid" ? ALL.slice(0, 2) : ALL;
   const cols   = layout === "1-grid" ? "grid-cols-1" : "grid-cols-2";
 

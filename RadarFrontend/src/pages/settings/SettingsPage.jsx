@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { ArrowLeft, CheckCircle2, AlertTriangle, Save, RotateCcw } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { SettingsContext } from '../../context/SettingsContext';
 import api from '../../api/api';
 import './SettingsPage.css';
 
-const SettingsPage = ({ embedded = false } = {}) => {
+const SettingsPage = ({ embedded = false, onBack } = {}) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { settings: ctxSettings, saveSettings: saveToServer } = useContext(SettingsContext);
   const toastTimerRef = useRef(null);
 
@@ -82,8 +83,12 @@ const SettingsPage = ({ embedded = false } = {}) => {
     });
   }, [ctxSettings]);
 
+  const isInvestor = location.pathname.includes('investor') ||
+    (localStorage.getItem('mode') || '').toUpperCase() === 'INVESTOR';
+
   const handleBack = () => {
-    navigate('/trader/dashboard');
+    if (onBack) { onBack(); return; }
+    navigate(isInvestor ? '/investor/dashboard' : '/trader/dashboard');
   };
 
   // Unified save handler
@@ -246,7 +251,7 @@ const SettingsPage = ({ embedded = false } = {}) => {
   );
 
   return (
-    <div className="settings-page">
+    <div className={`settings-page ${isInvestor ? 'investor-settings-theme' : ''}`}>
       {/* Background Glow */}
       <div className="settings-gradient-bg" />
 
@@ -271,7 +276,7 @@ const SettingsPage = ({ embedded = false } = {}) => {
               </motion.button>
             )}
             <h1 className="settings-title">Settings</h1>
-            <p className="settings-subtitle">Customize your RADAR trading experience</p>
+            <p className="settings-subtitle">Customize your RADAR {isInvestor ? 'investing' : 'trading'} experience</p>
           </div>
         </div>
       </motion.div>
@@ -290,7 +295,7 @@ const SettingsPage = ({ embedded = false } = {}) => {
                 transition={{ duration: 0.5, delay: 0.1 }}
                 className="settings-card"
               >
-                <h3 className="settings-card-title">Terminal & Market</h3>
+                <h3 className="settings-card-title">{isInvestor ? 'Portfolio' : 'Terminal'} & Market</h3>
                 
                 {renderDropdown(
                   'Default Landing Page',

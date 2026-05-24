@@ -11,13 +11,6 @@ const WatchlistSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    // 'trader' | 'investor' — separates Trader and Investor watchlists per user.
-    // Null means the watchlist was created before mode was introduced (legacy).
-    mode: {
-        type: String,
-        enum: ['trader', 'investor', null],
-        default: null,
-    },
     items: [{
         symbol: {
             type: String,
@@ -34,8 +27,6 @@ const WatchlistSchema = new mongoose.Schema({
     timestamps: true
 });
 
-// Unique per user + name + mode (null counts as its own "bucket")
-WatchlistSchema.index({ userId: 1, name: 1, mode: 1 }, { unique: true });
+WatchlistSchema.index({ userId: 1, name: 1 }, { unique: true });
 
 module.exports = mongoose.model('Watchlist', WatchlistSchema);
-

@@ -32,16 +32,16 @@ const LAYOUTS = [
 ];
 
 // Initial placeholder — replaced with live API symbols after mount
-const PLACEHOLDER_SYMBOLS = ['RELIANCE', 'TCS', 'INFY', 'HDFCBANK'];
+const PLACEHOLDER_SYMBOLS = ['SENSEX', 'S&P 500', 'NASDAQ', 'GOLD', 'BTC/USDT', 'ETH/USDT'];
 
 const MultiChartWorkspace = () => {
   const [layout, setLayout] = useState('2x2');
   const [availableSymbols, setAvailableSymbols] = useState(PLACEHOLDER_SYMBOLS);
   const [charts, setCharts] = useState([
-    { id: 1, symbol: 'RELIANCE', timeframe: '15' },
-    { id: 2, symbol: 'TCS', timeframe: '15' },
-    { id: 3, symbol: 'INFY', timeframe: '15' },
-    { id: 4, symbol: 'HDFCBANK', timeframe: '15' },
+    { id: 1, symbol: 'SENSEX', timeframe: 'D' },
+    { id: 2, symbol: 'S&P 500', timeframe: '15' },
+    { id: 3, symbol: 'GOLD', timeframe: '15' },
+    { id: 4, symbol: 'BTC/USDT', timeframe: '15' },
   ]);
   const [fullscreenChart, setFullscreenChart] = useState(null);
   const [syncEnabled, setSyncEnabled] = useState(false);

@@ -36,6 +36,22 @@ const CRYPTO_SYMBOLS = new Set([
     'ARB','OP','INJ','SUI','SEI','PEPE','WIF','TON','FLOKI','BONK',
 ]);
 
+// Sector benchmark proxies — used for relative comparison (from radar-dev)
+const SECTOR_PROXIES = {
+    'Financial Services': 'HDFCBANK.NS',
+    'Technology': 'TCS.NS',
+    'Healthcare': 'SUNPHARMA.NS',
+    'Consumer Defensive': 'ITC.NS',
+    'Consumer Cyclical': 'MARUTI.NS',
+    'Energy': 'RELIANCE.NS',
+    'Basic Materials': 'TATASTEEL.NS',
+    'Industrials': 'LT.NS',
+    'Communication Services': 'BHARTIARTL.NS',
+    'Utilities': 'NTPC.NS',
+    'Real Estate': 'DLF.NS',
+};
+
+
 const isCryptoSymbol = (symbol) => {
     const s = String(symbol || '').toUpperCase().replace(/USDT$/i, '').replace(/\.(NS|BO)$/i, '');
     return CRYPTO_SYMBOLS.has(s) || String(symbol).toUpperCase().endsWith('USDT');

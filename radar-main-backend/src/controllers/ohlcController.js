@@ -54,65 +54,7 @@ const getHistoricalData = async (req, res) => {
     }
 };
 
-const getOHLCData = asyncHandler(async (req, res) => {
-    const { symbol, exchange, timeframe, startDate, endDate, limit = 500 } = req.query;
 
-    if (!symbol) {
-        res.status(400);
-        throw new Error('Symbol is required');
-    }
-
-    const actualStartDate = startDate || new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
-    const actualEndDate = endDate || new Date().toISOString().slice(0, 10);
-
-    let result = await ohlcService.getOHLCData({
-        symbol,
-        exchange,
-        timeframe,
-        startDate: actualStartDate,
-        endDate: actualEndDate,
-        limit: parseInt(limit),
-    });
-
-    if (result.count === 0) {
-        // Fallback to live data if DB is empty (e.g. crypto symbols)
-        const { fetchCryptoHistory } = require('../services/cryptoService');
-        const { fetchStockHistory } = require('../services/stockService');
-        try {
-            let fallbackData = [];
-            const knownCryptos = ['BTC', 'ETH', 'SOL', 'ADA', 'XRP', 'DOGE', 'DOT', 'BNB', 'MATIC', 'AVAX', 'LINK', 'LTC'];
-            const bare = symbol.replace(/\.(NS|BO)$/i, '').replace(/-USD$/i, '');
-            if (knownCryptos.includes(bare)) {
-                fallbackData = await fetchCryptoHistory(bare, timeframe);
-            } else {
-                fallbackData = await fetchStockHistory(symbol, timeframe, { allowSynthetic: true });
-            }
-            if (fallbackData && fallbackData.length > 0) {
-                result = {
-                    success: true,
-                    count: fallbackData.length,
-                    data: fallbackData
-                };
-            }
-        } catch (e) {
-            console.error('OHLC Fallback failed:', e.message);
-        }
-    }
-
-    if (!result.success) {
-        res.status(500);
-        throw new Error(result.message || 'Failed to fetch OHLC data');
-    }
-
-    res.json({
-        success: true,
-        symbol,
-        exchange,
-        timeframe,
-        count: result.count,
-        data: result.data,
-    });
-});
 const liveMarketService = require('../services/liveMarketService');
 
 const getLatestCandle = asyncHandler(async (req, res) => {
@@ -275,7 +217,6 @@ const getStockDetails = asyncHandler(async (req, res) => {
 });
 module.exports = {
     getHistoricalData,
-    getOHLCData,
     getLatestCandle,
     getAvailableSymbols,
     getCompareData,

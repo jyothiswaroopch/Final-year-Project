@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, BookOpen, Calendar, Camera, Edit2, Hash, Save, UserRound, X, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { fetchCourses } from '../../api/learningApi';
+import { fetchCourses, getProgressKey } from '../../api/learningApi';
 import { fetchUserProfile, updateUserProfile } from '../../api/userApi';
 import { fetchWatchlistLiveData } from '../../api/watchlistApi';
 import api from '../../api/api';
@@ -103,7 +103,20 @@ const TraderProfilePage = ({ embedded = false } = {}) => {
       const signalsPayload = unwrap(signalsRes, []);
       setIndicatorSignals(Array.isArray(signalsPayload) ? signalsPayload : []);
 
-      setCourses((Array.isArray(courseRes) ? courseRes : []).slice(0, 2));
+      const allCourses = Array.isArray(courseRes) ? courseRes : [];
+
+      // Read localStorage progress for each course (same key format as LearningAcademy)
+      const coursesWithProgress = allCourses.map(c => {
+        const courseId = c.id || c._id;
+        const stored = JSON.parse(localStorage.getItem(getProgressKey(courseId, 'TRADER')) ||
+                       localStorage.getItem(getProgressKey(courseId, '')) || '{}');
+        const totalChapters = c.chapters?.length || 0;
+        const completedChapters = Object.values(stored.chapters || {}).filter(Boolean).length;
+        const pct = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0;
+        return { ...c, _progress: { pct, completedChapters, totalChapters } };
+      });
+
+      setCourses(coursesWithProgress);
 
       if (watchlistRows.length > 0) {
         const symbols = watchlistRows
@@ -563,13 +576,45 @@ const TraderProfilePage = ({ embedded = false } = {}) => {
           <h2>Trader Academy</h2>
           <p className="profile-section-note"><BookOpen size={19} /> Enhance your trading skills with our latest courses and materials.</p>
           <div className="profile-course-grid">
-            {courseFallbacks.map((course, index) => (
-              <article className={index % 2 === 0 ? 'profile-course-card teal' : 'profile-course-card violet'} key={course._id || course.id || course.title}>
-                <h3>{course.title}</h3>
-                <p>{course.description}</p>
-                <button onClick={() => navigate('/trader/dashboard/academy')}>Start Course</button>
-              </article>
-            ))}
+            {courseFallbacks.map((course, index) => {
+              const prog = course._progress;
+              const pct = prog?.pct ?? 0;
+              const completed = prog?.completedChapters ?? 0;
+              const total = prog?.totalChapters ?? 0;
+              const isDone = pct === 100;
+              return (
+                <article
+                  className={index % 2 === 0 ? 'profile-course-card teal' : 'profile-course-card violet'}
+                  key={course._id || course.id || course.title}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                    <h3 style={{ margin: 0 }}>{course.title}</h3>
+                    {isDone && (
+                      <span style={{
+                        fontSize: '9px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.1em',
+                        background: 'rgba(0,255,157,0.15)', color: '#00ff9d', border: '1px solid rgba(0,255,157,0.3)',
+                        borderRadius: '999px', padding: '2px 8px', flexShrink: 0, whiteSpace: 'nowrap'
+                      }}>✓ Complete</span>
+                    )}
+                  </div>
+                  <p>{course.description}</p>
+                  {total > 0 && (
+                    <div style={{ marginBottom: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', marginBottom: '4px', opacity: 0.7 }}>
+                        <span>{pct > 0 ? `${pct}% complete` : 'Not started'}</span>
+                        <span>{completed}/{total} chapters</span>
+                      </div>
+                      <div style={{ height: '3px', background: 'rgba(255,255,255,0.1)', borderRadius: '999px', overflow: 'hidden' }}>
+                        <div style={{ width: `${pct}%`, height: '100%', background: isDone ? '#00ff9d' : '#00d4ff', borderRadius: '999px', transition: 'width 0.4s ease' }} />
+                      </div>
+                    </div>
+                  )}
+                  <button onClick={() => navigate('/trader/dashboard/academy')}>
+                    {isDone ? 'Review Course' : pct > 0 ? 'Continue Course' : 'Start Course'}
+                  </button>
+                </article>
+              );
+            })}
           </div>
         </section>
       </div>

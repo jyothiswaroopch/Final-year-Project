@@ -147,35 +147,53 @@ export const fetchMarketHistory = async (symbol, type = 'STOCK', interval = '1D'
 
 export const fetchMarketNews = async (params = {}) => {
     try {
-        const response = await api.get('/news', { params });
+        // Normalize region: UI sends 'IN' or 'GLOBAL', backend expects 'india' or ''
+        const normalizedParams = { ...params };
+        if (params.region) {
+            const r = String(params.region).toUpperCase();
+            normalizedParams.region = r === 'IN' ? 'india' : '';
+            if (!normalizedParams.region) delete normalizedParams.region;
+        }
+
+        const response = await api.get('/news', { params: normalizedParams });
         const data = response.data?.data ?? response.data;
         if (data && data.length > 0) {
-            localStorage.setItem('radar_news_cache', JSON.stringify(data));
+            // Cache keyed by region so India and Global don't overwrite each other
+            const cacheKey = `radar_news_cache_${params.region || 'global'}`;
+            localStorage.setItem(cacheKey, JSON.stringify(data));
         }
         return data;
     } catch (error) {
         console.warn("Intelligent news API failed, falling back to basic news:", error.message);
         try {
-            const response = await api.get('/market/news', { params });
+            const normalizedParams = { ...params };
+            if (params.region) {
+                const r = String(params.region).toUpperCase();
+                normalizedParams.region = r === 'IN' ? 'india' : '';
+                if (!normalizedParams.region) delete normalizedParams.region;
+            }
+            const response = await api.get('/market/news', { params: normalizedParams });
             const data = response.data;
             if (data && data.length > 0) {
-                localStorage.setItem('radar_news_cache', JSON.stringify(data));
+                const cacheKey = `radar_news_cache_${params.region || 'global'}`;
+                localStorage.setItem(cacheKey, JSON.stringify(data));
             }
             return data;
         } catch (fallbackError) {
             console.error("All news fetch attempts failed:", fallbackError);
             
-            // Final fallback to cache
-            const cached = localStorage.getItem('radar_news_cache');
-            if (cached) {
-                console.log("Using cached news fallback");
-                return JSON.parse(cached);
-            }
+            // Final fallback — try region-specific cache, then generic
+            const cacheKey = `radar_news_cache_${params.region || 'global'}`;
+            const regionCache = localStorage.getItem(cacheKey);
+            if (regionCache) return JSON.parse(regionCache);
+            const genericCache = localStorage.getItem('radar_news_cache');
+            if (genericCache) return JSON.parse(genericCache);
             
             throw fallbackError;
         }
     }
 };
+
 
 export const fetchNewsInsight = async (title, summary) => {
     try {

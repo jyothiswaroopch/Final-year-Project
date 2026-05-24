@@ -2,49 +2,22 @@ import api from './api';
 
 const stripSuffix = (v) => String(v || '').replace(/\.(NS|BO)$/i, '');
 
-export const fetchUserWatchlist = async (mode) => {
+export const fetchUserWatchlist = async () => {
     try {
-        const params = mode ? { mode } : {};
-        const res = await api.get('/watchlist', { params });
+        const res = await api.get('/watchlist');
         const lists = Array.isArray(res.data) ? res.data : [];
         // Return flat list of symbols from the first (default) watchlist
-        // Items are stored as objects: {symbol: "RELIANCE.NS", addedAt: ...}
         if (lists.length === 0) return [];
-        return (lists[0].items || []).map(i => {
-            const sym = typeof i === 'string' ? i : (i?.symbol || i?.sym || '');
-            return stripSuffix(sym);
-        }).filter(Boolean);
+        return (lists[0].items || []).map(i => stripSuffix(i.symbol));
     } catch (err) {
         console.warn('fetchUserWatchlist failed:', err.message);
         return [];
     }
 };
 
-export const fetchWatchlists = async (mode) => {
-    try {
-        const params = mode ? { mode } : {};
-        const res = await api.get('/watchlist', { params });
-        return Array.isArray(res.data) ? res.data : [];
-    } catch (err) {
-        console.warn('fetchWatchlists failed:', err.message);
-        return [];
-    }
-};
-
-export const ensureWatchlist = async (mode = 'trader', name = 'Research Watchlist') => {
-    const modeLists = await fetchWatchlists(mode);
-    const named = modeLists.find((list) => String(list?.name || '').toLowerCase() === name.toLowerCase());
-    if (named) return named;
-    if (modeLists.length > 0) return modeLists[0];
-
-    const created = await createWatchlist(name, mode);
-    return created?.data ?? created;
-};
-
 export const addSymbolToWatchlist = async (watchlistId, symbol) => {
     try {
-        const url = watchlistId ? `/watchlist/${watchlistId}/add` : '/watchlist/add';
-        const res = await api.post(url, { symbol });
+        const res = await api.post(`/watchlist/${watchlistId}/add`, { symbol });
         return res.data;
     } catch (err) {
         console.error('addSymbolToWatchlist failed:', err.message);
@@ -54,8 +27,7 @@ export const addSymbolToWatchlist = async (watchlistId, symbol) => {
 
 export const removeSymbolFromWatchlist = async (watchlistId, symbol) => {
     try {
-        const url = watchlistId ? `/watchlist/${watchlistId}/remove/${encodeURIComponent(symbol)}` : `/watchlist/remove/${encodeURIComponent(symbol)}`;
-        const res = await api.delete(url);
+        const res = await api.delete(`/watchlist/${watchlistId}/remove/${encodeURIComponent(symbol)}`);
         return res.data;
     } catch (err) {
         console.error('removeSymbolFromWatchlist failed:', err.message);
@@ -63,12 +35,9 @@ export const removeSymbolFromWatchlist = async (watchlistId, symbol) => {
     }
 };
 
-
-export const createWatchlist = async (name, mode) => {
+export const createWatchlist = async (name) => {
     try {
-        const body = { name };
-        if (mode) body.mode = mode;
-        const res = await api.post('/watchlist', body);
+        const res = await api.post('/watchlist', { name });
         return res.data;
     } catch (err) {
         console.error('createWatchlist failed:', err.message);
@@ -76,11 +45,26 @@ export const createWatchlist = async (name, mode) => {
     }
 };
 
-// Fetch live price + technical data for a list of symbols in one call
-export const fetchWatchlistLiveData = async (mode) => {
+// Ensure a default watchlist exists; returns the full watchlist object
+// Accepts optional (type, name) args for compatibility with WatchlistContext
+export const ensureWatchlist = async (type = 'default', name = 'My Watchlist') => {
     try {
-        const params = mode ? { mode } : {};
-        const res = await api.get('/technical/watchlist', { params });
+        const res = await api.get('/watchlist');
+        const lists = Array.isArray(res.data) ? res.data : [];
+        if (lists.length > 0) return lists[0]; // return full object
+        // None exists — create one
+        const created = await api.post('/watchlist', { name });
+        return created.data || null;
+    } catch (err) {
+        console.warn('ensureWatchlist failed:', err.message);
+        return null;
+    }
+};
+
+// Fetch live price + technical data for a list of symbols in one call
+export const fetchWatchlistLiveData = async () => {
+    try {
+        const res = await api.get('/technical/watchlist');
         const payload = res.data?.data ?? res.data;
         return Array.isArray(payload) ? payload : [];
     } catch (err) {
