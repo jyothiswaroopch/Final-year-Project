@@ -1593,7 +1593,7 @@ export function SettingsPage() {
                                         localStorage.setItem('profileImage', selectedImage);
                                     }
 
-                                    window.dispatchEvent(new Event('profile_updated'));
+                                    window.dispatchEvent(new CustomEvent('radar:profile-updated', { detail: updatedUser }));
                                     setStatus('Changes Saved!');
                                     setTimeout(() => setStatus(''), 3000);
                                 }
