@@ -410,13 +410,23 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
             const resultsData = res?.data?.results || res?.data || res?.results || [];
             
             if (Array.isArray(resultsData) && resultsData.length > 0) {
+                const formatMcap = (val) => {
+                    if (!val || isNaN(val)) return 'N/A';
+                    const num = Number(val);
+                    if (num >= 1e12) return `${(num / 1e12).toFixed(2)}T`;
+                    if (num >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
+                    if (num >= 1e7) return `${(num / 1e7).toFixed(2)}Cr`;
+                    if (num >= 1e6) return `${(num / 1e6).toFixed(2)}M`;
+                    return num.toLocaleString('en-IN');
+                };
+
                 const mappedResults = resultsData.map(stock => ({
                     id: stock.symbol,
-                    price: `₹${stock.price}`,
-                    change: `${stock.change > 0 ? '+' : ''}${stock.change}%`,
-                    isPositive: stock.change >= 0,
+                    price: stock.price ? `₹${Number(stock.price).toLocaleString('en-IN')}` : 'N/A',
+                    change: stock.changePercent != null ? `${stock.changePercent > 0 ? '+' : ''}${stock.changePercent}%` : 'N/A',
+                    isPositive: stock.changePercent >= 0,
                     sector: stock.sector || 'Unknown',
-                    mcap: stock.marketCap || 'N/A',
+                    mcap: formatMcap(stock.marketCap),
                     pe: stock.pe || 'N/A',
                     roe: stock.roe || 'N/A',
                     yield: stock.dividendYield || 'N/A',
