@@ -119,7 +119,7 @@ export const useCandles = (symbol, interval = '1D') => {
     try {
       const { daysBack, interval: yInterval } = mapIntervalToParams(interval);
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      const res = await api.get(`/chart/${encodeURIComponent(symbol)}`, {
+      const res = await api.get(`/stocks/${encodeURIComponent(symbol)}/chart`, {
         params: { daysBack, interval: yInterval },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         timeout: 12000,
