@@ -8,7 +8,7 @@ const FundamentalsSnapshot       = require('../models/FundamentalsSnapshot');
 const logger                     = require('../config/logger');
 
 const DEFAULT_LIMIT = 50;
-const MAX_LIMIT     = 200;
+const MAX_LIMIT     = 3000;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const normalizeSymbol  = (v) => String(v || '').trim().toUpperCase();

@@ -41,7 +41,7 @@ const AdminDashboard = lazy(() => import('./components/AdminDashboard'));
 const RealtimeDemoPage = lazy(() => import('./pages/RealtimeDemoPage'));
 const SpecShowcasePage = lazy(() => import('./pages/SpecShowcase'));
 const Onboarding = lazy(() => import('./pages/Onboarding'));
-const InvestorStockPage = lazy(() => import('./pages/InvestorStockPageOld'));
+// const InvestorStockPageOld = lazy(() => import('./pages/InvestorStockPageOld'));
 const MarketResearchDashboard = lazy(() => import('./pages/MarketResearchDashboard'));
 const ScreenerPage = lazy(() => import('./pages/ScreenerPage'));
 const WatchlistDashboard = lazy(() => import('./pages/WatchlistDashboard'));
@@ -183,7 +183,7 @@ function App() {
               <Route path="/trader/stock/:symbol" element={<TraderStockPage />} />
               <Route path="/trade/:symbol" element={<TradeTerminalPage />} />
               <Route path="/chart/:symbol" element={<MinimalChartPage />} />
-              <Route path="/investor-stock/:symbol" element={<InvestorStockPage />} />
+              <Route path="/investor-stock/:symbol" element={<InvestorAdvancedCharts />} />
               <Route path="/asset/:symbol" element={<AssetAliasRoute />} />
 
               {/* Persona Dashboards */}

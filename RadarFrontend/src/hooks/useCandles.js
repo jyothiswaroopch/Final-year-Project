@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios';
+import api from '../api/api';
 
 // Helper to normalize any date input to yyyy-mm-dd
 const parseDateToYYYYMMDD = (dateStr) => {
@@ -119,7 +119,7 @@ export const useCandles = (symbol, interval = '1D') => {
     try {
       const { daysBack, interval: yInterval } = mapIntervalToParams(interval);
       const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      const res = await axios.get(`/api/chart/${encodeURIComponent(symbol)}`, {
+      const res = await api.get(`/chart/${encodeURIComponent(symbol)}`, {
         params: { daysBack, interval: yInterval },
         headers: token ? { Authorization: `Bearer ${token}` } : {},
         timeout: 12000,

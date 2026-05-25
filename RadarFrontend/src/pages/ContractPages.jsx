@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useRef } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import api from '../api/api';
 import Header from '../components/common/Header';
@@ -1174,7 +1174,7 @@ export function SettingsPage() {
     const openSessionsModal = () => { setIsSessionsModalOpen(true); fetchSessions(); };
 
     // Also fetch on mount so the summary card shows the real count
-    React.useEffect(() => { fetchSessions(); }, []);
+    useEffect(() => { fetchSessions(); }, []);
 
 
     const [preferences, setPreferences] = useState({
@@ -1213,7 +1213,7 @@ export function SettingsPage() {
         localStorage.setItem('investorTickerCustom', JSON.stringify(symbols));
         window.dispatchEvent(new Event('ticker_tape_updated'));
         try {
-            await api.patch('/user/settings', { ticker: { customSymbols: symbols } });
+            await api.post('/user/settings', { ticker: { customSymbols: symbols } });
         } catch (err) {
             console.error('Failed to save ticker settings to DB:', err);
         }

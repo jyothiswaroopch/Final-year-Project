@@ -2167,7 +2167,7 @@ const NewsFlash = ({ variant = "full" }) => {
       if (!silent) {
         setIsLoading(true);
       }
-      const response = await fetchMarketNews({ region });
+      const response = await fetchMarketNews({ region, assetClass: 'stocks' });
       setNewsItems(
         Array.isArray(response) && response.length
           ? response

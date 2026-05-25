@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams, useNavigate, useParams } from 'react-router-dom';
 import {
   ChevronLeft, Settings, Maximize2, Minimize2,
   Layout as LayoutIcon, ArrowLeftRight, Star, Newspaper,
@@ -561,8 +561,8 @@ const AdvancedChartsInner = ({ initialSymbol }) => {
 
 // ── Page export wrapped in Provider ───────────────────────────────────────────
 const InvestorAdvancedCharts = () => {
-  const [searchParams] = useSearchParams();
-  const symbol = searchParams.get('symbol') || 'RELIANCE';
+  const { symbol: pathSymbol } = useParams();
+  const symbol = pathSymbol || searchParams.get('symbol') || 'RELIANCE';
 
   return (
     <ChartProvider initialSymbol={symbol}>
