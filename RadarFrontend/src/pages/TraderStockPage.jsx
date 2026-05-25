@@ -40,6 +40,7 @@ import { useRealtimePrice } from '../hooks/useRealtimePrice';
 
 // Chart components
 import TradingChart from '../components/charts/TradingChart';
+import PremiumGate from '../components/common/PremiumGate';
 import './TraderDashboard.css';
 
 // Modular Sections
@@ -762,15 +763,17 @@ export default function TraderStockPage({ overrideSymbol, onBack }) {
           {/* Main Hero Chart (Dominant height, full remaining width) */}
           <div className="w-full flex-shrink-0 p-4 border-b border-white/[0.06] bg-[#04060a]">
             <div className="min-h-[58vh] w-full">
-              <TradingChart
-                symbol={symbol}
-                onSymbolChange={(sym) => navigate(`/trader/stock/${sym}`)}
-                isInWatchlist={isInWatchlist}
-                onWatchlistToggle={handleWatchlistToggle}
-                watchlistSymbols={watchlistRows.map(r => r.symbol)}
-                compareSymbol={compareSymbol}
-                onCompareSelect={setCompareSymbol}
-              />
+              <PremiumGate title="Advanced Trading Charts" description="Upgrade to Radar Pro to unlock real-time charting, multiple timeframes, and 100+ technical indicators." isDark={true} className="h-full w-full">
+                <TradingChart
+                  symbol={symbol}
+                  onSymbolChange={(sym) => navigate(`/trader/stock/${sym}`)}
+                  isInWatchlist={isInWatchlist}
+                  onWatchlistToggle={handleWatchlistToggle}
+                  watchlistSymbols={watchlistRows.map(r => r.symbol)}
+                  compareSymbol={compareSymbol}
+                  onCompareSelect={setCompareSymbol}
+                />
+              </PremiumGate>
             </div>
           </div>
 
