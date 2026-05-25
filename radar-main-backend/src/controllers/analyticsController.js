@@ -1,8 +1,20 @@
 const { fetchStockData } = require('../services/stockService');
+const FundamentalsSnapshot = require('../models/FundamentalsSnapshot');
 
 const getPreMarketPulse = async (req, res) => {
     try {
-        const stocks = await fetchStockData();
+        const dbDocs = await FundamentalsSnapshot.find({}, { symbol: 1 }).lean();
+        const symbolList = dbDocs.length > 0 ? dbDocs.map(d => `${d.symbol}.NS`) : null;
+        
+        let stocks = await fetchStockData(symbolList);
+
+        // Ensure changePercent is populated (e.g., if fallback data was returned)
+        stocks = stocks.map(s => {
+            if (s.changePercent == null && s.price && s.change) {
+                s.changePercent = (s.change / (s.price - s.change)) * 100;
+            }
+            return s;
+        });
 
         const sortedByChangeDesc = [...stocks].sort((a, b) => Number(b.changePercent || 0) - Number(a.changePercent || 0));
         const sortedByChangeAsc = [...stocks].sort((a, b) => Number(a.changePercent || 0) - Number(b.changePercent || 0));
