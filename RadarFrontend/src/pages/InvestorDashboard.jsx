@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
+
 import { useNavigate, Link, useParams } from "react-router-dom";
 import YourInvestments from '../components/investor/YourInvestments';
 import MostBoughtStocks from '../components/investor/MostBoughtStocks';

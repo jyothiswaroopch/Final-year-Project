@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useMemo, useState, useCallback } from "react";
+
 import { motion } from "framer-motion";
 import { Activity, TrendingUp } from "lucide-react";
 import SectionPanel from "../components/research/SectionPanel";

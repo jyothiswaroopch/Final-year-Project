@@ -1,4 +1,5 @@
-import { useState, useEffect, useContext, useCallback } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
+
 import { useNavigate } from "react-router-dom";
 import { Activity, Maximize2, TrendingDown, TrendingUp, Search, Newspaper, Globe, Zap, ExternalLink, Monitor } from "lucide-react";
 import { motion } from "framer-motion";
