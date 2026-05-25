@@ -4,25 +4,27 @@ const getPreMarketPulse = async (req, res) => {
     try {
         const stocks = await fetchStockData();
 
-        const sortedByChangeDesc = [...stocks].sort((a, b) => Number(b.change || 0) - Number(a.change || 0));
-        const sortedByChangeAsc = [...stocks].sort((a, b) => Number(a.change || 0) - Number(b.change || 0));
+        const sortedByChangeDesc = [...stocks].sort((a, b) => Number(b.changePercent || 0) - Number(a.changePercent || 0));
+        const sortedByChangeAsc = [...stocks].sort((a, b) => Number(a.changePercent || 0) - Number(b.changePercent || 0));
 
         const gapUp = sortedByChangeDesc.slice(0, 5).map((s) => ({
             symbol: s.symbol,
-            change: `${Number(s.change || 0) >= 0 ? '+' : ''}${Number(s.change || 0).toFixed(2)}%`,
+            change: `${Number(s.changePercent || 0) >= 0 ? '+' : ''}${Number(s.changePercent || 0).toFixed(2)}%`,
             price: s.price,
         }));
         const gapDown = sortedByChangeAsc.slice(0, 5).map((s) => ({
             symbol: s.symbol,
-            change: `${Number(s.change || 0).toFixed(2)}%`,
+            change: `${Number(s.changePercent || 0).toFixed(2)}%`,
             price: s.price,
         }));
 
-        const volumeShockers = sortedByChangeDesc.slice(0, 6).map((s, index) => ({
+        // Sort by volume for volume shockers
+        const sortedByVolumeDesc = [...stocks].sort((a, b) => Number(b.volume || 0) - Number(a.volume || 0));
+        const volumeShockers = sortedByVolumeDesc.slice(0, 6).map((s) => ({
             symbol: s.symbol,
-            volume: `${15 + index}M`,
-            avgVolume: `${9 + index}M`,
-            shock: `${(1.3 + (index * 0.1)).toFixed(1)}x`,
+            volume: s.volume ? `${(s.volume / 1000000).toFixed(2)}M` : 'N/A',
+            avgVolume: 'N/A', // We don't have avg volume in base fetch, so we leave it as N/A or compute it
+            shock: s.volume ? 'High Vol' : '-',
         }));
 
         res.json({
