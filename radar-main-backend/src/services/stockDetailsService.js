@@ -44,22 +44,22 @@ const getStockDetails = async (symbol) => {
         'defaultKeyStatistics',
         'price',
         'summaryDetail',
-        'majorHoldersBreakdown'
+        'majorHoldersBreakdown',
+        'incomeStatementHistory',
+        'incomeStatementHistoryQuarterly'
       ]
     }
   );
-  console.log(summary.assetProfile);
+  const quarterlyTS = summary?.incomeStatementHistoryQuarterly?.incomeStatementHistory || [];
+  const yearlyTS = summary?.incomeStatementHistory?.incomeStatementHistory || [];
 
-  const period1 = new Date(Date.now() - 5 * 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  const [quarterlyTS, yearlyTS] = await Promise.all([
-      yahooFinance.fundamentalsTimeSeries(yahooSymbol, { period1, module: 'financials', type: 'quarterly' }).catch(() => []),
-      yahooFinance.fundamentalsTimeSeries(yahooSymbol, { period1, module: 'financials', type: 'annual' }).catch(() => [])
-  ]);
+  // Sort them so oldest is first, newest is last (since Yahoo usually returns newest first)
+  const sortOldestFirst = (arr) => [...arr].sort((a, b) => new Date(a.endDate) - new Date(b.endDate));
 
   const formatTSData = (history, isQuarterly) => {
     if (!history || !history.length) return [];
-    return history.slice(-5).map(item => {
-        const date = new Date(item.date);
+    return sortOldestFirst(history).slice(-5).map(item => {
+        const date = new Date(item.endDate);
         let periodLabel = '';
         if (isQuarterly) {
             periodLabel = `Q${Math.floor(date.getMonth() / 3) + 1} '${date.getFullYear().toString().slice(-2)}`;
