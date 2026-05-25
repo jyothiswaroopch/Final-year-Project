@@ -562,6 +562,7 @@ const AdvancedChartsInner = ({ initialSymbol }) => {
 // ── Page export wrapped in Provider ───────────────────────────────────────────
 const InvestorAdvancedCharts = () => {
   const { symbol: pathSymbol } = useParams();
+  const [searchParams] = useSearchParams();
   const symbol = pathSymbol || searchParams.get('symbol') || 'RELIANCE';
 
   return (
