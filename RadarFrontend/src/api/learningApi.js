@@ -26,10 +26,19 @@ export const fetchCourse = async (id) => {
     }
 };
 
+export const fetchProgress = async () => {
+    try {
+        const res = await api.get('/learning/progress');
+        return res.data?.data || {};
+    } catch (err) {
+        console.error('Failed to fetch learning progress:', err);
+        return {};
+    }
+};
+
 export const saveProgress = async (courseId, chapterId, completed = true) => {
     try {
-        const userId = localStorage.getItem('userId') || 'anonymous';
-        await api.post('/learning/progress', { courseId, chapterId, completed, userId });
+        await api.post('/learning/progress', { courseId, chapterId, completed });
     } catch (err) {
         // silently fail — progress is also tracked locally
     }
@@ -37,8 +46,7 @@ export const saveProgress = async (courseId, chapterId, completed = true) => {
 
 export const submitQuiz = async (courseId, answers) => {
     try {
-        const userId = localStorage.getItem('userId') || 'anonymous';
-        const res = await api.post('/learning/quiz', { courseId, answers, userId });
+        const res = await api.post('/learning/quiz', { courseId, answers });
         return res.data?.data ?? null;
     } catch (err) {
         console.error('Failed to submit quiz:', err);

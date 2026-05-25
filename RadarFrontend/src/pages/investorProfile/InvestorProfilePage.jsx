@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, BookOpen, Calendar, Camera, Edit2, Hash, Save, UserRound, X, Zap, TrendingUp } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { fetchCourses, getProgressKey } from '../../api/learningApi';
+import { fetchCourses, fetchProgress, getProgressKey } from '../../api/learningApi';
 import { fetchUserProfile, updateUserProfile } from '../../api/userApi';
 import api from '../../api/api';
 
@@ -55,10 +55,11 @@ export default function InvestorProfilePage({ onBack }) {
     setLoading(true);
     setError('');
     try {
-      const [profileRes, courseRes, watchlistRes] = await Promise.all([
+      const [profileRes, courseRes, watchlistRes, progressRes] = await Promise.all([
         fetchUserProfile(),
         fetchCourses('investor').catch(() => []),
         api.get('/watchlist').catch(() => ({ data: [] })),
+        fetchProgress().catch(() => ({})),
       ]);
 
       const profileData = unwrap(profileRes, {});
@@ -76,13 +77,15 @@ export default function InvestorProfilePage({ onBack }) {
       setWatchlist(items.slice(0, 5));
 
       // All courses with progress from localStorage
+      const serverProgress = progressRes || {};
       const allCourses = Array.isArray(courseRes) ? courseRes : [];
       const coursesWithProgress = allCourses.map(c => {
         const courseId = c.id || c._id;
-        const stored = JSON.parse(
+        const storedLocal = JSON.parse(
           localStorage.getItem(getProgressKey(courseId, 'INVESTOR')) ||
           localStorage.getItem(getProgressKey(courseId, '')) || '{}'
         );
+        const stored = serverProgress[courseId] || storedLocal;
         const totalChapters = c.chapters?.length || 0;
         const completedChapters = Object.values(stored.chapters || {}).filter(Boolean).length;
         const pct = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0;

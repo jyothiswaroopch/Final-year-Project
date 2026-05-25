@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, BookOpen, Calendar, Camera, Edit2, Hash, Save, UserRound, X, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { fetchCourses, getProgressKey } from '../../api/learningApi';
+import { fetchCourses, fetchProgress, getProgressKey } from '../../api/learningApi';
 import { fetchUserProfile, updateUserProfile } from '../../api/userApi';
 import { fetchWatchlistLiveData } from '../../api/watchlistApi';
 import api from '../../api/api';
@@ -67,13 +67,14 @@ const TraderProfilePage = ({ embedded = false } = {}) => {
     setAnalyticsLoading(true);
     setError('');
     try {
-      const [profileRes, watchlistRes, courseRes, scanRes, breakoutRes, signalsRes] = await Promise.all([
+      const [profileRes, watchlistRes, courseRes, scanRes, breakoutRes, signalsRes, progressRes] = await Promise.all([
         fetchUserProfile(),
         fetchWatchlistLiveData('trader').catch(() => []),
         fetchCourses('trader').catch(() => []),
         api.get('/research/watchlist-scans').catch(() => ({ data: [] })),
         api.get('/technical/alerts').catch(() => ({ data: [] })),
         api.get('/technical/signals').catch(() => ({ data: [] })),
+        fetchProgress().catch(() => ({})),
       ]);
 
       const profileData = unwrap(profileRes, {});
@@ -105,11 +106,12 @@ const TraderProfilePage = ({ embedded = false } = {}) => {
 
       const allCourses = Array.isArray(courseRes) ? courseRes : [];
 
-      // Read localStorage progress for each course (same key format as LearningAcademy)
+      const serverProgress = progressRes || {};
       const coursesWithProgress = allCourses.map(c => {
         const courseId = c.id || c._id;
-        const stored = JSON.parse(localStorage.getItem(getProgressKey(courseId, 'TRADER')) ||
+        const storedLocal = JSON.parse(localStorage.getItem(getProgressKey(courseId, 'TRADER')) ||
                        localStorage.getItem(getProgressKey(courseId, '')) || '{}');
+        const stored = serverProgress[courseId] || storedLocal;
         const totalChapters = c.chapters?.length || 0;
         const completedChapters = Object.values(stored.chapters || {}).filter(Boolean).length;
         const pct = totalChapters > 0 ? Math.round((completedChapters / totalChapters) * 100) : 0;

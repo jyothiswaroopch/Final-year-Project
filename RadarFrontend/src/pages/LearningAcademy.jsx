@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, BookMarked, PlayCircle, Award, ChevronRight, ChevronLeft, CheckCircle, Circle, Zap, Clock, BarChart2, ArrowLeft, X, User } from 'lucide-react';
-import { fetchCourses, saveProgress, submitQuiz } from '../api/learningApi';
+import { fetchCourses, fetchProgress, saveProgress, submitQuiz } from '../api/learningApi';
 import { CourseCard, ICON_MAP, COLOR_MAP, LIGHT_COLOR_MAP } from '../components/learning/CourseCard';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -189,6 +189,20 @@ function CourseReader({ course, isTrader, onBack, mode }) {
   const [showQuiz, setShowQuiz] = useState(false);
   const [progress, setProgress] = useState(() => loadLocalProgress(course.id, mode));
 
+  useEffect(() => {
+    let active = true;
+    const initProgress = async () => {
+      const { fetchProgress } = await import('../api/learningApi');
+      const serverProgress = await fetchProgress();
+      if (active && serverProgress && serverProgress[course.id]) {
+        setProgress(serverProgress[course.id]);
+        saveLocalProgress(course.id, serverProgress[course.id], mode);
+      }
+    };
+    initProgress();
+    return () => { active = false; };
+  }, [course.id, mode]);
+
   const chapter = course.chapters?.[chapterIdx];
   const totalChapters = course.chapters?.length || 0;
 
@@ -342,16 +356,33 @@ export default function LearningAcademy() {
   useEffect(() => {
     let alive = true;
     setLoading(true);
-    fetchCourses(audience).then(data => {
+    
+    Promise.all([
+      fetchCourses(audience),
+      fetchProgress()
+    ]).then(([coursesData, serverProgress]) => {
       if (!alive) return;
-      setCourses(data);
+      setCourses(coursesData);
+      
       const pm = {};
-      data.forEach(c => { pm[c.id] = loadLocalProgress(c.id, mode); });
+      coursesData.forEach(c => {
+        if (serverProgress && serverProgress[c.id]) {
+          saveLocalProgress(c.id, serverProgress[c.id], mode);
+          pm[c.id] = serverProgress[c.id];
+        } else {
+          pm[c.id] = loadLocalProgress(c.id, mode);
+        }
+      });
       setProgressMap(pm);
       setLoading(false);
+    }).catch(err => {
+      if (!alive) return;
+      console.error('Error fetching courses/progress:', err);
+      setLoading(false);
     });
+    
     return () => { alive = false; };
-  }, []);
+  }, [audience, mode]);
 
   // Re-sync progress from localStorage whenever user returns to the course list
   useEffect(() => {

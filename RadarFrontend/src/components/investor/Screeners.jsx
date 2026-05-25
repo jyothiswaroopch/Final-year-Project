@@ -88,10 +88,7 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
     const [showCreateModal, setShowCreateModal] = useState(false);
     const [showSignalModal, setShowSignalModal] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
-    const [results, setResults] = useState(() => {
-        const cached = localStorage.getItem('radar_screener_results');
-        return cached ? JSON.parse(cached) : MOCK_FALLBACK_RESULTS;
-    });
+    const [results, setResults] = useState([]);
     const hasActiveFilters = Object.keys(activeFilters || {}).some(k => 
         activeFilters[k] !== undefined && 
         activeFilters[k] !== null && 

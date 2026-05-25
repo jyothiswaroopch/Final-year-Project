@@ -142,34 +142,99 @@ export const FundamentalsDrawer = ({ symbol, isDark }) => {
 
 // ── Alerts Drawer ──────────────────────────────────────────────────────────────
 export const AlertsDrawer = ({ symbol, isDark }) => {
-  const [alerts, setAlerts] = useState(() => {
-    try { 
-      const parsed = JSON.parse(localStorage.getItem('radar_active_alerts') || '[]'); 
-      return Array.isArray(parsed) ? parsed : [];
-    } catch { return []; }
-  });
+  const [alerts, setAlerts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [type, setType]     = useState('price');
   const [value, setValue]   = useState('');
   const [delivery, setDel]  = useState('in-app');
+  const [error, setError]   = useState(null);
 
   const stockDetails = useStockDetails(symbol);
 
-  const addAlert = () => {
+  // Load alerts from backend on mount
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      setLoading(true);
+      try {
+        const res = await api.get(`/alerts${symbol ? `?symbol=${symbol}` : ''}`);
+        const data = res.data?.data || res.data || [];
+        if (!cancelled) {
+          const arr = Array.isArray(data) ? data : [];
+          setAlerts(arr);
+          // Also sync to localStorage for the watchlist proximity badge
+          localStorage.setItem('radar_active_alerts', JSON.stringify(arr.map(a => ({
+            id: a._id || a.id,
+            symbol: a.symbol,
+            type: a.type || 'price',
+            value: a.targetPrice ?? a.value ?? '',
+            delivery: a.delivery || 'in-app',
+            active: a.isActive !== false,
+          }))));
+          window.dispatchEvent(new Event('radar_alerts_updated'));
+        }
+      } catch {
+        // Fallback to localStorage if not authenticated
+        try {
+          const cached = JSON.parse(localStorage.getItem('radar_active_alerts') || '[]');
+          const filtered = (Array.isArray(cached) ? cached : []).filter(a => !symbol || a?.symbol === symbol);
+          if (!cancelled) setAlerts(filtered);
+        } catch { if (!cancelled) setAlerts([]); }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, [symbol]);
+
+  const addAlert = async () => {
     if (!value.trim()) return;
-    const currentAlerts = Array.isArray(alerts) ? alerts : [];
-    const newAlert = { id: Date.now(), symbol, type, value, delivery, active: true };
-    const nextAlerts = [newAlert, ...currentAlerts];
-    setAlerts(nextAlerts);
-    localStorage.setItem('radar_active_alerts', JSON.stringify(nextAlerts));
-    setValue('');
-    window.dispatchEvent(new Event('radar_alerts_updated'));
+    setSaving(true);
+    setError(null);
+    try {
+      const payload = {
+        symbol,
+        type,
+        delivery,
+        targetPrice: type === 'price' ? Number(value) : undefined,
+        value: type !== 'price' ? value : undefined,
+        isActive: true,
+      };
+      const res = await api.post('/alerts', payload);
+      const newAlert = res.data?.data || res.data;
+      const next = [newAlert, ...alerts];
+      setAlerts(next);
+      localStorage.setItem('radar_active_alerts', JSON.stringify(next.map(a => ({
+        id: a._id || a.id, symbol: a.symbol, type: a.type, value: a.targetPrice ?? a.value ?? '', delivery: a.delivery, active: true,
+      }))));
+      window.dispatchEvent(new Event('radar_alerts_updated'));
+      setValue('');
+    } catch (err) {
+      // Fallback: save to localStorage only
+      const localAlert = { id: Date.now(), symbol, type, value, delivery, active: true };
+      const cached = (() => { try { return JSON.parse(localStorage.getItem('radar_active_alerts') || '[]'); } catch { return []; } })();
+      const next = [localAlert, ...cached];
+      localStorage.setItem('radar_active_alerts', JSON.stringify(next));
+      setAlerts(prev => [localAlert, ...prev]);
+      window.dispatchEvent(new Event('radar_alerts_updated'));
+      setValue('');
+      setError('Saved locally — will sync when online.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const deleteAlert = (id) => {
-    const currentAlerts = Array.isArray(alerts) ? alerts : [];
-    const nextAlerts = currentAlerts.filter(a => a?.id !== id);
-    setAlerts(nextAlerts);
-    localStorage.setItem('radar_active_alerts', JSON.stringify(nextAlerts));
+  const deleteAlert = async (alertId) => {
+    try {
+      await api.delete(`/alerts/${alertId}`);
+    } catch { /* ignore — remove from UI anyway */ }
+    const next = alerts.filter(a => (a._id || a.id) !== alertId);
+    setAlerts(next);
+    localStorage.setItem('radar_active_alerts', JSON.stringify(next.map(a => ({
+      id: a._id || a.id, symbol: a.symbol, type: a.type, value: a.targetPrice ?? a.value ?? '', delivery: a.delivery, active: true,
+    }))));
     window.dispatchEvent(new Event('radar_alerts_updated'));
   };
 
@@ -182,6 +247,8 @@ export const AlertsDrawer = ({ symbol, isDark }) => {
   const sel = `text-[11px] font-medium rounded-xl border outline-none px-3 py-2.5 cursor-pointer ${
     isDark ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-800'
   }`;
+
+  const companyAlerts = Array.isArray(alerts) ? alerts.filter(a => !symbol || (a?.symbol === symbol || a?.symbol === `${symbol}.NS`)) : [];
 
   return (
     <div className="space-y-4">
@@ -211,43 +278,44 @@ export const AlertsDrawer = ({ symbol, isDark }) => {
             <option value="email">Email</option>
             <option value="both">Both</option>
           </select>
+          {error && <p className="text-[10px] text-amber-500 font-medium">{error}</p>}
           <button
             onClick={addAlert}
-            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-[11px] font-black transition-colors"
+            disabled={saving || !value.trim()}
+            className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-[11px] font-black transition-colors"
           >
-            Create Alert
+            {saving ? 'Creating…' : 'Create Alert'}
           </button>
         </div>
       </div>
 
-      {(() => {
-        const companyAlerts = Array.isArray(alerts) ? alerts.filter(a => a?.symbol === symbol) : [];
-        if (companyAlerts.length === 0) return null;
-        
-        return (
-          <div className="space-y-2">
-            <p className={`text-[9px] font-black uppercase tracking-widest px-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Active Alerts for {symbol}</p>
-            {companyAlerts.map(a => (
-              <div key={a?.id || Math.random()} className={`flex items-center justify-between p-3 rounded-xl border group/alert transition-all ${isDark ? 'bg-slate-800/60 border-slate-700/60 hover:border-slate-600' : 'bg-white border-slate-100 hover:border-slate-200'}`}>
-                <div>
-                  <p className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{a?.symbol || 'STOCK'} · {a?.value || 'Alert'}</p>
-                  <p className={`text-[9px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{a?.type || 'price'} · {a?.delivery || 'in-app'}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse group-hover/alert:hidden" />
-                  <button
-                    onClick={() => deleteAlert(a?.id)}
-                    className="hidden group-hover/alert:flex items-center justify-center w-6 h-6 rounded-lg bg-rose-50/80 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
-                    title="Delete Alert"
-                  >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
+      {loading ? (
+        <div className="flex items-center justify-center py-6">
+          <Loader2 className="w-4 h-4 animate-spin text-blue-400" />
+        </div>
+      ) : companyAlerts.length > 0 ? (
+        <div className="space-y-2">
+          <p className={`text-[9px] font-black uppercase tracking-widest px-1 ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Active Alerts for {symbol}</p>
+          {companyAlerts.map(a => (
+            <div key={a?._id || a?.id || Math.random()} className={`flex items-center justify-between p-3 rounded-xl border group/alert transition-all ${isDark ? 'bg-slate-800/60 border-slate-700/60 hover:border-slate-600' : 'bg-white border-slate-100 hover:border-slate-200'}`}>
+              <div>
+                <p className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{a?.symbol} · {a?.targetPrice ? `₹${a.targetPrice}` : a?.value || 'Alert'}</p>
+                <p className={`text-[9px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{a?.type || 'price'} · {a?.delivery || 'in-app'}</p>
               </div>
-            ))}
-          </div>
-        );
-      })()}
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse group-hover/alert:hidden" />
+                <button
+                  onClick={() => deleteAlert(a?._id || a?.id)}
+                  className="hidden group-hover/alert:flex items-center justify-center w-6 h-6 rounded-lg bg-rose-50/80 hover:bg-rose-100 text-rose-600 transition-colors cursor-pointer"
+                  title="Delete Alert"
+                >
+                  <Trash2 size={13} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 };

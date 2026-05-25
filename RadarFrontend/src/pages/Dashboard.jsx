@@ -14,6 +14,7 @@ import {
   HelpCircle,
   LogOut,
   GraduationCap,
+  Bell,
 } from "lucide-react";
 import { updateUserMode } from "../api/userApi";
 import api from "../api/api";
@@ -182,6 +183,7 @@ export default function Dashboard() {
     isLoadingNotifications,
     isMarkingNotifications,
     markAllNotificationsRead,
+    markSingleRead,
   } = useHeaderData();
 
 
@@ -649,6 +651,52 @@ export default function Dashboard() {
                 </div>
 
                 <div className="flex items-center gap-4 pl-4 border-l border-white/10">
+                  <div className="relative" ref={notifRef}>
+                    <button
+                      onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
+                      className="relative w-8 h-8 flex items-center justify-center hover:bg-white/5 rounded-full text-[#9fb4c8] hover:text-white cursor-pointer transition-colors"
+                    >
+                      <Bell size={18} />
+                      {unreadCount > 0 && (
+                        <span className="absolute top-0 right-0 w-3.5 h-3.5 bg-rose-500 rounded-full text-white text-[9px] flex items-center justify-center font-bold">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
+                    </button>
+                    {isNotificationsOpen && (
+                      <div
+                        className="absolute right-0 top-10 w-80 rounded-2xl shadow-xl overflow-hidden z-[9999]"
+                        style={{ background: '#020617', border: '1px solid rgba(34, 211, 238, 0.3)' }}
+                      >
+                        <div className="px-4 py-3 border-b border-[#00f3ff]/10 flex justify-between items-center bg-[#00f3ff]/5">
+                          <h3 className="font-bold text-[11px] uppercase tracking-wider text-[#00f3ff]">Alerts</h3>
+                          <button onClick={markAllNotificationsRead} className="text-[10px] font-bold text-[#8ca3b8] hover:text-[#EAF9FF] transition-colors">Mark all read</button>
+                        </div>
+                        <div className="max-h-80 overflow-y-auto">
+                          {notifications && notifications.length > 0 ? notifications.map((n, i) => (
+                            <div
+                              key={i}
+                              onClick={() => markSingleRead(n._id || n.id)}
+                              className={`px-4 py-3 border-b border-[#00f3ff]/10 cursor-pointer transition-colors hover:bg-[#00f3ff]/10 flex gap-3 ${!n.read ? 'bg-[#00f3ff]/5' : ''}`}
+                            >
+                              <div className={`w-1.5 h-1.5 rounded-full mt-1.5 shrink-0 ${!n.read ? 'bg-[#00f3ff]' : 'bg-transparent'}`} />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[11px] font-black text-[#EAF9FF] truncate leading-snug">{n.title}</p>
+                                <p className="text-[10px] text-[#9fb4c8] line-clamp-2 mt-0.5 leading-normal">{n.message}</p>
+                                <p className="text-[9px] text-[#5d738a] mt-1.5 uppercase font-bold tracking-tight">{formatNotificationTime(n.timestamp || n.createdAt)}</p>
+                              </div>
+                            </div>
+                          )) : (
+                            <div className="p-10 text-center flex flex-col items-center justify-center opacity-60">
+                              <Bell size={24} className="mb-2 text-[#5d738a]" />
+                              <p className="text-[10px] font-bold text-[#5d738a] uppercase tracking-widest">No new alerts</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="profile-wrapper" ref={profileRef}>
                     <div
                       onClick={() => setIsProfileOpen(!isProfileOpen)}

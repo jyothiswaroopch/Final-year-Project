@@ -53,7 +53,7 @@ export const SettingsProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.patch('/user/settings', partial);
+      const res = await api.post('/user/settings', partial);
       const data = res.data?.data || res.data;
       setSettings(data);
       // Notify subscribers of updated settings
