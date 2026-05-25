@@ -46,7 +46,7 @@ const inRange = (value, min, max, { excludeOnMissing = false } = {}) => {
  * Priority: BREAKOUT > SQUEEZE > PULLBACK > REVERSAL > MOMENTUM
  */
 const classifySignal = (row) => {
-    const { rsi, score, changePercent, bias, volumeRatio, ema20, price } = row;
+    const { rsi, score, changePercent, change, bias, volumeRatio, ema20, price } = row;
 
     if (rsi > 60 && changePercent > 1.5 && volumeRatio > 1.5) return 'BREAKOUT';
     if (rsi < 40 && changePercent > 0) return 'REVERSAL';
@@ -290,12 +290,17 @@ const runScreener = async (payload = {}) => {
     const strictLive = payload.strictLive === true;
     const reqTimeframe = filters.timeframe || '1D';
 
-    // ── Step 1: Get price universe from Yahoo (cached in stockService) ────────
-    const stocks = await fetchStockData();
-    const symbolList = (Array.isArray(stocks) ? stocks : []).map(s => s.symbol);
+    // ── Step 1: Bulk-load FundamentalsSnapshot from MongoDB (one query) ───────
+    // We use the DB as the source of truth for the screener universe.
+    const dbDocs = await FundamentalsSnapshot.find({}).lean();
+    const dbCache = new Map();
+    dbDocs.forEach(d => dbCache.set(String(d.symbol).toUpperCase(), d));
+    const symbolList = dbDocs.map(d => `${d.symbol}.NS`);
 
-    // ── Step 2: Bulk-load FundamentalsSnapshot from MongoDB (one query) ───────
-    const dbCache = await loadFundamentalsCache(symbolList);
+    logger.info(`[Screener] Universe from DB: ${symbolList.length} stocks`);
+
+    // ── Step 2: Get live price data for this exact DB universe ───────────────
+    const stocks = await fetchStockData(symbolList);
 
     // ── Step 3: Build enriched rows ───────────────────────────────────────────
     const baseRows = (Array.isArray(stocks) ? stocks : []).map(stock => {
