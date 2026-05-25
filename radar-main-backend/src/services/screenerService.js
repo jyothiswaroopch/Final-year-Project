@@ -179,31 +179,60 @@ const applyBaseFilters = (rows, filters) => rows.filter((row) => {
 });
 
 // ── Attach live technical indicators ─────────────────────────────────────────
-const needsTechnicalData = (filters) => {
-    return true; // Signal classification requires RSI, EMA20, and score even if not explicitly filtered
+const needsTechnicalData = (filters, sortBy) => {
+    return filters.minRsi !== undefined || filters.maxRsi !== undefined ||
+           filters.minScore !== undefined || filters.maxScore !== undefined ||
+           filters.trendType !== undefined || (filters.signals && filters.signals.length > 0) ||
+           sortBy === 'rsi' || sortBy === 'score';
 };
 
 const attachTechnicals = async (rows, strictLive) => {
-    return Promise.all(rows.map(async (row) => {
-        try {
-            const [indicators, scoreResult] = await Promise.all([
-                getTechnicalIndicators('stock', row.displaySymbol, '1D', { strictLive }),
-                getInstrumentScore('stock', row.displaySymbol, { strictLive }),
-            ]);
+    if (rows.length === 0) return [];
+    
+    // Protect against rate limits and timeouts:
+    // If there are too many rows (e.g., Trader Screener requesting 3000), 
+    // skip live technicals and return safe default values.
+    if (rows.length > 200) {
+        logger.warn(`[Screener] Skipping live technicals for ${rows.length} rows to prevent timeout.`);
+        return rows.map(row => ({
+            ...row,
+            rsi: 50,
+            ema20: null,
+            macd: null,
+            score: 60,
+            bias: 'neutral',
+            technicalLive: false
+        }));
+    }
 
-            return {
-                ...row,
-                rsi:   toNumber(indicators?.rsi, 50),
-                ema20: indicators?.ema20 ?? null,
-                macd:  indicators?.macd ?? null,
-                score: toNumber(scoreResult?.score, 60),
-                bias:  scoreResult?.bias || 'neutral',
-                technicalLive: true,
-            };
-        } catch (_) {
-            return { ...row, rsi: 50, score: 60, bias: 'neutral', technicalLive: false };
-        }
-    }));
+    // Process in batches of 25 to avoid overwhelming the provider
+    const results = [];
+    const BATCH_SIZE = 25;
+    for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+        const batch = rows.slice(i, i + BATCH_SIZE);
+        const batchResults = await Promise.all(batch.map(async (row) => {
+            try {
+                const [indicators, scoreResult] = await Promise.all([
+                    getTechnicalIndicators('stock', row.displaySymbol, '1D', { strictLive }),
+                    getInstrumentScore('stock', row.displaySymbol, { strictLive }),
+                ]);
+
+                return {
+                    ...row,
+                    rsi:   toNumber(indicators?.rsi, 50),
+                    ema20: indicators?.ema20 ?? null,
+                    macd:  indicators?.macd ?? null,
+                    score: toNumber(scoreResult?.score, 60),
+                    bias:  scoreResult?.bias || 'neutral',
+                    technicalLive: true,
+                };
+            } catch (_) {
+                return { ...row, rsi: 50, ema20: null, macd: null, score: 60, bias: 'neutral', technicalLive: false };
+            }
+        }));
+        results.push(...batchResults);
+    }
+    return results;
 };
 
 // ── Apply technical filters ───────────────────────────────────────────────────
@@ -282,9 +311,14 @@ const runScreener = async (payload = {}) => {
     logger.info(`[Screener] After base filters: ${filteredBase.length} stocks`);
 
     // ── Step 5: Attach live technicals if RSI/score filters are requested ─────
-    const enrichedRows = needsTechnicalData(filters)
-        ? await attachTechnicals(filteredBase, strictLive)
-        : filteredBase.map(r => ({ ...r, rsi: r.rsi || 50, score: r.score || 60 }));
+    const mustFetchAllTechnicals = needsTechnicalData(filters, sortBy);
+    
+    let enrichedRows;
+    if (mustFetchAllTechnicals) {
+        enrichedRows = await attachTechnicals(filteredBase, strictLive);
+    } else {
+        enrichedRows = filteredBase.map(r => ({ ...r, rsi: r.rsi || 50, score: r.score || 60, bias: 'neutral' }));
+    }
 
     // ── Step 6: Apply technical + signal + trend filters ──────────────────────
     const filteredRows = applyTechnicalFilters(enrichedRows, filters);
@@ -294,8 +328,13 @@ const runScreener = async (payload = {}) => {
     const sorted    = sortRows(filteredRows, sortBy, sortOrder);
     const finalRows = sorted.slice(0, limit);
 
+    // ── Step 7.5: Attach technicals to final rows if we skipped it earlier ───
+    const finalEnrichedRows = mustFetchAllTechnicals 
+        ? finalRows 
+        : await attachTechnicals(finalRows, strictLive);
+
     // ── Step 8: Enrich final rows with sparkline + derived signals ────────────
-    const results = await Promise.all(finalRows.map(async (row) => {
+    const results = await Promise.all(finalEnrichedRows.map(async (row) => {
         // Sparkline (best-effort — don't fail the whole screener if Yahoo errors)
         let sparklineData = null;
         try {

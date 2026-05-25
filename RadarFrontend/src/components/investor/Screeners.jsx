@@ -403,7 +403,7 @@ const Screeners = ({ isHero = false, initialFilters = {} }) => {
                 apiFilters.volumeStatus = activeFilters.volume;
             }
 
-            const payload = { filters: apiFilters };
+            const payload = { filters: apiFilters, limit: 3000 };
             if (activeFilters.preset) payload.preset = activeFilters.preset;
 
             const res = await runScreenerScan(payload);
