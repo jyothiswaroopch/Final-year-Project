@@ -113,7 +113,7 @@ const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID); 
 
 const googleAuth = asyncHandler(async (req, res) => {
-    const { token } = req.body;
+    const { token, isSignup } = req.body;
 
     try {
         const ticket = await client.verifyIdToken({
@@ -143,6 +143,10 @@ const googleAuth = asyncHandler(async (req, res) => {
                 picture
             });
         } else {
+            if (isSignup === false) {
+                return res.status(404).json({ error: 'Account not found. Please sign up first.' });
+            }
+
             const randomPassword = crypto.randomBytes(16).toString('hex');
             user = await User.create({
                 username: name,
@@ -159,7 +163,8 @@ const googleAuth = asyncHandler(async (req, res) => {
                 authProvider: user.authProvider,
                 preferredMode: user.preferredMode,
                 token: jwtToken,
-                picture
+                picture,
+                isNewUser: true
             });
         }
     } catch (error) {

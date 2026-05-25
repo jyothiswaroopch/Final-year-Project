@@ -1424,14 +1424,14 @@ export function SettingsPage() {
                                 <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest">Password Management</h3>
                                 <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 flex justify-between items-center">
                                     <div>
-                                        <p className="text-[10px] text-slate-400 font-black uppercase mb-1">Current Password</p>
-                                        <p className="text-sm font-bold text-slate-800 tracking-tighter">••••••••••••</p>
+                                        <p className="text-[10px] text-slate-400 font-black uppercase mb-1">{isGoogleUser ? 'Login Method' : 'Current Password'}</p>
+                                        <p className="text-sm font-bold text-slate-800 tracking-tighter">{isGoogleUser ? 'Google Account' : '••••••••••••'}</p>
                                     </div>
                                     <button 
                                         onClick={() => setIsPasswordModalOpen(true)}
                                         className="text-[10px] font-black text-blue-600 hover:underline"
                                     >
-                                        Change Password
+                                        {isGoogleUser ? 'Create Password' : 'Change Password'}
                                     </button>
                                 </div>
                                 <p className="text-[11px] text-slate-400 font-bold leading-relaxed px-1">
