@@ -1,5 +1,5 @@
-import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
+import PremiumGate from '../../common/PremiumGate';
 
 const generateMockDepth = () => {
     const generateLevel = (base, offset) => Array.from({ length: 8 }, (_, i) => ({
@@ -40,62 +40,64 @@ export default function OrderFlow() {
     };
 
     return (
-        <div className="alpha-bento-card h-full flex flex-col area-depth">
-            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                <h4 className="terminal-label">Market Depth</h4>
-                <div className="flex gap-1">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse"></div>
-                    <span className="text-[9px] font-bold text-slate-500">L2 LIVE</span>
+        <PremiumGate title="Level 2 Market Depth" description="Upgrade to Radar Pro to unlock live L2 order book data and volume flow analytics." isDark={true} className="h-full">
+            <div className="alpha-bento-card h-full flex flex-col area-depth">
+                <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                    <h4 className="terminal-label">Market Depth</h4>
+                    <div className="flex gap-1">
+                        <div className="w-1.5 h-1.5 rounded-full bg-[#10b981] animate-pulse"></div>
+                        <span className="text-[9px] font-bold text-slate-500">L2 LIVE</span>
+                    </div>
+                </div>
+
+                <div className="flex-1 overflow-hidden flex flex-col">
+                    {}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col-reverse">
+                        {asks.map((item, i) => (
+                            <motion.div 
+                                key={`ask-${i}`} 
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                            >
+                                {renderLevel(item, 'ask')}
+                            </motion.div>
+                        ))}
+                    </div>
+
+                    {}
+                    <div className="py-2.5 bg-white/[0.05] border-y border-white/10 flex flex-col items-center">
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Spread: 0.05 (0.002%)</span>
+                        <span className="text-sm font-black text-white">2,870.15</span>
+                    </div>
+
+                    {}
+                    <div className="flex-1 overflow-y-auto custom-scrollbar">
+                        {bids.map((item, i) => (
+                            <motion.div 
+                                key={`bid-${i}`}
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: i * 0.05 }}
+                            >
+                                {renderLevel(item, 'bid')}
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+
+                {}
+                <div className="p-3 bg-[#0f172a]/40 border-t border-white/10 flex justify-between">
+                    <div className="flex flex-col">
+                        <span className="text-[9px] text-slate-500 font-bold uppercase">Buy Vol</span>
+                        <span className="text-xs font-bold text-emerald-400">58%</span>
+                    </div>
+                    <div className="flex flex-col text-right">
+                        <span className="text-[9px] text-slate-500 font-bold uppercase">Sell Vol</span>
+                        <span className="text-xs font-bold text-rose-400">42%</span>
+                    </div>
                 </div>
             </div>
-
-            <div className="flex-1 overflow-hidden flex flex-col">
-                {}
-                <div className="flex-1 overflow-y-auto custom-scrollbar flex flex-col-reverse">
-                    {asks.map((item, i) => (
-                        <motion.div 
-                            key={`ask-${i}`} 
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.05 }}
-                        >
-                            {renderLevel(item, 'ask')}
-                        </motion.div>
-                    ))}
-                </div>
-
-                {}
-                <div className="py-2.5 bg-white/[0.05] border-y border-white/10 flex flex-col items-center">
-                    <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest">Spread: 0.05 (0.002%)</span>
-                    <span className="text-sm font-black text-white">2,870.15</span>
-                </div>
-
-                {}
-                <div className="flex-1 overflow-y-auto custom-scrollbar">
-                    {bids.map((item, i) => (
-                        <motion.div 
-                            key={`bid-${i}`}
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: i * 0.05 }}
-                        >
-                            {renderLevel(item, 'bid')}
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-
-            {}
-            <div className="p-3 bg-[#0f172a]/40 border-t border-white/10 flex justify-between">
-                <div className="flex flex-col">
-                    <span className="text-[9px] text-slate-500 font-bold uppercase">Buy Vol</span>
-                    <span className="text-xs font-bold text-emerald-400">58%</span>
-                </div>
-                <div className="flex flex-col text-right">
-                    <span className="text-[9px] text-slate-500 font-bold uppercase">Sell Vol</span>
-                    <span className="text-xs font-bold text-rose-400">42%</span>
-                </div>
-            </div>
-        </div>
+        </PremiumGate>
     );
 }

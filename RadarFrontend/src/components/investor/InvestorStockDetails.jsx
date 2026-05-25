@@ -22,8 +22,10 @@ import {
   Zap,
   HelpCircle,
   Search,
-  Building2
+  Building2,
+  ArrowRight
 } from 'lucide-react';
+import PremiumGate from '../common/PremiumGate';
 import { 
   LineChart, 
   Line, 
@@ -867,47 +869,49 @@ const InvestorStockPage = () => {
 
                 <div className="radar-row-flex">
                   <div className="radar-card financial-performance-card flex-grow-main overflow-hidden">
-                    <div className="rc-header">
-                      <div className="rc-header-left">
-                        <BarChart3 className="rc-icon" />
-                        <div>
-                          <h3>Financial Performance</h3>
-                          {financialData?.source && financialData.source !== 'live' && (
-                            <span className="text-[9px] font-bold text-slate-400 block uppercase">
-                              {financialData.source === 'cached' ? 'Updated recently' : 'Showing last available data'}
-                            </span>
-                          )}
+                    <PremiumGate title="Financial Performance" description="Upgrade to Radar Pro to view detailed quarterly and annual statements." isDark={false} className="h-full">
+                      <div className="rc-header">
+                        <div className="rc-header-left">
+                          <BarChart3 className="rc-icon" />
+                          <div>
+                            <h3>Financial Performance</h3>
+                            {financialData?.source && financialData.source !== 'live' && (
+                              <span className="text-[9px] font-bold text-slate-400 block uppercase">
+                                {financialData.source === 'cached' ? 'Updated recently' : 'Showing last available data'}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                        <div className="b-tabs">
+                          {['Revenue', 'Profit', 'Share'].map(t => (
+                            <button key={t} onClick={() => setFinTab(t === 'Share' ? 'Shareholding' : t)} className={finTab.startsWith(t) ? 'active' : ''}>{t}</button>
+                          ))}
                         </div>
                       </div>
-                      <div className="b-tabs">
-                        {['Revenue', 'Profit', 'Share'].map(t => (
-                          <button key={t} onClick={() => setFinTab(t === 'Share' ? 'Shareholding' : t)} className={finTab.startsWith(t) ? 'active' : ''}>{t}</button>
-                        ))}
+                      <div className="rc-content">
+                        {isLoadingMetrics ? (
+                          <div className="metric-skeleton-chart animate-pulse bg-slate-100/50 rounded-2xl h-[220px] w-full" />
+                        ) : errorMetrics ? (
+                          <div className="h-[220px] flex items-center justify-center text-xs text-slate-400 font-bold">{errorMetrics}</div>
+                        ) : (
+                          <div className="b-canvas" style={{ height: '220px', marginTop: '20px' }}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <BarChart data={getMetricData()}>
+                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} dy={10} />
+                                <Tooltip cursor={{fill: '#f8fafc', radius: 4}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 15px rgba(0,0,0,0.05)' }} />
+                                <Bar 
+                                  name={finTab === 'Shareholding' ? 'Ownership %' : `${finTab} (₹ Cr)`} 
+                                  dataKey="value" 
+                                  fill={finTab === 'Profit' ? '#10b981' : '#3b82f6'} 
+                                  radius={[6, 6, 0, 0]} 
+                                  barSize={finTab === 'Shareholding' ? 48 : 32} 
+                                />
+                              </BarChart>
+                            </ResponsiveContainer>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                    <div className="rc-content">
-                      {isLoadingMetrics ? (
-                        <div className="metric-skeleton-chart animate-pulse bg-slate-100/50 rounded-2xl h-[220px] w-full" />
-                      ) : errorMetrics ? (
-                        <div className="h-[220px] flex items-center justify-center text-xs text-slate-400 font-bold">{errorMetrics}</div>
-                      ) : (
-                        <div className="b-canvas" style={{ height: '220px', marginTop: '20px' }}>
-                          <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={getMetricData()}>
-                              <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#94a3b8' }} dy={10} />
-                              <Tooltip cursor={{fill: '#f8fafc', radius: 4}} contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 8px 15px rgba(0,0,0,0.05)' }} />
-                              <Bar 
-                                name={finTab === 'Shareholding' ? 'Ownership %' : `${finTab} (₹ Cr)`} 
-                                dataKey="value" 
-                                fill={finTab === 'Profit' ? '#10b981' : '#3b82f6'} 
-                                radius={[6, 6, 0, 0]} 
-                                barSize={finTab === 'Shareholding' ? 48 : 32} 
-                              />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        </div>
-                      )}
-                    </div>
+                    </PremiumGate>
                   </div>
 
                   <div className="radar-card news-impact-card flex-grow-side">

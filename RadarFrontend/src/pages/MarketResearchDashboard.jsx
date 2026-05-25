@@ -12,6 +12,7 @@ import SearchBar from "../components/research/SearchBar";
 import ActionPanel from "../components/research/ActionPanel";
 import api from "../api/api";
 import { useMarketStatus } from "../hooks/useMarketStatus";
+import PremiumGate from "../components/common/PremiumGate";
 
 const TABS = ["Market Opportunities", "Momentum", "Breakout", "Pullback", "Fakeout"];
 const SECTORS = ["All", "IT", "Banking", "Auto", "Pharma", "FMCG", "Energy"];
@@ -401,37 +402,39 @@ const MarketResearchDashboard = () => {
               </SectionPanel>
             </div>
 
-            <div className="grid gap-4 xl:grid-cols-[1fr_1.3fr]">
-              <SectionPanel title="Top Momentum" subtitle="Stocks showing strong RSI momentum" accent="cyan">
-                <ul className="space-y-2 text-sm text-slate-200">
-                  {[...baseStocks].sort((a, b) => b.rsi - a.rsi).slice(0, 5).map((s) => (
-                    <li key={s.id} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 flex justify-between">
-                      <span className="font-semibold text-white">{s.symbol}</span>
-                      <span className="text-cyan-300">RSI {Number(s.rsi).toFixed(0)}</span>
-                    </li>
-                  ))}
-                  {baseStocks.length === 0 && <li className="text-slate-500 text-xs">Loading...</li>}
-                </ul>
-              </SectionPanel>
+            <PremiumGate title="Pro Market Intelligence" description="Upgrade to Radar Pro to access real-time momentum scores and live algorithmic signal feeds." isDark={true}>
+              <div className="grid gap-4 xl:grid-cols-[1fr_1.3fr]">
+                <SectionPanel title="Top Momentum" subtitle="Stocks showing strong RSI momentum" accent="cyan">
+                  <ul className="space-y-2 text-sm text-slate-200">
+                    {[...baseStocks].sort((a, b) => b.rsi - a.rsi).slice(0, 5).map((s) => (
+                      <li key={s.id} className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 flex justify-between">
+                        <span className="font-semibold text-white">{s.symbol}</span>
+                        <span className="text-cyan-300">RSI {Number(s.rsi).toFixed(0)}</span>
+                      </li>
+                    ))}
+                    {baseStocks.length === 0 && <li className="text-slate-500 text-xs">Loading...</li>}
+                  </ul>
+                </SectionPanel>
 
-              <SectionPanel title="Live Signal Feed" subtitle="Real-time market intelligence from scan" accent="violet">
-                <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1">
-                  {filteredStocks.slice(0, 8).map((s, index) => (
-                    <motion.div
-                      key={s.id}
-                      initial={{ opacity: 0, x: 8 }}
-                      whileInView={{ opacity: 1, x: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.04, duration: 0.22 }}
-                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200"
-                    >
-                      <span className="font-semibold text-white">{s.symbol}</span> — {s.signalType} — <span className={s.change >= 0 ? 'text-emerald-300' : 'text-rose-300'}>{s.change >= 0 ? '+' : ''}{Number(s.change).toFixed(2)}%</span>
-                    </motion.div>
-                  ))}
-                  {filteredStocks.length === 0 && !isScanning && <p className="text-slate-500 text-xs">No signals matched.</p>}
-                </div>
-              </SectionPanel>
-            </div>
+                <SectionPanel title="Live Signal Feed" subtitle="Real-time market intelligence from scan" accent="violet">
+                  <div className="max-h-[260px] space-y-2 overflow-y-auto pr-1">
+                    {filteredStocks.slice(0, 8).map((s, index) => (
+                      <motion.div
+                        key={s.id}
+                        initial={{ opacity: 0, x: 8 }}
+                        whileInView={{ opacity: 1, x: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: index * 0.04, duration: 0.22 }}
+                        className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-200"
+                      >
+                        <span className="font-semibold text-white">{s.symbol}</span> — {s.signalType} — <span className={s.change >= 0 ? 'text-emerald-300' : 'text-rose-300'}>{s.change >= 0 ? '+' : ''}{Number(s.change).toFixed(2)}%</span>
+                      </motion.div>
+                    ))}
+                    {filteredStocks.length === 0 && !isScanning && <p className="text-slate-500 text-xs">No signals matched.</p>}
+                  </div>
+                </SectionPanel>
+              </div>
+            </PremiumGate>
           </main>
         </div>
       </div>

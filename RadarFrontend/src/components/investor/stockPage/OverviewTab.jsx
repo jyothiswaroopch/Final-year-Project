@@ -24,6 +24,7 @@ import {
   Bookmark,
   Search,
 } from 'lucide-react';
+import PremiumGate from '../../common/PremiumGate';
 import {
   ResponsiveContainer,
   LineChart,
@@ -264,97 +265,99 @@ const OverviewSection = ({
         <div className="radar-quad-grid grid grid-cols-1 md:grid-cols-2 gap-6 auto-rows-fr">
           {/* 1. Financial Performance */}
           <div className={`radar-card p-6 rounded-3xl border flex flex-col h-full ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'} shadow-sm`}>
-            <div className="rc-header flex flex-col mb-6">
-              <div className="flex flex-col gap-4 mb-4">
-                <h3 className={`text-sm font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>Financial Performance</h3>
-                <div className="flex items-center">
-                  <div className="fin-period-toggles flex bg-slate-100 p-1 rounded-xl">
-                    {['Quarterly', 'Yearly'].map(p => (
-                      <button
-                        key={p}
-                        onClick={() => setFinPeriod(p)}
-                        className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${finPeriod === p ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400'}`}
-                      >
-                        {p}
-                      </button>
-                    ))}
+            <PremiumGate title="Financial Performance" description="Upgrade to Radar Pro to view detailed quarterly and annual statements." isDark={isDark} className="h-full">
+              <div className="rc-header flex flex-col mb-6">
+                <div className="flex flex-col gap-4 mb-4">
+                  <h3 className={`text-sm font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>Financial Performance</h3>
+                  <div className="flex items-center">
+                    <div className="fin-period-toggles flex bg-slate-100 p-1 rounded-xl">
+                      {['Quarterly', 'Yearly'].map(p => (
+                        <button
+                          key={p}
+                          onClick={() => setFinPeriod(p)}
+                          className={`px-3 py-1 text-[10px] font-black rounded-lg transition-all ${finPeriod === p ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-400'}`}
+                        >
+                          {p}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="fin-summary-display flex gap-8">
+                  <div className="fs-item">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-slate-300" />
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">REVENUE (CR)</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                        {currencyPrefix}{
+                          latestPerf.revenue?.toLocaleString('en-IN', { maximumFractionDigits: 1 }) || '—'
+                        }
+                      </span>
+                      <span className={`text-[10px] font-black ${getChangeColor(revChange)}`}>
+                        {formatChange(revChange)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="fs-item">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="text-[10px] font-bold text-slate-400 uppercase">PROFIT (CR)</span>
+                    </div>
+                    <div className="flex items-baseline gap-2">
+                      <span className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                        {currencyPrefix}{
+                          latestPerf.profit?.toLocaleString('en-IN', { maximumFractionDigits: 1 }) || '—'
+                        }
+                      </span>
+                      <span className={`text-[10px] font-black ${getChangeColor(profChange)}`}>
+                        {formatChange(profChange)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div className="fin-summary-display flex gap-8">
-                <div className="fs-item">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-2 h-2 rounded-full bg-slate-300" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">REVENUE (CR)</span>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                      {currencyPrefix}{
-                        latestPerf.revenue?.toLocaleString('en-IN', { maximumFractionDigits: 1 }) || '—'
+              <div className="rc-content flex-1 min-h-[200px]">
+                <ResponsiveContainer width="100%" height="100%" style={{ outline: 'none' }}>
+                  <BarChart 
+                    data={financialPerformance} 
+                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                    style={{ outline: 'none' }}
+                    onMouseMove={(state) => {
+                      if (state?.isTooltipActive && state?.activeTooltipIndex !== undefined) {
+                        setHoveredIndex(state.activeTooltipIndex);
+                      } else {
+                        setHoveredIndex(null);
                       }
-                    </span>
-                    <span className={`text-[10px] font-black ${getChangeColor(revChange)}`}>
-                      {formatChange(revChange)}
-                    </span>
-                  </div>
-                </div>
-                <div className="fs-item">
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="w-2 h-2 rounded-full bg-emerald-500" />
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">PROFIT (CR)</span>
-                  </div>
-                  <div className="flex items-baseline gap-2">
-                    <span className={`text-lg font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                      {currencyPrefix}{
-                        latestPerf.profit?.toLocaleString('en-IN', { maximumFractionDigits: 1 }) || '—'
-                      }
-                    </span>
-                    <span className={`text-[10px] font-black ${getChangeColor(profChange)}`}>
-                      {formatChange(profChange)}
-                    </span>
-                  </div>
-                </div>
+                    }}
+                    onMouseLeave={() => setHoveredIndex(null)}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#f1f5f9'} />
+                    <XAxis
+                      dataKey="quarter"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }}
+                    />
+                    <YAxis
+                      orientation="right"
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }}
+                    />
+                    <Tooltip
+                      cursor={{ fill: isDark ? '#334155' : '#f1f5f9' }}
+                      content={<></>}
+                    />
+                    <Bar dataKey="revenue" fill={isDark ? '#475569' : '#cbd5e1'} radius={[4, 4, 0, 0]} barSize={35} />
+                    <Bar dataKey="profit" fill="#10b981" radius={[4, 4, 0, 0]} barSize={35} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
-            </div>
-
-            <div className="rc-content flex-1 min-h-[200px]">
-              <ResponsiveContainer width="100%" height="100%" style={{ outline: 'none' }}>
-                <BarChart 
-                  data={financialPerformance} 
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                  style={{ outline: 'none' }}
-                  onMouseMove={(state) => {
-                    if (state?.isTooltipActive && state?.activeTooltipIndex !== undefined) {
-                      setHoveredIndex(state.activeTooltipIndex);
-                    } else {
-                      setHoveredIndex(null);
-                    }
-                  }}
-                  onMouseLeave={() => setHoveredIndex(null)}
-                >
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDark ? '#334155' : '#f1f5f9'} />
-                  <XAxis
-                    dataKey="quarter"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }}
-                  />
-                  <YAxis
-                    orientation="right"
-                    axisLine={false}
-                    tickLine={false}
-                    tick={{ fontSize: 10, fill: '#94a3b8', fontWeight: 700 }}
-                  />
-                  <Tooltip
-                    cursor={{ fill: isDark ? '#334155' : '#f1f5f9' }}
-                    content={<></>}
-                  />
-                  <Bar dataKey="revenue" fill={isDark ? '#475569' : '#cbd5e1'} radius={[4, 4, 0, 0]} barSize={35} />
-                  <Bar dataKey="profit" fill="#10b981" radius={[4, 4, 0, 0]} barSize={35} />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
+            </PremiumGate>
           </div>
 
           {/* 2. News & Impact */}

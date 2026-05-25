@@ -18,10 +18,12 @@ import {
     ChevronDown,
     Zap,
     LayoutDashboard,
-    Trash2
+    Trash2,
+    HelpCircle
 } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer } from 'recharts';
 import { runScreenerScan, createCustomFilter, getCustomFilters, deleteCustomFilter } from "../../api/screenerApi";
+import PremiumGate from '../common/PremiumGate';
 
 const mockReadyMade = [
     { id: 1, title: 'Consistent Growers', desc: '15%+ profit growth over 3 years.', icon: Activity, color: 'text-[#42C0A5]', bg: 'bg-[#42C0A5]/10' },
@@ -450,82 +452,88 @@ const AdvancedScreener = () => {
                     <div className="mt-4 pt-4 border-t border-[#30363d] flex items-center gap-4">
                         <span className="text-[10px] font-black text-[#8b949e] uppercase tracking-[0.2em] px-2">Market Signals</span>
                         <div className="flex gap-2.5">
-                            {strategies.map(s => {
-                                const Icon = s.icon;
-                                return (
-                                    <button 
-                                        key={s.id}
-                                        onClick={() => handleStrategySelect(s)}
-                                        className={`strategy-chip px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2.5 transition-all ${activeStrategy === s.id ? 'active' : ''}`}
-                                    >
-                                        <Icon size={14} className={activeStrategy === s.id ? 'text-[#42C0A5]' : s.color} />
-                                        {s.label}
-                                    </button>
-                                );
-                            })}
+                            <PremiumGate title="Advanced Market Signals" description="Upgrade to Pro to unlock institutional-grade algorithmic screening strategies." isDark={true} className="w-full">
+                                <div className="flex gap-2.5">
+                                    {strategies.map(s => {
+                                        const Icon = s.icon;
+                                        return (
+                                            <button 
+                                                key={s.id}
+                                                onClick={() => handleStrategySelect(s)}
+                                                className={`strategy-chip px-4 py-1.5 rounded-full text-xs font-bold flex items-center gap-2.5 transition-all ${activeStrategy === s.id ? 'active' : ''}`}
+                                            >
+                                                <Icon size={14} className={activeStrategy === s.id ? 'text-[#42C0A5]' : s.color} />
+                                                {s.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            </PremiumGate>
                         </div>
                     </div>
                 </div>
 
                 {}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between px-2">
-                             <div className="flex items-center gap-2 font-black text-[#c9d1d9] text-sm">
-                                <TrendingUp size={16} className="text-orange-400" />
-                                EXPLODING THEMES
-                             </div>
-                             <ChevronRight size={16} className="text-[#8b949e]" />
-                        </div>
-                        <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
-                            {[
-                                { title: 'Intraday Highs', val: '+12%', sub: 'Active Scans: 12' },
-                                { title: 'Bullish Crossover', val: '+5.5%', sub: 'Active Scans: 28' },
-                                { title: 'Volume Spike', val: '+8.2%', sub: 'Active Scans: 44' },
-                                { title: 'RSI Oversold', val: '+2.1%', sub: 'Active Scans: 19' },
-                                { title: 'Golden Cross', val: '+14.2%', sub: 'Active Scans: 7' },
-                                { title: 'High Vol Gappers', val: '+22.5%', sub: 'Active Scans: 15' },
-                                { title: 'Opening Breakout', val: '+18.1%', sub: 'Active Scans: 32' },
-                                { title: 'Crypto-related STK', val: '+31.4%', sub: 'Active Scans: 5' },
-                            ].map((t, i) => (
-                                <div key={i} className="min-w-[220px] bg-[#161b22] border border-[#30363d] p-5 rounded-2xl hover:border-[#42C0A5]/40 cursor-pointer transition-all group relative overflow-hidden">
-                                     <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
-                                        <TrendingUp size={40} className="text-[#42C0A5]" />
-                                     </div>
-                                     <div className="text-[10px] font-black text-[#42C0A5] mb-2 tracking-widest uppercase">Strategy {i+1}</div>
-                                     <div className="text-sm font-bold text-[#f0f6fc] mb-1">{t.title}</div>
-                                     <div className="flex items-center justify-between mt-4">
-                                        <div className="text-[11px] text-[#8b949e] font-bold">{t.sub}</div>
-                                        <span className="text-[10px] font-black text-[#42C0A5] bg-[#42C0A5]/10 px-2 py-0.5 rounded-full">{t.val}</span>
-                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="space-y-4">
-                        <div className="flex items-center justify-between px-2">
-                             <div className="flex items-center gap-2 font-black text-[#c9d1d9] text-sm">
-                                <ShieldCheck size={16} className="text-blue-400" />
-                                INSTITUTIONAL PICKS
-                             </div>
-                             <ChevronRight size={16} className="text-[#8b949e]" />
-                        </div>
-                        <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
-                            {mockReadyMade.map(item => {
-                                const Icon = item.icon;
-                                return (
-                                    <div key={item.id} className="min-w-[240px] bg-[#161b22] border border-[#30363d] p-4 rounded-xl hover:border-[#42C0A5]/40 cursor-pointer transition-all">
-                                        <div className="flex items-center gap-3 mb-2">
-                                            <Icon size={18} className={item.color} />
-                                            <span className="text-sm font-bold text-[#f0f6fc]">{item.title}</span>
-                                        </div>
-                                        <p className="text-[11px] text-[#8b949e] line-clamp-1">{item.desc}</p>
+                <PremiumGate title="Pro Discovery Themes" description="Upgrade to Pro to access institutional picks and exploding market themes." isDark={true}>
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between px-2">
+                                 <div className="flex items-center gap-2 font-black text-[#c9d1d9] text-sm">
+                                    <TrendingUp size={16} className="text-orange-400" />
+                                    EXPLODING THEMES
+                                 </div>
+                                 <ChevronRight size={16} className="text-[#8b949e]" />
+                            </div>
+                            <div className="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+                                {[
+                                    { title: 'Intraday Highs', val: '+12%', sub: 'Active Scans: 12' },
+                                    { title: 'Bullish Crossover', val: '+5.5%', sub: 'Active Scans: 28' },
+                                    { title: 'Volume Spike', val: '+8.2%', sub: 'Active Scans: 44' },
+                                    { title: 'RSI Oversold', val: '+2.1%', sub: 'Active Scans: 19' },
+                                    { title: 'Golden Cross', val: '+14.2%', sub: 'Active Scans: 7' },
+                                    { title: 'High Vol Gappers', val: '+22.5%', sub: 'Active Scans: 15' },
+                                    { title: 'Opening Breakout', val: '+18.1%', sub: 'Active Scans: 32' },
+                                    { title: 'Crypto-related STK', val: '+31.4%', sub: 'Active Scans: 5' },
+                                ].map((t, i) => (
+                                    <div key={i} className="min-w-[220px] bg-[#161b22] border border-[#30363d] p-5 rounded-2xl hover:border-[#42C0A5]/40 cursor-pointer transition-all group relative overflow-hidden">
+                                         <div className="absolute top-0 right-0 p-2 opacity-5 group-hover:opacity-10 transition-opacity">
+                                            <TrendingUp size={40} className="text-[#42C0A5]" />
+                                         </div>
+                                         <div className="text-[10px] font-black text-[#42C0A5] mb-2 tracking-widest uppercase">Strategy {i+1}</div>
+                                         <div className="text-sm font-bold text-[#f0f6fc] mb-1">{t.title}</div>
+                                         <div className="flex items-center justify-between mt-4">
+                                            <div className="text-[11px] text-[#8b949e] font-bold">{t.sub}</div>
+                                            <span className="text-[10px] font-black text-[#42C0A5] bg-[#42C0A5]/10 px-2 py-0.5 rounded-full">{t.val}</span>
+                                         </div>
                                     </div>
-                                );
-                            })}
+                                ))}
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between px-2">
+                                 <div className="flex items-center gap-2 font-black text-[#c9d1d9] text-sm">
+                                    <ShieldCheck size={16} className="text-blue-400" />
+                                    INSTITUTIONAL PICKS
+                                 </div>
+                                 <ChevronRight size={16} className="text-[#8b949e]" />
+                            </div>
+                            <div className="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+                                {mockReadyMade.map(item => {
+                                    const Icon = item.icon;
+                                    return (
+                                        <div key={item.id} className="min-w-[240px] bg-[#161b22] border border-[#30363d] p-4 rounded-xl hover:border-[#42C0A5]/40 cursor-pointer transition-all">
+                                            <div className="flex items-center gap-3 mb-2">
+                                                <Icon size={18} className={item.color} />
+                                                <span className="text-sm font-bold text-[#f0f6fc]">{item.title}</span>
+                                            </div>
+                                            <p className="text-[11px] text-[#8b949e] line-clamp-1">{item.desc}</p>
+                                        </div>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
-                </div>
+                </PremiumGate>
 
                 {}
                 <div className="bg-[#161b22] border border-[#30363d] rounded-2xl overflow-hidden shadow-2xl">

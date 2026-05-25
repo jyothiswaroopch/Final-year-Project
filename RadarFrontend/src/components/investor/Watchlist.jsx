@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, ChevronDown, CheckCircle, AlertTriangle, Eye, ShieldAlert, Plus, Bell, Activity, TrendingUp, TrendingDown, Info, ArrowRight, CornerRightDown, AlignLeft, Filter, BookOpen, Bookmark, SlidersHorizontal, Trash2, PieChart, BarChart3, ExternalLink, X } from 'lucide-react';
+import { Search, ChevronDown, CheckCircle, AlertTriangle, Eye, ShieldAlert, Plus, Bell, Activity, TrendingUp, TrendingDown, Info, ArrowRight, CornerRightDown, AlignLeft, Filter, BookOpen, Bookmark, SlidersHorizontal, Trash2, PieChart, BarChart3, ExternalLink, X, BellRing } from 'lucide-react';
 import { ResponsiveContainer, AreaChart, Area, BarChart, Bar, XAxis, YAxis, Tooltip as RechartsTooltip, Cell, CartesianGrid } from 'recharts';
 import api from '../../api/api';
 import { useSocket } from '../../hooks/useSocket';
 import { AlertsDrawer } from './charts/SidebarDrawers';
+import PremiumGate from '../common/PremiumGate';
 
 const mockSparklinePositive = Array.from({ length: 15 }, (_, i) => ({ value: 60 + Math.sin(i / 2) * 20 }));
 const mockSparklineNegative = Array.from({ length: 15 }, (_, i) => ({ value: 60 - Math.sin(i / 2) * 20 }));
@@ -1451,30 +1452,32 @@ const Watchlist = () => {
                                 </div>
 
                                 {/* Market Behavior Mirror + Heatmap */}
-                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                                    <MarketBehaviorMirror stats={stats} />
+                                <PremiumGate title="Advanced Portfolio Insights" description="Upgrade to Pro to unlock portfolio correlation analysis, market behavior benchmarking, and custom heatmaps." isDark={false}>
+                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                        <MarketBehaviorMirror stats={stats} />
 
-                                    <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 opacity-95">
-                                        <div className="flex items-center justify-between mb-1">
-                                            <div className="flex items-center gap-2 text-slate-800 font-black text-[15px]">
-                                                <SlidersHorizontal size={18} className="text-slate-500" />
-                                                Watchlist Heatmap Insights
-                                                <TooltipInfo text="A compact, interactive comparison of your watchlist stocks across key fundamental and technical metrics." />
-                                            </div>
-                                            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Research Tool</span>
-                                        </div>
-                                        <div className="text-[11px] font-medium text-slate-500 mb-5">Click any tile to compare all tracked stocks</div>
-                                        <div className="h-[250px] sm:h-[300px]">
-                                            {watchlist.length > 0 ? (
-                                                <WatchlistHeatmap watchlist={watchlist} />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-slate-400 font-medium text-xs border border-dashed border-slate-200 rounded-xl">
-                                                    Add stocks to view heatmap
+                                        <div className="bg-white rounded-[20px] shadow-sm border border-slate-100 p-5 md:p-6 opacity-95">
+                                            <div className="flex items-center justify-between mb-1">
+                                                <div className="flex items-center gap-2 text-slate-800 font-black text-[15px]">
+                                                    <SlidersHorizontal size={18} className="text-slate-500" />
+                                                    Watchlist Heatmap Insights
+                                                    <TooltipInfo text="A compact, interactive comparison of your watchlist stocks across key fundamental and technical metrics." />
                                                 </div>
-                                            )}
+                                                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Research Tool</span>
+                                            </div>
+                                            <div className="text-[11px] font-medium text-slate-500 mb-5">Click any tile to compare all tracked stocks</div>
+                                            <div className="h-[250px] sm:h-[300px]">
+                                                {watchlist.length > 0 ? (
+                                                    <WatchlistHeatmap watchlist={watchlist} />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-slate-400 font-medium text-xs border border-dashed border-slate-200 rounded-xl">
+                                                        Add stocks to view heatmap
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </PremiumGate>
                             </>
                         )}
                     </div>
