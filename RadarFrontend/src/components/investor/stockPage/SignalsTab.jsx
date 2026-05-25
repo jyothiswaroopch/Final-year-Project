@@ -10,7 +10,7 @@ import {
   Clock,
   AlertCircle,
 } from 'lucide-react';
-import PremiumGate from '../common/PremiumGate';
+import PremiumGate from '../../common/PremiumGate';
 
 const SignalsSection = ({
   isDark,
