@@ -189,10 +189,10 @@ const needsTechnicalData = (filters, sortBy) => {
 const attachTechnicals = async (rows, strictLive) => {
     if (rows.length === 0) return [];
     
-    // Protect against rate limits and timeouts:
+    // Protect against rate limits and timeouts (Vercel has a 10s limit):
     // If there are too many rows (e.g., Trader Screener requesting 3000), 
     // skip live technicals and return safe default values.
-    if (rows.length > 200) {
+    if (rows.length > 30) {
         logger.warn(`[Screener] Skipping live technicals for ${rows.length} rows to prevent timeout.`);
         return rows.map(row => ({
             ...row,
@@ -342,15 +342,18 @@ const runScreener = async (payload = {}) => {
     const results = await Promise.all(finalEnrichedRows.map(async (row) => {
         // Sparkline (best-effort — don't fail the whole screener if Yahoo errors)
         let sparklineData = null;
-        try {
-            const hist = await yahooFinanceService.fetchHistoricalData(
-                row.displaySymbol.includes('.') ? row.displaySymbol : `${row.displaySymbol}.NS`,
-                '1d', '1mo'
-            );
-            if (hist.success && hist.data) {
-                sparklineData = hist.data.slice(-15).map(c => ({ value: c.close || c.adjustedClose }));
-            }
-        } catch (_) { /* sparkline failure is non-fatal */ }
+        if (finalEnrichedRows.length <= 30) {
+            try {
+                const hist = await yahooFinanceService.fetchHistoricalData({
+                    symbol: row.displaySymbol,
+                    interval: '1d',
+                    range: '1mo'
+                });
+                if (hist && hist.length > 0) {
+                    sparklineData = hist.map(h => ({ time: h.date, value: h.close }));
+                }
+            } catch (_) { /* sparkline failure is non-fatal */ }
+        }
 
         // Classify derived fields from real data
         const rsiVal    = isFiniteNum(row.rsi)   ? row.rsi   : 50;
