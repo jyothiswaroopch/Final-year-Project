@@ -10,6 +10,7 @@ import {
   Clock,
   AlertCircle,
 } from 'lucide-react';
+import PremiumGate from '../common/PremiumGate';
 
 const SignalsSection = ({
   isDark,
@@ -171,48 +172,50 @@ const SignalsSection = ({
         ))}
 
         {/* KEY PRICE LEVELS */}
-        <MetricCard
-          title="Key Price Levels"
-          icon={<BarChart3 size={18} className="text-blue-500" />}
-          tooltip={INSIGHTS_TOOLTIPS.keyLevels}
-          isDark={isDark}
-        >
-          {(() => {
-            const currentPrice = quoteData?.regularMarketPrice || quoteData?.currentPrice || 100;
-            const high = quoteData?.regularMarketDayHigh || currentPrice * 1.02;
-            const low = quoteData?.regularMarketDayLow || currentPrice * 0.98;
-            const close = quoteData?.regularMarketPreviousClose || currentPrice;
+        <PremiumGate title="Advanced Pivot Analysis" description="Upgrade to Pro to unlock institutional support and resistance zones, gap analysis, and pivot points." isDark={isDark}>
+          <MetricCard
+            title="Key Price Levels"
+            icon={<BarChart3 size={18} className="text-blue-500" />}
+            tooltip={INSIGHTS_TOOLTIPS.keyLevels}
+            isDark={isDark}
+          >
+            {(() => {
+              const currentPrice = quoteData?.regularMarketPrice || quoteData?.currentPrice || 100;
+              const high = quoteData?.regularMarketDayHigh || currentPrice * 1.02;
+              const low = quoteData?.regularMarketDayLow || currentPrice * 0.98;
+              const close = quoteData?.regularMarketPreviousClose || currentPrice;
 
-            const pivot = (high + low + close) / 3;
-            const r1 = (pivot * 2) - low;
-            const r2 = pivot + (high - low);
-            const s1 = (pivot * 2) - high;
-            const s2 = pivot - (high - low);
+              const pivot = (high + low + close) / 3;
+              const r1 = (pivot * 2) - low;
+              const r2 = pivot + (high - low);
+              const s1 = (pivot * 2) - high;
+              const s2 = pivot - (high - low);
 
-            const range = r2 - s2 || 1;
-            const getPos = (val) => Math.min(100, Math.max(0, ((val - s2) / range) * 80 + 10));
+              const range = r2 - s2 || 1;
+              const getPos = (val) => Math.min(100, Math.max(0, ((val - s2) / range) * 80 + 10));
 
-            return (
-              <div className="relative h-1 bg-slate-100 rounded-full mt-8 mb-10">
-                {[
-                  { l: 'S2', p: `${getPos(s2)}%`, c: 'rose' },
-                  { l: 'S1', p: `${getPos(s1)}%`, c: 'amber' },
-                  { l: 'R1', p: `${getPos(r1)}%`, c: 'emerald' },
-                  { l: 'R2', p: `${getPos(r2)}%`, c: 'blue' },
-                ].map((m, i) => (
-                  <div key={i} className="absolute -top-1 flex flex-col items-center" style={{ left: m.p }}>
-                    <div className={`w-[2px] h-3 bg-${m.c}-500`} />
-                    <span className="text-[8px] font-black text-slate-400 mt-2 uppercase">{m.l}</span>
+              return (
+                <div className="relative h-1 bg-slate-100 rounded-full mt-8 mb-10">
+                  {[
+                    { l: 'S2', p: `${getPos(s2)}%`, c: 'rose' },
+                    { l: 'S1', p: `${getPos(s1)}%`, c: 'amber' },
+                    { l: 'R1', p: `${getPos(r1)}%`, c: 'emerald' },
+                    { l: 'R2', p: `${getPos(r2)}%`, c: 'blue' },
+                  ].map((m, i) => (
+                    <div key={i} className="absolute -top-1 flex flex-col items-center" style={{ left: m.p }}>
+                      <div className={`w-[2px] h-3 bg-${m.c}-500`} />
+                      <span className="text-[8px] font-black text-slate-400 mt-2 uppercase">{m.l}</span>
+                    </div>
+                  ))}
+                  <div className="absolute -top-4 -translate-x-1/2 flex flex-col items-center z-10" style={{ left: `${getPos(currentPrice)}%` }}>
+                    <span className="text-[10px] font-black text-blue-600 mb-1">{currentPrice.toFixed(2)}</span>
+                    <div className="w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white shadow-sm" />
                   </div>
-                ))}
-                <div className="absolute -top-4 -translate-x-1/2 flex flex-col items-center z-10" style={{ left: `${getPos(currentPrice)}%` }}>
-                  <span className="text-[10px] font-black text-blue-600 mb-1">{currentPrice.toFixed(2)}</span>
-                  <div className="w-2 h-2 bg-blue-600 rounded-full ring-2 ring-white shadow-sm" />
                 </div>
-              </div>
-            );
-          })()}
-        </MetricCard>
+              );
+            })()}
+          </MetricCard>
+        </PremiumGate>
 
         {/* VOLUME INSIGHTS */}
         <MetricCard
@@ -295,34 +298,36 @@ const SignalsSection = ({
         </MetricCard>
 
         {/* SHAREHOLDING PATTERN */}
-        <div className={`col-span-1 p-6 rounded-[24px] border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
-          <div className="flex items-center justify-between mb-8">
-            <h3 className={`text-sm font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
-              Shareholding Pattern
-            </h3>
-            <div className="flex gap-4 text-[9px] font-bold text-slate-400">
-              <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">Current</span>
+        <PremiumGate title="Insider & Institution Holdings" description="Upgrade to Pro to view detailed shareholding patterns, promoter pledge data, and institutional block deals." isDark={isDark}>
+          <div className={`col-span-1 p-6 rounded-[24px] border ${isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-100'}`}>
+            <div className="flex items-center justify-between mb-8">
+              <h3 className={`text-sm font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                Shareholding Pattern
+              </h3>
+              <div className="flex gap-4 text-[9px] font-bold text-slate-400">
+                <span className="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600">Current</span>
+              </div>
+            </div>
+
+            <div className="space-y-6 max-w-3xl">
+              {[
+                { label: 'Promoters', value: Number(stockDetails?.shareholding?.promoters || 0), color: 'bg-emerald-500' },
+                { label: 'Retail & Others', value: Number(stockDetails?.shareholding?.retail || 0), color: 'bg-emerald-500' },
+                { label: 'Institutions', value: Number(stockDetails?.shareholding?.institutions || 0), color: 'bg-emerald-500' },
+              ].map((item, i) => (
+                <div key={i} className="flex flex-col gap-2">
+                  <div className="flex justify-between items-center text-[11px] font-semibold text-slate-500">
+                    <span>{item.label}</span>
+                    <span className={`font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>{item.value.toFixed(2)}%</span>
+                  </div>
+                  <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 flex overflow-hidden">
+                    <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.value}%` }} />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
-
-          <div className="space-y-6 max-w-3xl">
-            {[
-              { label: 'Promoters', value: Number(stockDetails?.shareholding?.promoters || 0), color: 'bg-emerald-500' },
-              { label: 'Retail & Others', value: Number(stockDetails?.shareholding?.retail || 0), color: 'bg-emerald-500' },
-              { label: 'Institutions', value: Number(stockDetails?.shareholding?.institutions || 0), color: 'bg-emerald-500' },
-            ].map((item, i) => (
-              <div key={i} className="flex flex-col gap-2">
-                <div className="flex justify-between items-center text-[11px] font-semibold text-slate-500">
-                  <span>{item.label}</span>
-                  <span className={`font-black ${isDark ? 'text-white' : 'text-slate-800'}`}>{item.value.toFixed(2)}%</span>
-                </div>
-                <div className="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 flex overflow-hidden">
-                  <div className={`h-full ${item.color} rounded-full`} style={{ width: `${item.value}%` }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        </PremiumGate>
 
         {/* SIGNAL CONSISTENCY */}
         <MetricCard

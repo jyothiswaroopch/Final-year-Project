@@ -85,11 +85,8 @@ const BottomAnalyticalPanel = ({ symbol, isDark, stockDetails }) => {
       if (activeTab !== 'Signals') return;
       setInsightsLoading(true);
       try {
-        const response = await fetch(`/api/stocks/${symbol}/signals?term=${term}`, {
-          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
-        });
-        const resData = await response.json();
-        if (resData.success) setInsightsData(resData.data);
+        const response = await api.get(`/stocks/${encodeURIComponent(symbol)}/signals?term=${term}`);
+        if (response.data?.success) setInsightsData(response.data.data);
       } catch (err) {
         console.error("Failed to fetch insights:", err);
       } finally {
